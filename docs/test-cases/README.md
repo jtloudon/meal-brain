@@ -11,11 +11,11 @@
 
 | Module | Test File | Status | Test Count | Coverage |
 |--------|-----------|--------|------------|----------|
-| Quantity Math | [unit/quantity-math.md](unit/quantity-math.md) | ⬜ | 0/5 | 0% |
+| Quantity Math | [unit/quantity-math.md](unit/quantity-math.md) | ✅ | 5/5 | 100% |
 | Ingredient Aggregation | [unit/ingredient-aggregation.md](unit/ingredient-aggregation.md) | ⬜ | 0/6 | 0% |
 | Unit Validation | [unit/unit-validation.md](unit/unit-validation.md) | ⬜ | 0/4 | 0% |
 
-**Total Unit Tests**: 0/15 complete
+**Total Unit Tests**: 5/15 complete
 
 ---
 
@@ -75,29 +75,30 @@
 ## Overall Progress
 
 **Total Tests Defined**: 58
-**Total Tests Implemented**: 0
-**Total Tests Passing**: 0
+**Total Tests Implemented**: 5
+**Total Tests Passing**: 5
 
 **Coverage by Layer**:
-- Unit: 0%
-- Tools: 0%
-- Integration: 0%
-- E2E: 0%
-- AI Behavior: 0%
+- Unit: 33% (5/15)
+- Tools: 0% (0/27)
+- Integration: 0% (0/6)
+- E2E: 0% (0/6)
+- AI Behavior: 0% (0/4)
 
 ---
 
 ## Phase 1 Goals
 
 **Must Complete** (Critical Path):
-- [x] Quantity Math (5 tests)
-- [x] Ingredient Aggregation (6 tests)
-- [x] recipe.create (4 tests)
-- [x] planner.add_meal (5 tests)
-- [x] grocery.push_ingredients (4 tests)
-- [x] Authentication Flow (4 tests)
+- [x] Quantity Math (5 tests) ✅ COMPLETE
+- [ ] Ingredient Aggregation (6 tests)
+- [ ] recipe.create (4 tests)
+- [ ] planner.add_meal (5 tests)
+- [ ] grocery.push_ingredients (4 tests)
+- [ ] Authentication Flow (4 tests)
 
 **Target**: 28/58 tests passing by end of Phase 1
+**Current**: 5/28 Phase 1 critical tests passing (18%)
 
 ---
 
@@ -116,6 +117,6 @@ When implementing a feature:
 
 ## Next Test to Implement
 
-**Start here**: [unit/quantity-math.md](unit/quantity-math.md)
+**Current**: [unit/ingredient-aggregation.md](unit/ingredient-aggregation.md)
 
-This is the foundation for all quantity operations and has no dependencies.
+Quantity math complete! Next up: ingredient aggregation logic (merging, grouping).

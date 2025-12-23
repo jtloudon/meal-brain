@@ -461,15 +461,16 @@ The MVP is complete when:
 - [x] Create authentication flow spec
 - [x] **BONUS**: Project skeleton established
 
-### Phase 1 Progress: Step 0 ✅ Step 1 ✅ Complete
+### Phase 1 Progress: Step 0 ✅ Step 1 ✅ Step 2 ✅ Complete
 - [x] Folder structure (cloud-ready)
 - [x] TypeScript config
 - [x] package.json basics
 - [x] Demo data SQL
-- [x] All dependencies installed (Next.js, React, TS, Vitest, Playwright, Tailwind v4, Supabase, Lucide)
-- [x] All configurations (Next.js, Tailwind, Vitest, env template)
+- [x] All dependencies installed
+- [x] All configurations
 - [x] Dev server verified working
-- [ ] **Next**: Write + pass quantity-math tests (Step 2 - TDD)
+- [x] First TDD module: quantity-math (5/5 tests passing)
+- [ ] **Next**: Set up Supabase locally (Step 3)
 
 ---
 

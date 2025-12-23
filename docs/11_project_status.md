@@ -7,9 +7,9 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 1 Step 1 Complete - Infrastructure fully configured
-**Code exists:** Project skeleton + all dependencies + configurations
-**Phase:** Phase 1 (Step 0 ✅ Step 1 ✅ → Step 2: TDD next)
+**Status:** Phase 1 Step 2 Complete - First TDD module passing
+**Code exists:** Infrastructure + first pure function module (quantity-math)
+**Phase:** Phase 1 (Step 0 ✅ Step 1 ✅ Step 2 ✅ → Step 3: Supabase next)
 
 ---
 
@@ -82,10 +82,17 @@ Specs are strong but not yet exercised in code.
 - ✅ Environment variables template (.env.local.example)
 - ✅ Minimal app layout and page (dev server verified working)
 
-**Next (Step 2 - TDD)**:
-- ⏳ Write first tests (quantity-math)
-- ⏳ Implement quantity-math module
-- ⏳ 5/5 unit tests passing
+**Completed (Step 2 - TDD)**:
+- ✅ Wrote 5 quantity-math unit tests
+- ✅ Implemented addQuantities + isValidQuantity
+- ✅ All 5 tests passing (100% coverage)
+- ✅ Test progress tracker updated
+
+**Next (Step 3 - Supabase)**:
+- ⏳ Install Supabase CLI
+- ⏳ Initialize Supabase project
+- ⏳ Create initial migration
+- ⏳ Verify local database connection
 
 **Not Started**:
 - Supabase local setup
