@@ -41,9 +41,9 @@ The MVP is complete when:
 
 ## Phase Breakdown
 
-### Phase 0: Documentation Consolidation ✓ (Current)
+### Phase 0: Documentation Consolidation ✅ COMPLETE
 **Duration**: 2-3 hours
-**Status**: In progress
+**Status**: Complete
 
 **Goal**: Clean, consolidated documentation ready for implementation
 
@@ -52,35 +52,49 @@ The MVP is complete when:
 - [x] Merge Tools specs → `02_tools_spec.md` (Agent SDK pattern)
 - [x] Merge AI governance → `09_ai_behavior_contract.md`
 - [x] Merge implementation plans → `08_implementation_plan.md` (this file)
-- [ ] Delete redundant repo structure doc
-- [ ] Consolidate decision rules → `10_deterministic_rules.md`
-- [ ] Create `13_external_services.md`
-- [ ] Create `14_error_handling.md`
-- [ ] Create `15_testing_strategy.md`
-- [ ] Create `16_authentication_flow.md`
+- [x] Consolidate decision rules → `10_deterministic_rules.md`
+- [x] Create `13_external_services.md`
+- [x] Create `14_error_handling.md`
+- [x] Create `15_testing_strategy.md`
+- [x] Create `16_authentication_flow.md`
+- [x] **BONUS**: Add user onboarding spec to data models
+- [x] **BONUS**: Create demo data strategy (supabase/seed.sql)
 
-**Exit Criteria**:
+**Exit Criteria**: ✅ ALL MET
 - Single source of truth for all specifications
 - No conflicting documentation
 - External dependencies specified
 - Ready to start coding
 
+**Step 0 Bonus (Project Skeleton)**: ✅ COMPLETE
+- [x] Folder structure created (cloud-ready for Vercel)
+- [x] TypeScript config
+- [x] Basic package.json (no dependencies yet)
+- [x] Demo data SQL prepared
+
 ---
 
 ### Phase 1: Local Infrastructure & Repo Genesis
 **Duration**: 1 week (part-time, ~10-12 hours)
-**Status**: Not started
+**Status**: In Progress (Step 0 complete, Step 1 next)
 
 **Goal**: Prove plumbing works. Establish real application backbone with local data.
 
 #### Deliverables
 
 **Repository & Infrastructure**:
-- Initialize Git repository
-- Create `.gitignore` (exclude `.env`, `node_modules`, etc.)
-- Set up local Supabase (`supabase start`)
-- Initialize Next.js project (App Router)
-- Install dependencies (Agent SDK, Tailwind, shadcn/ui, Lucide)
+- [x] Initialize Git repository
+- [x] Create `.gitignore` (exclude `.env`, `node_modules`, etc.)
+- [x] Create folder structure (cloud-ready)
+- [x] TypeScript configuration
+- [x] Basic package.json
+- [x] Install dependencies (Next.js, React, TypeScript, Vitest, Playwright, Tailwind, Supabase client, Lucide)
+- [x] Configure Next.js (next.config.js)
+- [x] Configure Tailwind CSS v4 (@tailwindcss/postcss)
+- [x] Configure Vitest (vitest.config.ts)
+- [x] Environment variables template (.env.local.example)
+- [x] Verify dev server starts (✅ http://localhost:3000)
+- [ ] Set up local Supabase (`supabase start`)
 
 **Database Schema & Migrations**:
 - Create tables:
@@ -101,13 +115,13 @@ The MVP is complete when:
 - Household association on first login
 
 **Agent SDK Project Scaffolding**:
-- Create `backend/` directory structure:
-  - `agent/` - Agent orchestration
-  - `tools/` - Agent SDK tool definitions (Zod schemas)
-  - `data/` - Database access layer
-  - `tests/` - Test files
-- Define first Tool as Agent SDK skill: `recipe.list` (read-only)
-- Validate Tool can execute against local Supabase
+- [x] Create directory structure (refactored for Vercel):
+  - `app/api/agent/` - Agent SDK endpoint (Vercel serverless)
+  - `lib/tools/` - Agent SDK tool definitions (Zod schemas)
+  - `lib/db/` - Supabase client singleton
+  - `tests/` - E2E test files
+- [ ] Define first Tool as Agent SDK skill: `recipe.list` (read-only)
+- [ ] Validate Tool can execute against local Supabase
 
 **Testing Infrastructure**:
 - Set up Vitest for unit/integration tests
@@ -431,21 +445,31 @@ The MVP is complete when:
 
 ## Current Status
 
-**Active Phase**: Phase 0 (Documentation Consolidation)
-**Next Phase**: Phase 1 (Local Infrastructure & Repo Genesis)
+**Active Phase**: Phase 1 (Local Infrastructure & Repo Genesis)
+**Current Step**: Step 1 (Infrastructure Setup)
 **Estimated Timeline to MVP**: 5-7 weeks (part-time)
 
-### Phase 0 Progress
+### Phase 0 Progress: ✅ COMPLETE
 - [x] Merge UI docs
 - [x] Merge Tools specs
 - [x] Merge AI governance
 - [x] Merge implementation plans
-- [ ] Delete redundant docs
-- [ ] Consolidate decision rules
-- [ ] Create external services spec
-- [ ] Create error handling spec
-- [ ] Create testing strategy spec
-- [ ] Create authentication flow spec
+- [x] Consolidate decision rules
+- [x] Create external services spec
+- [x] Create error handling spec
+- [x] Create testing strategy spec
+- [x] Create authentication flow spec
+- [x] **BONUS**: Project skeleton established
+
+### Phase 1 Progress: Step 0 ✅ Step 1 ✅ Complete
+- [x] Folder structure (cloud-ready)
+- [x] TypeScript config
+- [x] package.json basics
+- [x] Demo data SQL
+- [x] All dependencies installed (Next.js, React, TS, Vitest, Playwright, Tailwind v4, Supabase, Lucide)
+- [x] All configurations (Next.js, Tailwind, Vitest, env template)
+- [x] Dev server verified working
+- [ ] **Next**: Write + pass quantity-math tests (Step 2 - TDD)
 
 ---
 

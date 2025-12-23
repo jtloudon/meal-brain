@@ -36,6 +36,34 @@ Users authenticate via magic link and belong to exactly one household.
 
 ---
 
+## UserPreferences
+
+Captures onboarding choices and AI personalization settings.
+All fields are optional and editable later.
+
+```json
+{
+  "id": "uuid",
+  "user_id": "uuid",
+  "household_context": "just-me | couple | family",
+  "dietary_constraints": ["dairy-free", "gluten-free"],
+  "ai_style": "coach | collaborator",
+  "planning_preferences": ["week-by-week", "batch-cooking", "leftovers"],
+  "ai_learning_enabled": true,
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
+}
+```
+
+**Rules**:
+- One record per user
+- All fields nullable (safe defaults if skipped)
+- `dietary_constraints` and `planning_preferences` are arrays
+- AI uses this context but never enforces silently
+- Editable via Settings → AI Preferences
+
+---
+
 ## Recipe
 
 A recipe is a reusable meal definition.

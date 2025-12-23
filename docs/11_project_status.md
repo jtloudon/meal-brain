@@ -7,9 +7,9 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Requirements & specs actively being defined  
-**Code exists:** No  
-**Phase:** Pre-implementation
+**Status:** Phase 1 Step 1 Complete - Infrastructure fully configured
+**Code exists:** Project skeleton + all dependencies + configurations
+**Phase:** Phase 1 (Step 0 ✅ Step 1 ✅ → Step 2: TDD next)
 
 ---
 
@@ -64,22 +64,48 @@ Specs are strong but not yet exercised in code.
 ---
 
 ## Implementation Progress
-**Status:** Nothing implemented yet
+**Status:** Step 1 (Infrastructure) Complete
 
-- No repository scaffold finalized
-- No auth, database, or frontend code written
-- Clean slate with no technical debt
+**Completed (Step 0 - Skeleton)**:
+- ✅ Repository structure established
+- ✅ Folder structure created (cloud-ready)
+- ✅ TypeScript configuration
+- ✅ Basic package.json
+- ✅ Demo data strategy (supabase/seed.sql)
+- ✅ User onboarding data model added
+
+**Completed (Step 1 - Infrastructure)**:
+- ✅ All dependencies installed (Next.js, React, TypeScript, Vitest, Playwright, Tailwind, Supabase client)
+- ✅ Next.js configured (next.config.js)
+- ✅ Tailwind CSS configured (v4 with @tailwindcss/postcss)
+- ✅ Vitest configured (vitest.config.ts)
+- ✅ Environment variables template (.env.local.example)
+- ✅ Minimal app layout and page (dev server verified working)
+
+**Next (Step 2 - TDD)**:
+- ⏳ Write first tests (quantity-math)
+- ⏳ Implement quantity-math module
+- ⏳ 5/5 unit tests passing
+
+**Not Started**:
+- Supabase local setup
+- Database migrations
+- Authentication
+- Agent SDK integration
 
 ---
 
 ## External Services Readiness
-**Status:** None configured
+**Status:** None configured (intentional)
 
-- No GitHub repository yet
-- No Supabase project
-- No Vercel project
+- ✅ GitHub repository exists (local only, not pushed yet)
+- ⏳ Supabase local setup (Step 4)
+- ⏳ Vercel project (Phase 5+)
 
-This is intentional to allow architectural clarity first.
+**Cloud Deployment Strategy Decided**:
+- Agent SDK will run in Vercel API routes (not Supabase Edge Functions)
+- Simpler deployment: Single Vercel project handles frontend + backend
+- Supabase Cloud only for database + auth
 
 ---
 

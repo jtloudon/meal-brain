@@ -28,27 +28,49 @@ Optional later:
 ---
 
 ## Hosting
-Frontend:
+
+**Frontend + Backend (Unified)**:
 - Vercel
+  - Next.js App Router (frontend)
+  - API Routes (Agent SDK backend - serverless functions)
+  - Environment variables for config
 
-Backend (serverless):
+**Database + Auth**:
 - Supabase
-  - Postgres
-  - Auth (household-only)
-  - Storage (images, OCR inputs)
-  - Edge Functions (SKILL runtime)
+  - Postgres (database)
+  - Auth (magic-link, household isolation)
+  - Storage (images, OCR inputs - Phase 3+)
 
-AI Orchestrator:
-- Vercel API route or Supabase Edge Function
+**AI Orchestrator**:
+- **Decision**: Vercel API Routes (chosen over Supabase Edge Functions)
+- **Location**: `/app/api/agent/route.ts`
+- **Rationale**:
+  - Simpler deployment (one project, not two)
+  - Perfect for 2-user household scale
+  - Serverless on Vercel (pay per request)
+  - Easy to migrate to Edge Functions later if needed
 
 ---
 
 ## Major Components
+
+**Frontend** (Next.js):
 - Web UI (recipes, planner, groceries)
 - Persistent AI chat panel
-- LLM reasoning layer (creative)
-- SKILL execution layer (deterministic)
-- Media ingestion pipeline (voice + photos)
+- React components + Tailwind styling
+
+**Backend** (Vercel API Routes):
+- `/app/api/agent/` - Agent SDK orchestrator
+- `/lib/tools/` - Deterministic Tool definitions (Zod schemas)
+- `/lib/db/` - Supabase client singleton
+
+**AI Layers**:
+- LLM reasoning layer (creative) - Claude 4.5 Sonnet
+- Tool execution layer (deterministic) - Agent SDK Skills
+
+**Media** (Phase 3+):
+- Voice ingestion (Web Speech API)
+- Photo ingestion (OCR pipeline)
 
 ---
 
