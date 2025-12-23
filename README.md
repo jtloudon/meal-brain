@@ -1,6 +1,6 @@
 # MealBrain
 
-**AI-powered household meal planning that you actually control.**
+> **An AI sous chef you control - helpful, never bossy**
 
 A mobile-first web app for planning meals, managing recipes, and generating grocery lists—with an AI assistant that suggests but never surprises.
 
