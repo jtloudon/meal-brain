@@ -55,3 +55,6 @@ next-env.d.ts
 
 # Claude Code (keep plans for reference)
 # .claude/plans/
+
+# Local helper files (not for repo)
+resume-context-prompt-for-human.md
