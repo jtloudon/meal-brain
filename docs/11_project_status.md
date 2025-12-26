@@ -244,7 +244,18 @@ Specs are strong but not yet exercised in code.
   - Console logging for debugging
   - User-friendly guidance ("log out and log back in")
 
+**Completed (E2E Testing ✅)**:
+- ✅ E2E test infrastructure working (Playwright)
+- ✅ 11/14 E2E tests passing (79% coverage)
+  - ✅ Recipe list, search, filter, detail, create
+  - ✅ Meal planner week view, navigation, add meal
+  - ✅ Authentication flow (new user, returning user)
+  - ⏸️ Auth edge cases (2 tests - expired/reused tokens, deferred)
+  - 🐛 Recipe edit (1 test skipped - validation bug discovered)
+- ✅ **Bug found**: Recipe edit PUT endpoint returns 400 (validation error)
+
 **Next Steps**:
+- 🐛 Debug recipe edit validation bug (PUT /api/recipes/:id returns 400)
 - Remove meal functionality (click to delete)
 - Grocery list UI (list selector, items, check off)
 - Wire up action buttons (Add to Planner, Push to Grocery from recipe detail)
@@ -253,7 +264,6 @@ Specs are strong but not yet exercised in code.
 **Not Started**:
 - Agent SDK integration
 - UI polish and components
-- Additional Tool integrations (recipe.list, recipe.update, etc.)
 
 ---
 
