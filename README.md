@@ -8,12 +8,12 @@ A mobile-first web app for planning meals, managing recipes, and generating groc
 
 ## Project Status
 
-**Current Phase**: Phase 1 COMPLETE ✅ → Moving to Phase 2
+**Current Phase**: Phase 2 In Progress - All Tools Complete ✅
 
 **For detailed status and roadmap**, see:
 - **[Implementation Plan](docs/08_implementation_plan.md)** - Complete execution roadmap, phase breakdown, success criteria
 - **[Project Status](docs/11_project_status.md)** - Current state snapshot, what's done, what's next
-- **[Test Progress](docs/test-cases/README.md)** - Test coverage tracker (26/58 tests passing, 100% Phase 1 coverage)
+- **[Test Progress](docs/test-cases/README.md)** - Test coverage tracker (40/58 tests passing, 100% Tool coverage)
 
 ---
 
@@ -130,9 +130,14 @@ All project specifications live in `/docs`:
 - ✅ 3 Tools implemented and tested (recipe.create, planner.add_meal, grocery.push_ingredients)
 - ✅ Authentication (magic-link flow working end-to-end)
 
-### Phase 2 (Core CRUD)
-- Recipe management (create, edit, delete)
-- Meal planner (week view, add/remove meals)
+### Phase 2 (Core CRUD) - In Progress
+- ✅ **All 9 Tools complete** (27/27 tests, 100% coverage)
+  - Recipe: create, list, update
+  - Planner: add_meal, remove_meal, list_meals
+  - Grocery: push_ingredients, create_list, add_item
+- ⏳ UI Implementation (next)
+  - Recipe management screens (list, detail, create/edit)
+  - Meal planner screen (week view, add/remove meals)
 - Grocery list generation
 - Ingredient aggregation
 

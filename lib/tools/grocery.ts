@@ -2,6 +2,31 @@ import { z } from 'zod';
 import { supabase } from '@/lib/db/supabase';
 
 /**
+ * Valid units for grocery items (matches recipe units).
+ */
+const VALID_UNITS = [
+  // Volume
+  'cup',
+  'tbsp',
+  'tsp',
+  'ml',
+  'l',
+  'fl oz',
+  'gallon',
+  // Weight
+  'lb',
+  'oz',
+  'g',
+  'kg',
+  // Count
+  'whole',
+  'clove',
+  'can',
+  'package',
+  'slice',
+] as const;
+
+/**
  * Tool context for authenticated operations.
  */
 export interface ToolContext {
@@ -48,6 +73,28 @@ export const PushIngredientsSchema = z.object({
 });
 
 export type PushIngredientsInput = z.infer<typeof PushIngredientsSchema>;
+
+/**
+ * Zod schema for creating a new grocery list.
+ */
+export const CreateListSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(50, 'Name too long'),
+});
+
+export type CreateListInput = z.infer<typeof CreateListSchema>;
+
+/**
+ * Zod schema for manually adding an item to a grocery list.
+ */
+export const AddItemSchema = z.object({
+  grocery_list_id: z.string().uuid('Invalid grocery list ID format'),
+  name: z.string().min(1, 'Name is required'),
+  quantity: z.number().positive('Quantity must be positive'),
+  unit: z.enum(VALID_UNITS, { errorMap: () => ({ message: 'Invalid unit' }) }),
+  ingredient_id: z.string().optional(),
+});
+
+export type AddItemInput = z.infer<typeof AddItemSchema>;
 
 /**
  * Pushes ingredients to a grocery list with deterministic merging.
@@ -195,11 +242,203 @@ export async function pushIngredients(
 }
 
 /**
+ * Creates a new grocery list for a household.
+ * Enforces household isolation and prevents duplicate list names.
+ *
+ * @param input - List name
+ * @param context - User and household context for RLS
+ * @returns Tool result with grocery_list_id on success
+ */
+export async function createList(
+  input: CreateListInput,
+  context: ToolContext
+): Promise<ToolResult<{ grocery_list_id: string }>> {
+  try {
+    // Validate input
+    const validated = CreateListSchema.parse(input);
+
+    // Check if list with same name already exists in household
+    const { data: existingList } = await supabase
+      .from('grocery_lists')
+      .select('id')
+      .eq('household_id', context.householdId)
+      .eq('name', validated.name)
+      .single();
+
+    if (existingList) {
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: 'name',
+          message: `A grocery list named "${validated.name}" already exists`,
+        },
+      };
+    }
+
+    // Create the list
+    const { data: groceryList, error } = await supabase
+      .from('grocery_lists')
+      .insert({
+        household_id: context.householdId,
+        name: validated.name,
+      })
+      .select('id')
+      .single();
+
+    if (error || !groceryList) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: error?.message ?? 'Failed to create grocery list',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        grocery_list_id: groceryList.id,
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
+ * Manually adds a single item to a grocery list.
+ * Enforces household isolation and unit validation.
+ *
+ * @param input - Item details (name, quantity, unit)
+ * @param context - User and household context for RLS
+ * @returns Tool result with grocery_item_id on success
+ */
+export async function addItem(
+  input: AddItemInput,
+  context: ToolContext
+): Promise<ToolResult<{ grocery_item_id: string }>> {
+  try {
+    // Validate input
+    const validated = AddItemSchema.parse(input);
+
+    // Verify grocery list exists and belongs to household
+    const { data: list, error: listError } = await supabase
+      .from('grocery_lists')
+      .select('id, household_id')
+      .eq('id', validated.grocery_list_id)
+      .single();
+
+    if (listError || !list) {
+      return {
+        success: false,
+        error: {
+          type: 'NOT_FOUND',
+          message: 'Grocery list not found',
+        },
+      };
+    }
+
+    if (list.household_id !== context.householdId) {
+      return {
+        success: false,
+        error: {
+          type: 'AUTHORIZATION_ERROR',
+          message: 'You do not have permission to add items to this list',
+        },
+      };
+    }
+
+    // Add the item
+    const { data: item, error } = await supabase
+      .from('grocery_items')
+      .insert({
+        grocery_list_id: validated.grocery_list_id,
+        ingredient_id: validated.ingredient_id ?? null,
+        display_name: validated.name,
+        quantity: validated.quantity,
+        unit: validated.unit,
+        checked: false,
+      })
+      .select('id')
+      .single();
+
+    if (error || !item) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: error?.message ?? 'Failed to add item',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        grocery_item_id: item.id,
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
  * Grocery tools namespace (for future expansion).
  */
 export const grocery = {
   push_ingredients: {
     execute: pushIngredients,
     schema: PushIngredientsSchema,
+  },
+  create_list: {
+    execute: createList,
+    schema: CreateListSchema,
+  },
+  add_item: {
+    execute: addItem,
+    schema: AddItemSchema,
   },
 };

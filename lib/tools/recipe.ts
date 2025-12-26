@@ -50,6 +50,47 @@ export const CreateRecipeSchema = z.object({
 export type CreateRecipeInput = z.infer<typeof CreateRecipeSchema>;
 
 /**
+ * Zod schema for listing recipes with optional filters.
+ */
+export const ListRecipesSchema = z.object({
+  filters: z
+    .object({
+      tags: z.array(z.string()).optional(),
+      rating: z.number().min(1).max(5).optional(),
+      search: z.string().optional(),
+    })
+    .optional(),
+  limit: z.number().positive().max(100).default(50),
+  offset: z.number().nonnegative().default(0),
+});
+
+export type ListRecipesInput = z.infer<typeof ListRecipesSchema>;
+
+/**
+ * Zod schema for updating an existing recipe.
+ */
+export const UpdateRecipeSchema = z.object({
+  recipe_id: z.string().uuid('Invalid recipe ID format'),
+  title: z.string().min(1).max(100).optional(),
+  ingredients: z
+    .array(
+      z.object({
+        name: z.string().min(1, 'Ingredient name is required'),
+        quantity: z.number().positive('Quantity must be positive'),
+        unit: z.enum(VALID_UNITS),
+        prep_state: z.string().optional(),
+      })
+    )
+    .optional(),
+  instructions: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  rating: z.number().min(1).max(5).optional(),
+  notes: z.string().optional(),
+});
+
+export type UpdateRecipeInput = z.infer<typeof UpdateRecipeSchema>;
+
+/**
  * Tool context for authenticated operations.
  */
 export interface ToolContext {
@@ -65,7 +106,12 @@ export type ToolResult<T> =
   | {
       success: false;
       error: {
-        type: 'VALIDATION_ERROR' | 'DATABASE_ERROR' | 'AUTHORIZATION_ERROR';
+        type:
+          | 'VALIDATION_ERROR'
+          | 'DATABASE_ERROR'
+          | 'AUTHORIZATION_ERROR'
+          | 'NOT_FOUND'
+          | 'PERMISSION_DENIED';
         field?: string;
         message: string;
       };
@@ -201,11 +247,293 @@ export async function createRecipe(
 }
 
 /**
+ * Lists recipes with optional filtering and pagination.
+ * Enforces household isolation via context.
+ *
+ * @param input - Filter and pagination options
+ * @param context - User and household context for RLS
+ * @returns Tool result with recipes array and total count
+ */
+export async function listRecipes(
+  input: ListRecipesInput,
+  context: ToolContext
+): Promise<
+  ToolResult<{
+    recipes: Array<{
+      id: string;
+      title: string;
+      tags: string[];
+      rating: number | null;
+      created_at: string;
+    }>;
+    total: number;
+  }>
+> {
+  try {
+    // Validate input
+    const validated = ListRecipesSchema.parse(input);
+
+    // Build query
+    let query = supabase
+      .from('recipes')
+      .select('id, title, tags, rating, created_at', { count: 'exact' })
+      .eq('household_id', context.householdId)
+      .order('created_at', { ascending: false });
+
+    // Apply filters
+    if (validated.filters) {
+      // Filter by tags (array contains any of the provided tags)
+      if (validated.filters.tags && validated.filters.tags.length > 0) {
+        query = query.overlaps('tags', validated.filters.tags);
+      }
+
+      // Filter by rating
+      if (validated.filters.rating) {
+        query = query.eq('rating', validated.filters.rating);
+      }
+
+      // Filter by search (case-insensitive title search)
+      if (validated.filters.search) {
+        query = query.ilike('title', `%${validated.filters.search}%`);
+      }
+    }
+
+    // Apply pagination
+    query = query.range(
+      validated.offset,
+      validated.offset + validated.limit - 1
+    );
+
+    // Execute query
+    const { data: recipes, error, count } = await query;
+
+    if (error) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: error.message,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        recipes: recipes ?? [],
+        total: count ?? 0,
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
+ * Updates an existing recipe.
+ * Enforces household isolation and permission checks.
+ *
+ * @param input - Recipe fields to update (partial)
+ * @param context - User and household context for RLS
+ * @returns Tool result with success status
+ */
+export async function updateRecipe(
+  input: UpdateRecipeInput,
+  context: ToolContext
+): Promise<ToolResult<{ recipe_id: string }>> {
+  try {
+    // Validate input
+    const validated = UpdateRecipeSchema.parse(input);
+
+    // Check if recipe exists and belongs to household
+    const { data: existingRecipe, error: fetchError } = await supabase
+      .from('recipes')
+      .select('id, household_id')
+      .eq('id', validated.recipe_id)
+      .single();
+
+    if (fetchError || !existingRecipe) {
+      return {
+        success: false,
+        error: {
+          type: 'NOT_FOUND',
+          message: 'Recipe not found',
+        },
+      };
+    }
+
+    // Check permission (household isolation)
+    if (existingRecipe.household_id !== context.householdId) {
+      return {
+        success: false,
+        error: {
+          type: 'PERMISSION_DENIED',
+          message: 'You do not have permission to update this recipe',
+        },
+      };
+    }
+
+    // Build update object (only include provided fields)
+    const updateData: Record<string, any> = {};
+    if (validated.title !== undefined) updateData.title = validated.title;
+    if (validated.rating !== undefined) updateData.rating = validated.rating;
+    if (validated.tags !== undefined) updateData.tags = validated.tags;
+    if (validated.notes !== undefined) updateData.notes = validated.notes;
+    if (validated.instructions !== undefined)
+      updateData.instructions = validated.instructions;
+
+    // Update recipe if there are fields to update
+    if (Object.keys(updateData).length > 0) {
+      const { error: updateError } = await supabase
+        .from('recipes')
+        .update(updateData)
+        .eq('id', validated.recipe_id);
+
+      if (updateError) {
+        return {
+          success: false,
+          error: {
+            type: 'DATABASE_ERROR',
+            message: updateError.message,
+          },
+        };
+      }
+    }
+
+    // Update ingredients if provided
+    if (validated.ingredients) {
+      // Delete existing ingredients
+      const { error: deleteError } = await supabase
+        .from('recipe_ingredients')
+        .delete()
+        .eq('recipe_id', validated.recipe_id);
+
+      if (deleteError) {
+        return {
+          success: false,
+          error: {
+            type: 'DATABASE_ERROR',
+            message: deleteError.message,
+          },
+        };
+      }
+
+      // Create canonical ingredients if they don't exist
+      for (const ingredient of validated.ingredients) {
+        const { data: existing } = await supabase
+          .from('ingredients')
+          .select('id')
+          .eq('canonical_name', ingredient.name.toLowerCase())
+          .single();
+
+        if (!existing) {
+          await supabase.from('ingredients').insert({
+            canonical_name: ingredient.name.toLowerCase(),
+          });
+        }
+      }
+
+      // Insert new ingredients
+      const recipeIngredients = await Promise.all(
+        validated.ingredients.map(async (ingredient) => {
+          const { data: canonicalIngredient } = await supabase
+            .from('ingredients')
+            .select('id')
+            .eq('canonical_name', ingredient.name.toLowerCase())
+            .single();
+
+          return {
+            recipe_id: validated.recipe_id,
+            ingredient_id: canonicalIngredient?.id ?? null,
+            display_name: ingredient.name,
+            quantity: ingredient.quantity,
+            unit: ingredient.unit,
+            prep_state: ingredient.prep_state ?? null,
+            optional: false,
+          };
+        })
+      );
+
+      const { error: ingredientsError } = await supabase
+        .from('recipe_ingredients')
+        .insert(recipeIngredients);
+
+      if (ingredientsError) {
+        return {
+          success: false,
+          error: {
+            type: 'DATABASE_ERROR',
+            message: ingredientsError.message,
+          },
+        };
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        recipe_id: validated.recipe_id,
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
  * Recipe tools namespace (for future expansion).
  */
 export const recipe = {
   create: {
     execute: createRecipe,
     schema: CreateRecipeSchema,
+  },
+  list: {
+    execute: listRecipes,
+    schema: ListRecipesSchema,
+  },
+  update: {
+    execute: updateRecipe,
+    schema: UpdateRecipeSchema,
   },
 };
