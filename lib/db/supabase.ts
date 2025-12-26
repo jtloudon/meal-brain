@@ -11,17 +11,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 /**
- * Supabase client singleton for server-side operations.
- * In test environment, uses service role key to bypass RLS.
- * In production, uses anon key with Row Level Security (RLS) enforced.
+ * Supabase client singleton for server-side Tool operations.
+ * Uses service role key to bypass RLS.
+ * Authorization is enforced by Tool context (household_id checks).
  *
- * For authenticated operations, use `supabase.auth.setSession()` or
- * pass user context to queries.
+ * This client should ONLY be used in Tool functions where we explicitly
+ * check permissions via the context parameter.
  */
 export const supabase = createClient(
   supabaseUrl,
-  // Use service role key in test environment to bypass RLS
-  process.env.VITEST ? (supabaseServiceRoleKey ?? supabaseAnonKey) : supabaseAnonKey
+  // Use service role key to bypass RLS (we handle authz in Tools)
+  supabaseServiceRoleKey ?? supabaseAnonKey
 );
 
 /**

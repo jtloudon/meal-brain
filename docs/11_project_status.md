@@ -7,9 +7,9 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 2 In Progress - All Tools Complete ✅
-**Code exists:** Infrastructure + pure functions + database + **All 9 Tools** + Working Auth Flow
-**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding next)
+**Status:** Phase 2 In Progress - Recipe Screens Complete ✅
+**Code exists:** Infrastructure + pure functions + database + **All 9 Tools** + Working Auth Flow + **Recipe UI (List & Detail)**
+**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Create Form next)
 
 ---
 
@@ -175,11 +175,39 @@ Specs are strong but not yet exercised in code.
   - Grocery: push_ingredients, create_list, add_item
 - ✅ Backend API layer complete and validated
 
-**Next Milestone**: Phase 2 - UI Implementation
-- UI scaffolding (bottom nav, empty screens, mobile-first responsive)
-- Recipe management screens (list, detail, create/edit)
-- Meal planner screen (week view, add/remove meals)
+**Completed (Phase 2 - UI Scaffolding ✅)**:
+- ✅ Bottom tab navigation (4 tabs: Planner, Recipes, Groceries, Settings)
+- ✅ AuthenticatedLayout component (auth check, header, logout)
+- ✅ Placeholder screens for all tabs
+- ✅ Mobile-first responsive design (viewport meta, proper spacing)
+- ✅ Supabase client configured (service role key for Tools, bypasses RLS with app-level authz)
+
+**Completed (Phase 2 - Recipe Screens ✅)**:
+- ✅ Recipe list screen (`/recipes`)
+  - Card grid with title, tags, star ratings
+  - Real-time search by title
+  - Empty state handling
+  - Click to navigate to detail
+- ✅ Recipe detail screen (`/recipes/[id]`)
+  - Full recipe display (title, rating, tags, notes)
+  - Ingredients list with checkboxes (for shopping reference)
+  - Instructions section (collapsible)
+  - Action buttons (Add to Planner, Push to Grocery - placeholders)
+- ✅ API routes
+  - GET `/api/recipes` - list with search/filters
+  - GET `/api/recipes/[id]` - single recipe with ingredients
+- ✅ Instructions column added to database schema
+
+**Next Milestone**: Phase 2 - Recipe Create/Edit Form
+- Create new recipes (Plus button functionality)
+- Edit existing recipes
+- Ingredient builder UI
+- Tag management
+
+**Pending**:
+- Meal planner screens (week view, add/remove meals)
 - Grocery lists screens (list selector, items, check off)
+- Wire up action buttons to Tools
 
 **Not Started**:
 - Agent SDK integration

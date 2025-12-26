@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Plus } from 'lucide-react';
 
-export default function PlannerPage() {
+export default function GroceriesPage() {
   return (
     <AuthenticatedLayout
-      title="Meal Planner"
+      title="Grocery Lists"
       action={
         <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
           <Plus size={20} />
@@ -24,18 +24,18 @@ export default function PlannerPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
               />
             </svg>
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-2">
-            No meals planned yet
+            No grocery lists yet
           </h2>
           <p className="text-sm text-gray-600 mb-6">
-            Start planning your week by adding meals to your calendar
+            Create a list to start tracking your shopping needs
           </p>
           <button className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            Plan Your First Meal
+            Create Your First List
           </button>
         </div>
       </div>
