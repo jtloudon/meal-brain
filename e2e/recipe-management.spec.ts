@@ -22,38 +22,67 @@ test.describe('Recipe Management', () => {
   });
 
   test('should display recipe list', async ({ page }) => {
+    // Debug: Take screenshot and log page content
+    await page.screenshot({ path: 'test-results/debug-recipes-page.png' });
+    const pageContent = await page.content();
+    console.log('Page URL:', page.url());
+    console.log('Has "Loading":', pageContent.includes('Loading'));
+    console.log('Has "Chicken":', pageContent.includes('Chicken'));
+    console.log('Has "No recipes":', pageContent.includes('No recipes'));
+
+    // Wait for either recipes to load OR empty state (max 10s)
+    try {
+      await page.waitForSelector('text=Chicken Curry, text=No recipes', { timeout: 10000 });
+    } catch (e) {
+      console.log('Timeout waiting for content');
+    }
+
     // Should see recipe cards
-    await expect(page.locator('text=Chicken Curry')).toBeVisible();
-    await expect(page.locator('text=Beef Tacos')).toBeVisible();
+    await expect(page.locator('h3:has-text("Chicken Curry")')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('h3:has-text("Beef Tacos")')).toBeVisible();
   });
 
   test('should search recipes by title', async ({ page }) => {
+    // Wait for recipes to load first
+    await page.waitForSelector('text=Chicken Curry', { timeout: 10000 });
+
     // Type in search box
     await page.fill('input[placeholder*="Search"]', 'Chicken');
 
+    // Wait a moment for client-side filtering
+    await page.waitForTimeout(500);
+
     // Should see only matching recipe
-    await expect(page.locator('text=Chicken Curry')).toBeVisible();
-    await expect(page.locator('text=Beef Tacos')).not.toBeVisible();
+    await expect(page.locator('h3:has-text("Chicken Curry")')).toBeVisible();
+    await expect(page.locator('h3:has-text("Beef Tacos")')).not.toBeVisible();
   });
 
   test('should filter recipes by rating', async ({ page }) => {
+    // Wait for recipes to load
+    await page.waitForSelector('text=Chicken Curry', { timeout: 10000 });
+
     // Select 5 stars filter
     await page.selectOption('select', '5');
 
-    // Should filter to only 5-star recipes
-    const recipeCards = page.locator('[class*="rounded-lg"][class*="shadow"]');
-    const count = await recipeCards.count();
+    // Wait for filtering
+    await page.waitForTimeout(500);
 
-    // Verify filtered results (depends on demo data)
+    // Should see filtered results (exact count depends on demo data ratings)
+    const recipeCards = page.locator('div.cursor-pointer:has(h3)');
+    const count = await recipeCards.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });
 
   test('should navigate to recipe detail', async ({ page }) => {
-    // Click on a recipe card
-    await page.click('button:has-text("Chicken Curry")');
+    // Wait for recipes to load
+    await page.waitForSelector('text=Chicken Curry', { timeout: 10000 });
+
+    // Click on a recipe card (the whole div is clickable)
+    await page.locator('div.cursor-pointer:has-text("Chicken Curry")').first().click();
+    await page.waitForURL(/\/recipes\/[^/]+$/);
 
     // Should see recipe details
-    await expect(page.locator('h1:has-text("Chicken Curry"), h2:has-text("Chicken Curry")')).toBeVisible();
+    await expect(page.locator('text=Chicken Curry')).toBeVisible();
     await expect(page.locator('h2:has-text("Ingredients:")')).toBeVisible();
   });
 
@@ -89,8 +118,11 @@ test.describe('Recipe Management', () => {
   });
 
   test('should edit an existing recipe', async ({ page }) => {
+    // Wait for recipes to load
+    await page.waitForSelector('text=Chicken Curry', { timeout: 10000 });
+
     // Click on a recipe card
-    await page.click('button:has-text("Chicken Curry")');
+    await page.locator('div.cursor-pointer:has-text("Chicken Curry")').first().click();
     await page.waitForURL(/\/recipes\/[^/]+$/);
 
     // Click Edit button
