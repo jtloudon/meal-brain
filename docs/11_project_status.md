@@ -246,17 +246,17 @@ Specs are strong but not yet exercised in code.
 
 **Completed (E2E Testing ✅)**:
 - ✅ E2E test infrastructure working (Playwright)
-- ✅ 12/14 E2E tests passing (86% coverage)
-  - ✅ Recipe list, search, filter, detail, create, **edit**
-  - ✅ Meal planner week view, navigation, add meal
+- ✅ 13/16 E2E tests passing (81% coverage)
+  - ✅ Recipe **full CRUD** (7/7 tests, 100%): list, search, filter, detail, create, edit, **delete**
+  - ✅ Meal planner CRUD (4/5 tests, 80%): view, navigate, add meal, **remove meal**
   - ✅ Authentication flow (new user, returning user)
-  - ⏸️ Auth edge cases (2 tests - expired/reused tokens, deferred)
+  - ⏸️ Auth edge cases (3 tests - expired/reused tokens, deferred)
+- ✅ **TDD workflow established**: Write test → Implement → Pass → Commit
 - ✅ **Bug fixed**: Seed data UUIDs were invalid per RFC 4122 (Zod .uuid() validation)
 
 **Next Steps**:
-- Remove meal functionality (click to delete)
-- Grocery list UI (list selector, items, check off)
-- Wire up action buttons (Add to Planner, Push to Grocery from recipe detail)
+- Grocery list UI (list selector, items, check off) - **TDD**
+- Wire up action buttons (Add to Planner, Push to Grocery from recipe detail) - **TDD**
 - Polish and refinements
 
 **Not Started**:
