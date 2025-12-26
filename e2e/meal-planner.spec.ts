@@ -92,6 +92,42 @@ test.describe('Meal Planner', () => {
     await expect(page.locator('text=Chicken Curry').first()).toBeVisible();
   });
 
+  test('should remove meal from planner', async ({ page }) => {
+    // First, add a meal so we have something to remove
+    await page.locator('header button').first().click();
+    await page.waitForURL('**/planner/add');
+
+    // Select a recipe
+    await page.fill('input[placeholder*="Search"]', 'Chicken');
+    await page.click('text=Chicken Curry');
+
+    // Select date and meal type
+    await expect(page.locator('text=Schedule Meal')).toBeVisible();
+    await page.click('button:has-text("dinner")');
+
+    // Add to planner
+    await page.click('button:has-text("Add to Planner")');
+    await page.waitForURL('**/planner');
+
+    // Verify meal was added
+    await expect(page.locator('text=Chicken Curry').first()).toBeVisible();
+
+    // Count meals before removal
+    const initialCount = await page.locator('text=Chicken Curry').count();
+
+    // Now remove it - click any X button on a Chicken Curry meal card
+    const removeButton = page.locator('button[aria-label*="Remove"]').first();
+    await removeButton.click();
+
+    // Should show confirmation or immediately remove
+    // Wait a moment for the meal to disappear
+    await page.waitForTimeout(500);
+
+    // Meal count should have decreased by 1
+    const remainingCount = await page.locator('text=Chicken Curry').count();
+    expect(remainingCount).toBe(initialCount - 1);
+  });
+
   test('should show empty state when no meals planned', async ({ page }) => {
     // If there are no meals, should see empty state
     // This test might fail if meals exist from previous tests

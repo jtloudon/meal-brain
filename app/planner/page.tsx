@@ -57,6 +57,25 @@ export default function PlannerPage() {
     }
   };
 
+  const handleRemoveMeal = async (mealId: string) => {
+    try {
+      const response = await fetch(`/api/planner/${mealId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove meal');
+      }
+
+      // Optimistically update UI
+      setMeals((prevMeals) => prevMeals.filter((m) => m.id !== mealId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove meal');
+      // Refetch to ensure UI is in sync
+      fetchMeals();
+    }
+  };
+
   const getMealsForDay = (date: Date): Record<MealType, PlannedMeal[]> => {
     const dateStr = formatDate(date);
     const dayMeals = meals.filter((m) => m.date === dateStr);
@@ -175,8 +194,16 @@ export default function PlannerPage() {
                           dayMeals[mealType].map((meal) => (
                             <div
                               key={meal.id}
-                              className="bg-white border border-gray-200 rounded p-2 text-xs"
+                              className="bg-white border border-gray-200 rounded p-2 text-xs relative group"
                             >
+                              {/* Remove button */}
+                              <button
+                                onClick={() => handleRemoveMeal(meal.id)}
+                                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm"
+                                aria-label="Remove meal"
+                              >
+                                ×
+                              </button>
                               <div className="font-medium text-gray-900">
                                 {meal.recipe.title}
                               </div>
