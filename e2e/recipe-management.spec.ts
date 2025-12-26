@@ -141,14 +141,7 @@ test.describe('Recipe Management', () => {
     await expect(page.locator('h1:has-text("Test Recipe")').first()).toBeVisible();
   });
 
-  test.skip('should edit an existing recipe [BUG: PUT returns 400]', async ({ page }) => {
-    // Monitor network requests
-    page.on('response', async response => {
-      if (response.url().includes('/api/recipes')) {
-        console.log(`[API] ${response.request().method()} ${response.url()} - ${response.status()}`);
-      }
-    });
-
+  test('should edit an existing recipe', async ({ page }) => {
     // Wait for recipes to load
     await page.waitForSelector('text=Chicken Curry', { timeout: 10000 });
 
@@ -166,9 +159,6 @@ test.describe('Recipe Management', () => {
 
     // Save changes
     await page.click('button:has-text("Save Changes")');
-
-    // Wait for API call
-    await page.waitForTimeout(3000);
 
     // Should redirect back to detail
     await page.waitForURL(/\/recipes\/[^/]+$/, { timeout: 10000 });

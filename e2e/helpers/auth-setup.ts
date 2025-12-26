@@ -10,7 +10,7 @@ export async function loginTestUser(page: Page): Promise<{ email: string; cleanu
   const testEmail = `test-${Date.now()}@example.com`;
 
   // Use the demo household ID (has recipes already)
-  const DEMO_HOUSEHOLD_ID = '00000000-0000-0000-0000-000000000001';
+  const DEMO_HOUSEHOLD_ID = '00000000-0000-4000-8000-000000000001';
 
   // Create user associated with demo household
   await seedDatabase({
