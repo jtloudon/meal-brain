@@ -38,8 +38,13 @@ Optional later:
 **Database + Auth**:
 - Supabase
   - Postgres (database)
-  - Auth (magic-link, household isolation)
+  - Auth (magic-link with PKCE, household isolation)
   - Storage (images, OCR inputs - Phase 3+)
+  - **Auth Pattern**: Server-side callback route (`app/auth/callback/route.ts`)
+    - Uses Next.js Route Handler with `createServerClient`
+    - Handles PKCE code exchange with cookie-based session storage
+    - Avoids client-side PKCE verifier storage issues
+    - Redirects based on user state (onboarding vs authenticated home)
 
 **AI Orchestrator**:
 - **Decision**: Vercel API Routes (chosen over Supabase Edge Functions)

@@ -1,12 +1,12 @@
 # Tool Test: grocery.push_ingredients
 
-**Module**: `backend/tools/grocery.ts`
+**Module**: `lib/tools/grocery.ts`
 
-**Status**: ⬜ Not started
+**Status**: ✅ Complete
 
-**Test Count**: 0/4 passing
+**Test Count**: 4/4 passing
 
-**Coverage**: 0%
+**Coverage**: 100%
 
 ---
 
@@ -31,7 +31,7 @@ grocery.push_ingredients.execute({
 
 ## Test Case 1: Push ingredients to empty list
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -76,7 +76,7 @@ expect(items[0]).toMatchObject({
 
 ## Test Case 2: Merge with existing ingredients (same unit)
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -131,7 +131,7 @@ expect(result.message).toContain('Merged rice: 1 cup + 0.5 cup = 1.5 cup');
 
 ## Test Case 3: Do not merge when units differ
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -183,7 +183,7 @@ expect(result.message).toContain('Unit mismatch');
 
 ## Test Case 4: Validation - Invalid grocery list ID
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -288,9 +288,9 @@ describe('grocery.push_ingredients Tool', () => {
 
 ## Progress Tracking
 
-- [ ] Test Case 1: Push to empty list
-- [ ] Test Case 2: Merge same unit
-- [ ] Test Case 3: No merge different units
-- [ ] Test Case 4: Invalid list ID error
+- [x] Test Case 1: Push to empty list
+- [x] Test Case 2: Merge same unit
+- [x] Test Case 3: No merge different units
+- [x] Test Case 4: Invalid list ID error
 
-**When all 4 pass**: Update [../README.md](../README.md) status to ✅
+✅ **All tests passing!**

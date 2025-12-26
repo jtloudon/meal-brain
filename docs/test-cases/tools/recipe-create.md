@@ -1,12 +1,12 @@
 # Tool Test: recipe.create
 
-**Module**: `backend/tools/recipe.ts`
+**Module**: `lib/tools/recipe.ts`
 
-**Status**: ⬜ Not started
+**Status**: ✅ Complete
 
-**Test Count**: 0/4 passing
+**Test Count**: 4/4 passing
 
-**Coverage**: 0%
+**Coverage**: 100%
 
 ---
 
@@ -177,9 +177,9 @@ export const CreateRecipeSchema = z.object({
 
 ## Progress Tracking
 
-- [ ] Test Case 1: Valid input
-- [ ] Test Case 2: Missing title
-- [ ] Test Case 3: Invalid unit
-- [ ] Test Case 4: RLS enforcement
+- [x] Test Case 1: Valid input
+- [x] Test Case 2: Missing title
+- [x] Test Case 3: Invalid unit
+- [x] Test Case 4: RLS enforcement
 
-**When all 4 pass**: Update [../README.md](../README.md) status to ✅
+**Status**: ✅ All tests passing - [../README.md](../README.md) updated

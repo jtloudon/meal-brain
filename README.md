@@ -8,17 +8,16 @@ A mobile-first web app for planning meals, managing recipes, and generating groc
 
 ## Project Status
 
-**Current Phase**: Phase 0 (Documentation Complete) ✅
-
-**Next Phase**: Phase 1 (Local Infrastructure & Repo Genesis)
+**Current Phase**: Phase 1 COMPLETE ✅ → Moving to Phase 2
 
 **For detailed status and roadmap**, see:
 - **[Implementation Plan](docs/08_implementation_plan.md)** - Complete execution roadmap, phase breakdown, success criteria
 - **[Project Status](docs/11_project_status.md)** - Current state snapshot, what's done, what's next
+- **[Test Progress](docs/test-cases/README.md)** - Test coverage tracker (26/58 tests passing, 100% Phase 1 coverage)
 
 ---
 
-## Quick Start (Coming in Phase 1)
+## Quick Start
 
 ```bash
 # Clone repository
@@ -123,12 +122,13 @@ All project specifications live in `/docs`:
 
 ## Features (Roadmap)
 
-### Phase 1 (MVP Foundation) - In Progress
+### Phase 1 (MVP Foundation) - ✅ COMPLETE
 - ✅ Documentation complete
-- ⏳ Local Supabase setup
-- ⏳ Authentication (magic-link)
-- ⏳ Database schema + migrations
-- ⏳ Test infrastructure
+- ✅ Local Supabase setup
+- ✅ Database schema + migrations (2 migrations applied)
+- ✅ Test infrastructure (Vitest + Playwright)
+- ✅ 3 Tools implemented and tested (recipe.create, planner.add_meal, grocery.push_ingredients)
+- ✅ Authentication (magic-link flow working end-to-end)
 
 ### Phase 2 (Core CRUD)
 - Recipe management (create, edit, delete)

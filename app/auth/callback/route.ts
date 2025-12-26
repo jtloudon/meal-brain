@@ -1,0 +1,70 @@
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
+  const error = requestUrl.searchParams.get('error');
+  const error_description = requestUrl.searchParams.get('error_description');
+
+  console.log('[CALLBACK ROUTE] Processing auth callback');
+  
+  if (error) {
+    console.error('[CALLBACK ROUTE] Auth error:', error, error_description);
+    return NextResponse.redirect(`${requestUrl.origin}/login?error=${error_description}`);
+  }
+
+  if (code) {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
+
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    console.log('[CALLBACK ROUTE] Exchange result:', { hasSession: !!data?.session, error: exchangeError });
+
+    if (exchangeError) {
+      console.error('[CALLBACK ROUTE] Exchange error:', exchangeError);
+      return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_failed`);
+    }
+
+    // Check if user has a household
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log('[CALLBACK ROUTE] User:', user?.email);
+
+    if (!user) {
+      return NextResponse.redirect(`${requestUrl.origin}/login`);
+    }
+
+    // Check for user record
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('household_id')
+      .eq('id', user.id)
+      .single();
+
+    console.log('[CALLBACK ROUTE] User record:', userRecord);
+
+    if (!userRecord || !userRecord.household_id) {
+      return NextResponse.redirect(`${requestUrl.origin}/onboarding`);
+    }
+
+    return NextResponse.redirect(`${requestUrl.origin}/planner`);
+  }
+
+  return NextResponse.redirect(`${requestUrl.origin}/login`);
+}

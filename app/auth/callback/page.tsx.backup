@@ -1,0 +1,115 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/auth/supabase-client';
+
+export default function AuthCallbackPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const handleCallback = async () => {
+      const supabase = createClient();
+
+      // Exchange the code for a session
+      const code = searchParams.get('code');
+      const token_hash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
+
+      if (code) {
+        // Handle OAuth code exchange (PKCE flow)
+        console.log('[CALLBACK] Exchanging code for session...');
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        console.log('[CALLBACK] Exchange result:', { hasSession: !!data?.session, error });
+
+        if (error) {
+          console.error('[CALLBACK] Code exchange error:', error);
+          setError(error.message);
+          setTimeout(() => router.push('/login'), 2000);
+          return;
+        }
+
+        console.log('[CALLBACK] Code exchange successful');
+      } else if (token_hash && type) {
+        // Handle magic link token
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash,
+          type: type as any,
+        });
+
+        if (error) {
+          console.error('Token verification error:', error);
+          if (error.message.includes('expired')) {
+            setError('This link has expired. Please request a new one.');
+          } else if (error.message.includes('already been used')) {
+            setError('This link is no longer valid. Please request a new one.');
+          } else {
+            setError(error.message);
+          }
+          setTimeout(() => router.push('/login'), 2000);
+          return;
+        }
+      }
+
+      // Check if user has a household
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('[CALLBACK] Auth user:', user?.id, user?.email);
+
+      if (!user) {
+        console.error('[CALLBACK] No user found after auth');
+        router.push('/login');
+        return;
+      }
+
+      // Check if user belongs to a household
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('household_id')
+        .eq('id', user.id)
+        .single();
+
+      console.log('[CALLBACK] User record:', userRecord, 'Error:', userError);
+
+      if (!userRecord || !userRecord.household_id) {
+        // New user - redirect to onboarding
+        console.log('[CALLBACK] No household found, redirecting to onboarding');
+        router.push('/onboarding');
+      } else {
+        // Existing user - redirect to planner
+        console.log('[CALLBACK] Found household, redirecting to planner');
+        router.push('/planner');
+      }
+    };
+
+    handleCallback();
+  }, [router, searchParams]);
+
+  if (error) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md text-center">
+          <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+            <h2 className="text-xl font-semibold text-red-900 mb-2">
+              Authentication Error
+            </h2>
+            <p className="text-red-800 mb-4">{error}</p>
+            <p className="text-sm text-red-700">Redirecting to login...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6">
+      <div className="w-full max-w-md text-center">
+        <div className="animate-pulse">
+          <h2 className="text-xl font-semibold mb-2">Verifying...</h2>
+          <p className="text-secondary">Please wait while we sign you in</p>
+        </div>
+      </div>
+    </main>
+  );
+}

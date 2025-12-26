@@ -1,12 +1,12 @@
 # Tool Test: planner.add_meal
 
-**Module**: `backend/tools/planner.ts`
+**Module**: `lib/tools/planner.ts`
 
-**Status**: ⬜ Not started
+**Status**: ✅ Complete
 
-**Test Count**: 0/5 passing
+**Test Count**: 5/5 passing
 
-**Coverage**: 0%
+**Coverage**: 100%
 
 ---
 
@@ -27,7 +27,7 @@ planner.add_meal.execute({
 
 ## Test Case 1: Add meal to valid date
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -64,7 +64,7 @@ expect(meal.meal_type).toBe('dinner');
 
 ## Test Case 2: Reject invalid date format
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -92,7 +92,7 @@ expect(result.error.field).toBe('date');
 
 ## Test Case 3: Reject non-existent recipe
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -119,7 +119,7 @@ expect(result.error.message).toContain('Recipe not found');
 
 ## Test Case 4: Reject invalid meal_type
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -146,7 +146,7 @@ expect(result.error.field).toBe('meal_type');
 
 ## Test Case 5: Allow duplicate meals on same date
 
-**Status**: ⬜
+**Status**: ✅
 
 **Given**:
 ```typescript
@@ -200,10 +200,10 @@ export const AddMealSchema = z.object({
 
 ## Progress Tracking
 
-- [ ] Test Case 1: Add valid meal
-- [ ] Test Case 2: Invalid date format
-- [ ] Test Case 3: Non-existent recipe
-- [ ] Test Case 4: Invalid meal_type
-- [ ] Test Case 5: Allow duplicates
+- [x] Test Case 1: Add valid meal
+- [x] Test Case 2: Invalid date format
+- [x] Test Case 3: Non-existent recipe
+- [x] Test Case 4: Invalid meal_type
+- [x] Test Case 5: Allow duplicates
 
-**When all 5 pass**: Update [../README.md](../README.md) status to ✅
+✅ **All tests passing!**

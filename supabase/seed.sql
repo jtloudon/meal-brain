@@ -5,9 +5,13 @@
 INSERT INTO households (id, name, created_at) VALUES
   ('00000000-0000-0000-0000-000000000001', 'Demo Household', NOW());
 
--- Demo Users
--- Note: Actual auth users created by Supabase Auth
--- This just links them to the household
+-- Demo Auth Users (for local development only)
+-- In production, these are created by Supabase Auth via magic-link
+INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, role, aud, instance_id) VALUES
+  ('10000000-0000-0000-0000-000000000001', 'demo@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000'),
+  ('10000000-0000-0000-0000-000000000002', 'spouse@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000');
+
+-- Demo Users (link auth users to household)
 INSERT INTO users (id, email, household_id, created_at) VALUES
   ('10000000-0000-0000-0000-000000000001', 'demo@mealbrain.app', '00000000-0000-0000-0000-000000000001', NOW()),
   ('10000000-0000-0000-0000-000000000002', 'spouse@mealbrain.app', '00000000-0000-0000-0000-000000000001', NOW());
@@ -23,23 +27,23 @@ INSERT INTO user_preferences (user_id, household_context, dietary_constraints, a
    NOW());
 
 -- Demo Ingredients (canonical list)
-INSERT INTO ingredients (id, name, category) VALUES
-  ('a0000000-0000-0000-0000-000000000001', 'chicken breast', 'protein'),
-  ('a0000000-0000-0000-0000-000000000002', 'rice', 'grain'),
-  ('a0000000-0000-0000-0000-000000000003', 'coconut milk', 'dairy-alternative'),
-  ('a0000000-0000-0000-0000-000000000004', 'curry powder', 'spice'),
-  ('a0000000-0000-0000-0000-000000000005', 'onion', 'vegetable'),
-  ('a0000000-0000-0000-0000-000000000006', 'garlic', 'vegetable'),
-  ('a0000000-0000-0000-0000-000000000007', 'ground beef', 'protein'),
-  ('a0000000-0000-0000-0000-000000000008', 'taco shells', 'grain'),
-  ('a0000000-0000-0000-0000-000000000009', 'lettuce', 'vegetable'),
-  ('a0000000-0000-0000-0000-00000000000a', 'tomato', 'vegetable'),
-  ('a0000000-0000-0000-0000-00000000000b', 'cheddar cheese', 'dairy'),
-  ('a0000000-0000-0000-0000-00000000000c', 'black beans', 'protein'),
-  ('a0000000-0000-0000-0000-00000000000d', 'bell pepper', 'vegetable'),
-  ('a0000000-0000-0000-0000-00000000000e', 'olive oil', 'fat'),
-  ('a0000000-0000-0000-0000-00000000000f', 'salt', 'seasoning'),
-  ('a0000000-0000-0000-0000-000000000010', 'black pepper', 'seasoning');
+INSERT INTO ingredients (id, canonical_name) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'chicken breast'),
+  ('a0000000-0000-0000-0000-000000000002', 'rice'),
+  ('a0000000-0000-0000-0000-000000000003', 'coconut milk'),
+  ('a0000000-0000-0000-0000-000000000004', 'curry powder'),
+  ('a0000000-0000-0000-0000-000000000005', 'onion'),
+  ('a0000000-0000-0000-0000-000000000006', 'garlic'),
+  ('a0000000-0000-0000-0000-000000000007', 'ground beef'),
+  ('a0000000-0000-0000-0000-000000000008', 'taco shells'),
+  ('a0000000-0000-0000-0000-000000000009', 'lettuce'),
+  ('a0000000-0000-0000-0000-00000000000a', 'tomato'),
+  ('a0000000-0000-0000-0000-00000000000b', 'cheddar cheese'),
+  ('a0000000-0000-0000-0000-00000000000c', 'black beans'),
+  ('a0000000-0000-0000-0000-00000000000d', 'bell pepper'),
+  ('a0000000-0000-0000-0000-00000000000e', 'olive oil'),
+  ('a0000000-0000-0000-0000-00000000000f', 'salt'),
+  ('a0000000-0000-0000-0000-000000000010', 'black pepper');
 
 -- Demo Recipes
 INSERT INTO recipes (id, household_id, title, rating, tags, notes, created_at) VALUES
