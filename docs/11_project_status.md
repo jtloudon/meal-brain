@@ -246,16 +246,14 @@ Specs are strong but not yet exercised in code.
 
 **Completed (E2E Testing ✅)**:
 - ✅ E2E test infrastructure working (Playwright)
-- ✅ 11/14 E2E tests passing (79% coverage)
-  - ✅ Recipe list, search, filter, detail, create
+- ✅ 12/14 E2E tests passing (86% coverage)
+  - ✅ Recipe list, search, filter, detail, create, **edit**
   - ✅ Meal planner week view, navigation, add meal
   - ✅ Authentication flow (new user, returning user)
   - ⏸️ Auth edge cases (2 tests - expired/reused tokens, deferred)
-  - 🐛 Recipe edit (1 test skipped - validation bug discovered)
-- ✅ **Bug found**: Recipe edit PUT endpoint returns 400 (validation error)
+- ✅ **Bug fixed**: Seed data UUIDs were invalid per RFC 4122 (Zod .uuid() validation)
 
 **Next Steps**:
-- 🐛 Debug recipe edit validation bug (PUT /api/recipes/:id returns 400)
 - Remove meal functionality (click to delete)
 - Grocery list UI (list selector, items, check off)
 - Wire up action buttons (Add to Planner, Push to Grocery from recipe detail)

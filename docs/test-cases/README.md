@@ -55,13 +55,13 @@
 |------|-----------|--------|------------|----------|
 | Authentication | [e2e/authentication-flow.md](e2e/authentication-flow.md) | ✅ | 2/4 | 50% |
 | Meal Planning | e2e/meal-planner.spec.ts | ✅ | 3/4 | 75% |
-| Recipe Management | e2e/recipe-management.spec.ts | 🟨 | 5/6 | 83% |
+| Recipe Management | e2e/recipe-management.spec.ts | ✅ | 6/6 | 100% |
 
-**Total E2E Tests**: 10/14 complete (1 skipped due to bug)
+**Total E2E Tests**: 11/14 complete (auth edge cases deferred)
 
 **Notes**:
-- Recipe edit test skipped: PUT /api/recipes/:id returns 400 (validation bug)
 - Auth edge case tests (expired/reused tokens) deferred to Phase 3+
+- Bug fixed: Invalid UUIDs in seed data (now RFC 4122 compliant)
 
 ---
 
@@ -79,14 +79,14 @@
 ## Overall Progress
 
 **Total Tests Defined**: 58
-**Total Tests Implemented**: 50
-**Total Tests Passing**: 50
+**Total Tests Implemented**: 51
+**Total Tests Passing**: 51
 
 **Coverage by Layer**:
 - Unit: 73% (11/15)
 - Tools: 100% (27/27) ✅
 - Integration: 0% (0/6)
-- E2E: 71% (10/14) ✅ (1 skipped, 2 deferred)
+- E2E: 79% (11/14) ✅ (2 auth edge cases deferred)
 - AI Behavior: 0% (0/4)
 
 ---
