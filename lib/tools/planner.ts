@@ -34,7 +34,7 @@ export const AddMealSchema = z.object({
       'Invalid recipe ID format'
     ),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format - must be YYYY-MM-DD'),
-  meal_type: z.enum(['breakfast', 'lunch', 'dinner']),
+  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']),
 });
 
 export type AddMealInput = z.infer<typeof AddMealSchema>;
@@ -255,7 +255,11 @@ export async function listMeals(
       recipe_id: string;
       date: string;
       meal_type: string;
-      recipe_title: string;
+      recipe: {
+        title: string;
+        tags: string[];
+        rating: number | null;
+      };
     }>;
     total: number;
   }>
@@ -274,7 +278,9 @@ export async function listMeals(
         date,
         meal_type,
         recipes (
-          title
+          title,
+          tags,
+          rating
         )
       `
       )
@@ -294,13 +300,17 @@ export async function listMeals(
       };
     }
 
-    // Transform data to include recipe title
+    // Transform data to include recipe object
     const formattedMeals = (meals ?? []).map((meal: any) => ({
       id: meal.id,
       recipe_id: meal.recipe_id,
       date: meal.date,
       meal_type: meal.meal_type,
-      recipe_title: meal.recipes?.title ?? 'Unknown Recipe',
+      recipe: {
+        title: meal.recipes?.title ?? 'Unknown Recipe',
+        tags: meal.recipes?.tags ?? [],
+        rating: meal.recipes?.rating ?? null,
+      },
     }));
 
     return {

@@ -7,9 +7,9 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 2 In Progress - Recipe Screens Complete ✅
-**Code exists:** Infrastructure + pure functions + database + **All 9 Tools** + Working Auth Flow + **Recipe UI (List & Detail)**
-**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Create Form next)
+**Status:** Phase 2 In Progress - Meal Planner Mostly Complete ✅
+**Code exists:** Infrastructure + pure functions + database + **All 9 Tools** + Working Auth Flow + **Recipe UI (Full CRUD)** + **Meal Planner (Week View + Add Meals)**
+**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Recipe Forms ✅ → Meal Planner ✅ → Polish next)
 
 ---
 
@@ -188,26 +188,67 @@ Specs are strong but not yet exercised in code.
   - Real-time search by title
   - Empty state handling
   - Click to navigate to detail
+  - Plus button wired to create form
 - ✅ Recipe detail screen (`/recipes/[id]`)
   - Full recipe display (title, rating, tags, notes)
   - Ingredients list with checkboxes (for shopping reference)
   - Instructions section (collapsible)
+  - Edit button wired to edit form
   - Action buttons (Add to Planner, Push to Grocery - placeholders)
 - ✅ API routes
   - GET `/api/recipes` - list with search/filters
   - GET `/api/recipes/[id]` - single recipe with ingredients
+  - POST `/api/recipes` - create new recipe
+  - PUT `/api/recipes/[id]` - update existing recipe
 - ✅ Instructions column added to database schema
 
-**Next Milestone**: Phase 2 - Recipe Create/Edit Form
-- Create new recipes (Plus button functionality)
-- Edit existing recipes
-- Ingredient builder UI
-- Tag management
+**Completed (Phase 2 - Recipe Forms ✅)**:
+- ✅ Recipe create form (`/recipes/new`)
+  - Title, rating (star selector), tags, notes, instructions fields
+  - Dynamic ingredient builder (add/remove ingredients)
+  - Unit selector with all 15 valid units
+  - Form validation and error handling
+  - Navigation from Plus button and empty state
+  - **Bug fix**: Instructions now properly saved to database (lib/tools/recipe.ts:145)
+- ✅ Recipe edit form (`/recipes/[id]/edit`)
+  - Pre-populated with existing recipe data
+  - Same form UI as create
+  - Update ingredients (full replace)
+  - Navigation from Edit button on detail screen
+- ✅ Full CRUD flow working end-to-end
 
-**Pending**:
-- Meal planner screens (week view, add/remove meals)
-- Grocery lists screens (list selector, items, check off)
-- Wire up action buttons to Tools
+**Completed (Phase 2 - Meal Planner UI ✅)**:
+- ✅ Week view planner (`/planner`)
+  - 7-day calendar with prev/next navigation
+  - Grid layout: breakfast, lunch, dinner, snack per day
+  - Today's date highlighted
+  - Empty state with CTA
+  - Real-time meal display with recipe details
+- ✅ Add meal flow (`/planner/add`)
+  - Step 1: Select recipe (with search)
+  - Step 2: Pick date + meal type
+  - All 4 meal types supported (breakfast, lunch, dinner, snack)
+- ✅ API routes
+  - GET `/api/planner` - List meals for date range
+  - POST `/api/planner` - Add meal to planner
+  - Better error messages for auth issues
+
+**Completed (Database & Infrastructure ✅)**:
+- ✅ Migrations consolidated into single schema file
+  - Removed 2 subsequent migration files
+  - Single source of truth for database schema
+  - Includes 'snack' meal type from the start
+  - Fixed household creation policy (TO authenticated)
+- ✅ Enhanced error handling
+  - Actionable error messages for auth failures
+  - Console logging for debugging
+  - User-friendly guidance ("log out and log back in")
+
+**Next Steps**:
+- Remove meal functionality (click to delete)
+- Grocery list UI (list selector, items, check off)
+- Wire up action buttons (Add to Planner, Push to Grocery from recipe detail)
+- Polish and refinements
 
 **Not Started**:
 - Agent SDK integration

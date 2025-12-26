@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { ArrowLeft, Calendar, ShoppingCart, Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Calendar, ShoppingCart, Star, ChevronDown, ChevronUp, Edit } from 'lucide-react';
 
 interface RecipeIngredient {
   id: string;
@@ -251,6 +251,13 @@ export default function RecipeDetailPage() {
 
         {/* Action Buttons */}
         <div className="space-y-3 mt-6">
+          <button
+            onClick={() => router.push(`/recipes/${recipe.id}/edit`)}
+            className="w-full px-4 py-3 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Edit size={18} />
+            Edit Recipe
+          </button>
           <button className="w-full px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
             <Calendar size={18} />
             Add to Planner

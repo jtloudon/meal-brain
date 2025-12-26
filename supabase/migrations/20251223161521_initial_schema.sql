@@ -40,6 +40,7 @@ CREATE TABLE recipes (
   rating INTEGER CHECK (rating >= 1 AND rating <= 5),
   tags TEXT[] DEFAULT '{}',
   notes TEXT,
+  instructions TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -71,7 +72,7 @@ CREATE TABLE planner_meals (
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   recipe_id UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
   date DATE NOT NULL,
-  meal_type TEXT NOT NULL CHECK (meal_type IN ('breakfast', 'lunch', 'dinner')),
+  meal_type TEXT NOT NULL CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -130,6 +131,7 @@ CREATE POLICY "Users can read own household"
 -- Households: Authenticated users can create households
 CREATE POLICY "Users can create households"
   ON households FOR INSERT
+  TO authenticated
   WITH CHECK (true);
 
 -- Users: Users can read their own record (even without household) AND household members

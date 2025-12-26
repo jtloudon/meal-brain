@@ -142,6 +142,7 @@ export async function createRecipe(
         rating: validated.rating ?? null,
         tags: validated.tags ?? [],
         notes: validated.notes ?? null,
+        instructions: validated.instructions ?? null,
       })
       .select('id')
       .single();
@@ -273,10 +274,10 @@ export async function listRecipes(
     // Validate input
     const validated = ListRecipesSchema.parse(input);
 
-    // Build query
+    // Build query - include ingredients, notes, and instructions for client-side search
     let query = supabase
       .from('recipes')
-      .select('id, title, tags, rating, created_at', { count: 'exact' })
+      .select('id, title, tags, rating, created_at, notes, instructions, recipe_ingredients(display_name)', { count: 'exact' })
       .eq('household_id', context.householdId)
       .order('created_at', { ascending: false });
 
@@ -292,10 +293,7 @@ export async function listRecipes(
         query = query.eq('rating', validated.filters.rating);
       }
 
-      // Filter by search (case-insensitive title search)
-      if (validated.filters.search) {
-        query = query.ilike('title', `%${validated.filters.search}%`);
-      }
+      // Search is handled client-side for comprehensive tag/text search
     }
 
     // Apply pagination

@@ -11,6 +11,9 @@ interface Recipe {
   tags: string[];
   rating: number | null;
   created_at: string;
+  notes?: string | null;
+  instructions?: string | null;
+  recipe_ingredients?: Array<{ display_name: string }>;
 }
 
 export default function RecipesPage() {
@@ -18,11 +21,12 @@ export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [minRating, setMinRating] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRecipes();
-  }, [search]);
+  }, [search, minRating]);
 
   const fetchRecipes = async () => {
     try {
@@ -41,7 +45,42 @@ export default function RecipesPage() {
       const data = await response.json();
       console.log('[Frontend] API response:', data);
       console.log('[Frontend] First recipe:', data.recipes?.[0]);
-      setRecipes(data.recipes || []);
+
+      let recipes = data.recipes || [];
+
+      // Client-side filtering (search text + rating)
+      // Note: We fetch all recipes and filter client-side for simplicity
+      // and to enable case-insensitive search across all content
+      if (search || minRating !== null) {
+        recipes = recipes.filter((recipe: Recipe) => {
+          // Search filter
+          let matchesSearch = true;
+          if (search) {
+            const searchLower = search.toLowerCase();
+            const matchesTitle = recipe.title.toLowerCase().includes(searchLower);
+            const matchesTag = recipe.tags.some(tag =>
+              tag.toLowerCase().includes(searchLower)
+            );
+            const matchesNotes = recipe.notes?.toLowerCase().includes(searchLower) || false;
+            const matchesInstructions = recipe.instructions?.toLowerCase().includes(searchLower) || false;
+            const matchesIngredient = recipe.recipe_ingredients?.some(ing =>
+              ing.display_name.toLowerCase().includes(searchLower)
+            ) || false;
+
+            matchesSearch = matchesTitle || matchesTag || matchesNotes || matchesInstructions || matchesIngredient;
+          }
+
+          // Rating filter (minimum rating)
+          let matchesRating = true;
+          if (minRating !== null) {
+            matchesRating = recipe.rating !== null && recipe.rating >= minRating;
+          }
+
+          return matchesSearch && matchesRating;
+        });
+      }
+
+      setRecipes(recipes);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load recipes');
     } finally {
@@ -71,7 +110,10 @@ export default function RecipesPage() {
     <AuthenticatedLayout
       title="Recipes"
       action={
-        <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+        <button
+          onClick={() => router.push('/recipes/new')}
+          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        >
           <Plus size={20} />
         </button>
       }
@@ -90,6 +132,22 @@ export default function RecipesPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        {/* Rating Filter */}
+        <div className="mb-4">
+          <select
+            value={minRating ?? ''}
+            onChange={(e) => setMinRating(e.target.value ? parseInt(e.target.value) : null)}
+            className="w-full px-3 py-2 bg-gray-100 border-none rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All ratings</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5 stars</option>
+            <option value="4">⭐⭐⭐⭐ 4+ stars</option>
+            <option value="3">⭐⭐⭐ 3+ stars</option>
+            <option value="2">⭐⭐ 2+ stars</option>
+            <option value="1">⭐ 1+ stars</option>
+          </select>
         </div>
 
         {/* Loading State */}
@@ -134,7 +192,10 @@ export default function RecipesPage() {
                   : 'Start building your recipe collection'}
               </p>
               {!search && (
-                <button className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <button
+                  onClick={() => router.push('/recipes/new')}
+                  className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
                   Add Your First Recipe
                 </button>
               )}

@@ -90,7 +90,7 @@ export const AddItemSchema = z.object({
   grocery_list_id: z.string().uuid('Invalid grocery list ID format'),
   name: z.string().min(1, 'Name is required'),
   quantity: z.number().positive('Quantity must be positive'),
-  unit: z.enum(VALID_UNITS, { errorMap: () => ({ message: 'Invalid unit' }) }),
+  unit: z.enum(VALID_UNITS),
   ingredient_id: z.string().optional(),
 });
 
