@@ -23,14 +23,14 @@ test.describe('Meal Planner', () => {
 
   test('should display week view', async ({ page }) => {
     // Should see days of the week
-    await expect(page.locator('text=Monday')).toBeVisible();
-    await expect(page.locator('text=Tuesday')).toBeVisible();
+    await expect(page.locator('text=Monday').first()).toBeVisible();
+    await expect(page.locator('text=Tuesday').first()).toBeVisible();
 
     // Should see meal type labels (case-insensitive)
-    await expect(page.locator('text=/breakfast/i')).toBeVisible();
-    await expect(page.locator('text=/lunch/i')).toBeVisible();
-    await expect(page.locator('text=/dinner/i')).toBeVisible();
-    await expect(page.locator('text=/snack/i')).toBeVisible();
+    await expect(page.locator('text=/breakfast/i').first()).toBeVisible();
+    await expect(page.locator('text=/lunch/i').first()).toBeVisible();
+    await expect(page.locator('text=/dinner/i').first()).toBeVisible();
+    await expect(page.locator('text=/snack/i').first()).toBeVisible();
   });
 
   test('should navigate between weeks', async ({ page }) => {
@@ -39,19 +39,19 @@ test.describe('Meal Planner', () => {
 
     // Week should change (date range should be different)
     // This is a basic check - could be more specific
-    await expect(page.locator('text=/\\w+ \\d+/')).toBeVisible();
+    await expect(page.locator('text=/\\w+ \\d+/').first()).toBeVisible();
 
     // Click Prev week
     await page.click('button:has-text("Prev")');
 
     // Should be back
-    await expect(page.locator('text=/\\w+ \\d+/')).toBeVisible();
+    await expect(page.locator('text=/\\w+ \\d+/').first()).toBeVisible();
 
     // Click Today
     await page.click('button:has-text("Today")');
 
     // Should show current week
-    await expect(page.locator('text=/\\w+ \\d+/')).toBeVisible();
+    await expect(page.locator('text=/\\w+ \\d+/').first()).toBeVisible();
   });
 
   test('should add meal to planner', async ({ page }) => {
@@ -89,7 +89,7 @@ test.describe('Meal Planner', () => {
     await page.waitForURL('**/planner');
 
     // Should see the meal in the week view
-    await expect(page.locator('text=Chicken Curry')).toBeVisible();
+    await expect(page.locator('text=Chicken Curry').first()).toBeVisible();
   });
 
   test('should show empty state when no meals planned', async ({ page }) => {
