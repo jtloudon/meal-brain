@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { ArrowLeft, Calendar, ShoppingCart, Star, ChevronDown, ChevronUp, Edit } from 'lucide-react';
+import { ArrowLeft, Calendar, ShoppingCart, Star, ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react';
 
 interface RecipeIngredient {
   id: string;
@@ -35,6 +35,8 @@ export default function RecipeDetailPage() {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(
     new Set()
   );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -72,6 +74,28 @@ export default function RecipeDetailPage() {
       }
       return next;
     });
+  };
+
+  const handleDelete = async () => {
+    if (!recipe) return;
+
+    try {
+      setDeleting(true);
+      const response = await fetch(`/api/recipes/${recipe.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete recipe');
+      }
+
+      // Redirect to recipe list
+      router.push('/recipes');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete recipe');
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   const renderStars = (rating: number | null) => {
@@ -258,6 +282,13 @@ export default function RecipeDetailPage() {
             <Edit size={18} />
             Edit Recipe
           </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full px-4 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Trash2 size={18} />
+            Delete Recipe
+          </button>
           <button className="w-full px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
             <Calendar size={18} />
             Add to Planner
@@ -267,6 +298,36 @@ export default function RecipeDetailPage() {
             Push Ingredients to Grocery List
           </button>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Delete Recipe?
+              </h3>
+              <p className="text-sm text-gray-600 mb-6">
+                Are you sure you want to delete "{recipe.title}"? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AuthenticatedLayout>
   );

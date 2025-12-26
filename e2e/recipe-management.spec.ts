@@ -164,4 +164,36 @@ test.describe('Recipe Management', () => {
     await page.waitForURL(/\/recipes\/[^/]+$/, { timeout: 10000 });
     await expect(page.locator('h1:has-text("Chicken Curry Updated")').first()).toBeVisible();
   });
+
+  test('should delete a recipe', async ({ page }) => {
+    // First, create a test recipe to delete (so we don't delete seed data)
+    await page.click('header button:has-text("Plus")');
+    await page.waitForURL('**/recipes/new');
+
+    // Create a recipe called "Delete Me Test Recipe"
+    await page.fill('input[placeholder*="Recipe name"]', 'Delete Me Test Recipe');
+    await page.fill('input[placeholder="Name"]', 'test ingredient');
+    await page.fill('input[placeholder="Qty"]', '1');
+    await page.click('button:has-text("Create Recipe")');
+    await page.waitForURL(/\/recipes\/[^/]+$/);
+
+    // Now we're on the detail page - delete this recipe
+    await page.click('button:has-text("Delete Recipe")');
+
+    // Should show confirmation dialog
+    await expect(page.locator('text=Are you sure')).toBeVisible();
+    await expect(page.locator('text=Delete Me Test Recipe')).toBeVisible();
+
+    // Confirm deletion - click the red "Delete" button in the modal
+    const confirmButton = page.locator('button:has-text("Delete")').filter({ hasText: /^Delete$|^Deleting\.\.\.$/ }).last();
+    await confirmButton.click();
+
+    // Should redirect to recipe list
+    await page.waitForURL('/recipes', { timeout: 10000 });
+
+    // The test recipe should no longer exist
+    await page.waitForTimeout(500);
+    const testRecipeExists = await page.locator('text=Delete Me Test Recipe').count();
+    expect(testRecipeExists).toBe(0);
+  });
 });
