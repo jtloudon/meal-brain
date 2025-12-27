@@ -6,7 +6,7 @@ import { supabase } from '@/lib/db/supabase';
 const TEST_HOUSEHOLD_ID = '00000000-0000-4000-8000-000000000002';
 const TEST_USER_ID = '10000000-0000-4000-8000-000000000003';
 
-describe('Tool: grocery.add_item', () => {
+describe('Tool: grocery.check_item', () => {
   let testListId: string;
 
   beforeAll(async () => {
@@ -20,10 +20,10 @@ describe('Tool: grocery.add_item', () => {
       .delete()
       .eq('household_id', TEST_HOUSEHOLD_ID);
 
-    // Create a test grocery list
+    // Create a fresh test list for each test
     const listResult = await groceryTools.create_list.execute(
       {
-        name: 'Weekly Groceries',
+        name: 'Test List',
       },
       {
         userId: TEST_USER_ID,
@@ -31,18 +31,17 @@ describe('Tool: grocery.add_item', () => {
       }
     );
 
-    expect(listResult.success).toBe(true);
     if (listResult.success) {
       testListId = listResult.data.grocery_list_id;
     }
   });
 
-  it('Test Case 1: Add item to list', async () => {
-    // When: Add an item
-    const result = await groceryTools.add_item.execute(
+  it('Test Case 1: Check an unchecked item', async () => {
+    // Given: An unchecked item exists
+    const itemResult = await groceryTools.add_item.execute(
       {
         grocery_list_id: testListId,
-        name: 'milk',
+        name: 'Milk',
         quantity: 1,
         unit: 'gallon',
       },
@@ -52,33 +51,16 @@ describe('Tool: grocery.add_item', () => {
       }
     );
 
-    // Then: Should succeed
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.grocery_item_id).toBeDefined();
+    expect(itemResult.success).toBe(true);
+    if (!itemResult.success) return;
 
-      // Verify in database
-      const { data: item } = await supabase
-        .from('grocery_items')
-        .select('*')
-        .eq('id', result.data.grocery_item_id)
-        .single();
+    const itemId = itemResult.data.grocery_item_id;
 
-      expect(item?.display_name).toBe('milk');
-      expect(item?.quantity).toBe(1);
-      expect(item?.unit).toBe('gallon');
-      expect(item?.checked).toBe(false); // Default unchecked
-    }
-  });
-
-  it('Test Case 2: Reject invalid unit', async () => {
-    // When: Try to add item with invalid unit
-    const result = await groceryTools.add_item.execute(
+    // When: Check the item
+    const result = await groceryTools.check_item.execute(
       {
-        grocery_list_id: testListId,
-        name: 'sugar',
-        quantity: 1,
-        unit: 'handfuls', // Invalid unit
+        grocery_item_id: itemId,
+        checked: true,
       },
       {
         userId: TEST_USER_ID,
@@ -86,11 +68,43 @@ describe('Tool: grocery.add_item', () => {
       }
     );
 
-    // Then: Should fail with validation error
+    // Then: Should succeed and item should be checked
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.checked).toBe(true);
+
+      // Verify in database
+      const { data: item } = await supabase
+        .from('grocery_items')
+        .select('checked')
+        .eq('id', itemId)
+        .single();
+
+      expect(item?.checked).toBe(true);
+    }
+  });
+
+  it('Test Case 2: Item not found error', async () => {
+    // Given: A fake item ID
+    const fakeItemId = '00000000-0000-0000-0000-000000000000';
+
+    // When: Try to check the item
+    const result = await groceryTools.check_item.execute(
+      {
+        grocery_item_id: fakeItemId,
+        checked: true,
+      },
+      {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      }
+    );
+
+    // Then: Should fail with NOT_FOUND error
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.type).toBe('VALIDATION_ERROR');
-      expect(result.error.field).toBe('unit');
+      expect(result.error.type).toBe('NOT_FOUND');
+      expect(result.error.message).toContain('not found');
     }
   });
 });

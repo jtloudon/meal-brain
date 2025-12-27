@@ -3,8 +3,8 @@ import { grocery } from '@/lib/tools/grocery';
 import { supabase } from '@/lib/db/supabase';
 
 // Test household and user IDs (from seed data)
-const TEST_HOUSEHOLD_ID = '00000000-0000-0000-0000-000000000001';
-const TEST_USER_ID = '10000000-0000-0000-0000-000000000001';
+const TEST_HOUSEHOLD_ID = '00000000-0000-4000-8000-000000000002';
+const TEST_USER_ID = '10000000-0000-4000-8000-000000000003';
 
 // Test ingredient IDs (from seed data)
 const RICE_INGREDIENT_ID = 'a0000000-0000-0000-0000-000000000002';

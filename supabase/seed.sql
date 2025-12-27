@@ -3,18 +3,21 @@
 
 -- Demo Household
 INSERT INTO households (id, name, created_at) VALUES
-  ('00000000-0000-4000-8000-000000000001', 'Demo Household', NOW());
+  ('00000000-0000-4000-8000-000000000001', 'Demo Household', NOW()),
+  ('00000000-0000-4000-8000-000000000002', 'Test Household', NOW());
 
 -- Demo Auth Users (for local development only)
 -- In production, these are created by Supabase Auth via magic-link
 INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, role, aud, instance_id) VALUES
   ('10000000-0000-4000-8000-000000000001', 'demo@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-4000-8000-000000000000'),
-  ('10000000-0000-4000-8000-000000000002', 'spouse@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-4000-8000-000000000000');
+  ('10000000-0000-4000-8000-000000000002', 'spouse@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-4000-8000-000000000000'),
+  ('10000000-0000-4000-8000-000000000003', 'test@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-4000-8000-000000000000');
 
 -- Demo Users (link auth users to household)
 INSERT INTO users (id, email, household_id, created_at) VALUES
   ('10000000-0000-4000-8000-000000000001', 'demo@mealbrain.app', '00000000-0000-4000-8000-000000000001', NOW()),
-  ('10000000-0000-4000-8000-000000000002', 'spouse@mealbrain.app', '00000000-0000-4000-8000-000000000001', NOW());
+  ('10000000-0000-4000-8000-000000000002', 'spouse@mealbrain.app', '00000000-0000-4000-8000-000000000001', NOW()),
+  ('10000000-0000-4000-8000-000000000003', 'test@mealbrain.app', '00000000-0000-4000-8000-000000000002', NOW());
 
 -- Demo User Preferences (for first user)
 INSERT INTO user_preferences (user_id, household_context, dietary_constraints, ai_style, planning_preferences, ai_learning_enabled, created_at) VALUES

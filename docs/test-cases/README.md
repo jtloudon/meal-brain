@@ -32,8 +32,11 @@
 | grocery.create_list | [tools/grocery-create-list.md](tools/grocery-create-list.md) | ✅ | 2/2 | 100% |
 | grocery.push_ingredients | [tools/grocery-push-ingredients.md](tools/grocery-push-ingredients.md) | ✅ | 4/4 | 100% |
 | grocery.add_item | [tools/grocery-add-item.md](tools/grocery-add-item.md) | ✅ | 2/2 | 100% |
+| grocery.check_item | [tools/grocery-check-item.md](tools/grocery-check-item.md) | ✅ | 2/2 | 100% |
+| grocery.list_lists | [tools/grocery-list-lists.md](tools/grocery-list-lists.md) | ✅ | 2/2 | 100% |
+| grocery.get_list | [tools/grocery-get-list.md](tools/grocery-get-list.md) | ✅ | 3/3 | 100% |
 
-**Total Tool Tests**: 27/27 complete
+**Total Tool Tests**: 34/34 complete
 
 ---
 
@@ -80,18 +83,18 @@
 
 ## Overall Progress
 
-**Total Tests Defined**: 60
-**Total Tests Implemented**: 53
-**Total Tests Passing**: 53
+**Total Tests Defined**: 67
+**Total Tests Implemented**: 60
+**Total Tests Passing**: 60
 
 **Coverage by Layer**:
 - Unit: 73% (11/15)
-- Tools: 100% (27/27) ✅
+- Tools: 100% (34/34) ✅
 - Integration: 0% (0/6)
 - E2E: 77% (13/17) ✅ (3 auth edge cases deferred)
 - AI Behavior: 0% (0/4)
 
-**Overall Test Coverage**: 88% (53/60) ✅
+**Overall Test Coverage**: 90% (60/67) ✅
 
 ---
 

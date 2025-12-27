@@ -97,6 +97,32 @@ export const AddItemSchema = z.object({
 export type AddItemInput = z.infer<typeof AddItemSchema>;
 
 /**
+ * Zod schema for checking/unchecking a grocery item.
+ */
+export const CheckItemSchema = z.object({
+  grocery_item_id: z.string().uuid('Invalid item ID format'),
+  checked: z.boolean(),
+});
+
+export type CheckItemInput = z.infer<typeof CheckItemSchema>;
+
+/**
+ * Zod schema for listing all grocery lists.
+ */
+export const ListListsSchema = z.object({});
+
+export type ListListsInput = z.infer<typeof ListListsSchema>;
+
+/**
+ * Zod schema for getting a single grocery list with items.
+ */
+export const GetListSchema = z.object({
+  grocery_list_id: z.string().uuid('Invalid grocery list ID format'),
+});
+
+export type GetListInput = z.infer<typeof GetListSchema>;
+
+/**
  * Pushes ingredients to a grocery list with deterministic merging.
  * Ingredients with the same ingredient_id and unit are merged (quantities added).
  * Ingredients with different units are kept separate.
@@ -426,6 +452,258 @@ export async function addItem(
 }
 
 /**
+ * Toggles the checked state of a grocery item.
+ *
+ * @param input - Item ID and checked state
+ * @param context - User and household context for RLS
+ * @returns Tool result with updated checked state
+ */
+export async function checkItem(
+  input: CheckItemInput,
+  context: ToolContext
+): Promise<ToolResult<{ checked: boolean }>> {
+  try {
+    // Validate input
+    const validated = CheckItemSchema.parse(input);
+
+    // Verify item exists and belongs to household
+    const { data: item, error: fetchError } = await supabase
+      .from('grocery_items')
+      .select('id, grocery_list_id, grocery_lists!inner(household_id)')
+      .eq('id', validated.grocery_item_id)
+      .single();
+
+    if (fetchError || !item) {
+      return {
+        success: false,
+        error: {
+          type: 'NOT_FOUND',
+          message: 'Grocery item not found',
+        },
+      };
+    }
+
+    // Check household isolation
+    const householdId = (item.grocery_lists as any).household_id;
+    if (householdId !== context.householdId) {
+      return {
+        success: false,
+        error: {
+          type: 'AUTHORIZATION_ERROR',
+          message: 'You do not have permission to modify this item',
+        },
+      };
+    }
+
+    // Update checked state
+    const { error: updateError } = await supabase
+      .from('grocery_items')
+      .update({ checked: validated.checked })
+      .eq('id', validated.grocery_item_id);
+
+    if (updateError) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: updateError.message,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        checked: validated.checked,
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
+ * Lists all grocery lists for a household.
+ *
+ * @param input - Empty object (no parameters needed)
+ * @param context - User and household context for RLS
+ * @returns Tool result with list of grocery lists
+ */
+export async function listLists(
+  input: ListListsInput,
+  context: ToolContext
+): Promise<ToolResult<{ lists: Array<{ id: string; name: string; created_at: string }> }>> {
+  try {
+    // Validate input
+    ListListsSchema.parse(input);
+
+    // Fetch all lists for household
+    const { data: lists, error } = await supabase
+      .from('grocery_lists')
+      .select('id, name, created_at')
+      .eq('household_id', context.householdId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: error.message,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        lists: lists || [],
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
+ * Gets a single grocery list with all items.
+ *
+ * @param input - Grocery list ID
+ * @param context - User and household context for RLS
+ * @returns Tool result with list details and items
+ */
+export async function getList(
+  input: GetListInput,
+  context: ToolContext
+): Promise<
+  ToolResult<{
+    id: string;
+    name: string;
+    created_at: string;
+    items: Array<{
+      id: string;
+      display_name: string;
+      quantity: number;
+      unit: string;
+      checked: boolean;
+      ingredient_id: string | null;
+    }>;
+  }>
+> {
+  try {
+    // Validate input
+    const validated = GetListSchema.parse(input);
+
+    // Verify list exists and belongs to household
+    const { data: list, error: listError } = await supabase
+      .from('grocery_lists')
+      .select('id, name, created_at')
+      .eq('id', validated.grocery_list_id)
+      .eq('household_id', context.householdId)
+      .single();
+
+    if (listError || !list) {
+      return {
+        success: false,
+        error: {
+          type: 'NOT_FOUND',
+          message: 'Grocery list not found or does not belong to your household',
+        },
+      };
+    }
+
+    // Fetch all items in the list
+    const { data: items, error: itemsError } = await supabase
+      .from('grocery_items')
+      .select('id, display_name, quantity, unit, checked, ingredient_id')
+      .eq('grocery_list_id', validated.grocery_list_id)
+      .order('created_at', { ascending: true });
+
+    if (itemsError) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: itemsError.message,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: list.id,
+        name: list.name,
+        created_at: list.created_at,
+        items: items || [],
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
  * Grocery tools namespace (for future expansion).
  */
 export const grocery = {
@@ -440,5 +718,17 @@ export const grocery = {
   add_item: {
     execute: addItem,
     schema: AddItemSchema,
+  },
+  check_item: {
+    execute: checkItem,
+    schema: CheckItemSchema,
+  },
+  list_lists: {
+    execute: listLists,
+    schema: ListListsSchema,
+  },
+  get_list: {
+    execute: getList,
+    schema: GetListSchema,
   },
 };

@@ -3,8 +3,8 @@ import { planner } from '@/lib/tools/planner';
 import { supabase } from '@/lib/db/supabase';
 
 // Test household and user IDs (from seed data)
-const TEST_HOUSEHOLD_ID = '00000000-0000-0000-0000-000000000001';
-const TEST_USER_ID = '10000000-0000-0000-0000-000000000001';
+const TEST_HOUSEHOLD_ID = '00000000-0000-4000-8000-000000000002';
+const TEST_USER_ID = '10000000-0000-4000-8000-000000000003';
 
 // Test recipe ID (Chicken Curry from seed data)
 const TEST_RECIPE_ID = 'b0000000-0000-0000-0000-000000000001';
