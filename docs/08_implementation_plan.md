@@ -448,15 +448,15 @@ The MVP is complete when:
 
 ## Current Status
 
-**Active Phase**: Phase 2 In Progress - Recipe & Planner CRUD Complete ✅
-**Completion**: 53/60 total tests passing (88%), all Tools at 100%, Recipe + Planner UI complete with full CRUD, E2E tests at 77%
+**Active Phase**: Phase 2 In Progress - All 12 Tools Complete ✅
+**Completion**: 60/67 total tests passing (90%), all Tools at 100% (34/34), Recipe + Planner UI complete with full CRUD, E2E tests at 77%
 **Estimated Timeline to MVP**: 1-2 weeks (part-time)
 
 **Recent Work (TDD)**:
-- ✅ Recipe delete feature (E2E test → Implementation → Pass)
-- ✅ Remove meal from planner (E2E test → Implementation → Pass)
-- ✅ Recipe Management: 100% CRUD coverage (7/7 E2E tests)
-- ✅ Meal Planner: 80% CRUD coverage (4/5 E2E tests)
+- ✅ 3 new Grocery Tools (check_item, list_lists, get_list) - 7/7 tests passing
+- ✅ Test UUIDs updated to RFC 4122 format
+- ✅ All 12 Tools complete with 100% coverage
+- ✅ Backend fully validated and ready for UI
 
 ### Phase 0 Progress: ✅ COMPLETE
 - [x] Merge UI docs
@@ -496,14 +496,17 @@ The MVP is complete when:
 - **26/58 total tests passing (45% overall)**
 - All exit criteria met ✅
 
-### Phase 2 Progress: Meal Planner Complete ✅
-- [x] **All 9 Tools implemented with TDD** (27/27 tests, 100% coverage)
+### Phase 2 Progress: All Tools Complete ✅
+- [x] **All 12 Tools implemented with TDD** (34/34 tests, 100% coverage)
   - [x] recipe.list (3/3 tests ✅)
   - [x] recipe.update (3/3 tests ✅)
   - [x] planner.remove_meal (2/2 tests ✅)
   - [x] planner.list_meals (2/2 tests ✅)
   - [x] grocery.create_list (2/2 tests ✅)
   - [x] grocery.add_item (2/2 tests ✅)
+  - [x] grocery.check_item (2/2 tests ✅)
+  - [x] grocery.list_lists (2/2 tests ✅)
+  - [x] grocery.get_list (3/3 tests ✅)
 - [x] **Recipe UI Complete** (Full CRUD)
   - [x] Recipe list screen (search by title/tags/notes/instructions, rating filter)
   - [x] Recipe detail screen (full display, actions)
@@ -521,8 +524,8 @@ The MVP is complete when:
 - [ ] **Next**: Grocery List UI + wire up action buttons
 
 **Phase 2 Progress Stats**:
-- **53/60 total tests passing (88% overall)**
-- **All backend Tools complete and validated** ✅
+- **60/67 total tests passing (90% overall)** ✅
+- **All 12 backend Tools complete and validated** ✅ (34/34 tests, 100%)
 - **Recipe management: Full CRUD** ✅ (7/7 E2E tests, 100% coverage)
 - **Meal planner: Full CRUD** ✅ (4/5 E2E tests, 80% coverage)
 - **TDD workflow established** ✅ (Test-first development for all new features)

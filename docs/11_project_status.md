@@ -7,9 +7,9 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 2 In Progress - Meal Planner Mostly Complete ✅
-**Code exists:** Infrastructure + pure functions + database + **All 9 Tools** + Working Auth Flow + **Recipe UI (Full CRUD)** + **Meal Planner (Week View + Add Meals)**
-**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Recipe Forms ✅ → Meal Planner ✅ → Polish next)
+**Status:** Phase 2 In Progress - All Tools Complete, Grocery UI Next ✅
+**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow + **Recipe UI (Full CRUD)** + **Meal Planner (Week View + Add Meals)**
+**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Recipe Forms ✅ → Meal Planner ✅ → Grocery UI next)
 
 ---
 
@@ -169,10 +169,10 @@ Specs are strong but not yet exercised in code.
 - ✅ **Auth flow works end-to-end** (manual + automated tests)
 
 **Completed (Phase 2 - All Tools ✅)**:
-- ✅ All 9 Tools implemented with 100% test coverage (27/27 tests passing)
+- ✅ All 12 Tools implemented with 100% test coverage (34/34 tests passing)
   - Recipe: create, list, update
   - Planner: add_meal, remove_meal, list_meals
-  - Grocery: push_ingredients, create_list, add_item
+  - Grocery: push_ingredients, create_list, add_item, check_item, list_lists, get_list
 - ✅ Backend API layer complete and validated
 
 **Completed (Phase 2 - UI Scaffolding ✅)**:
