@@ -1,9 +1,13 @@
 -- Demo Data for Local Development
 -- Run this with: supabase db reset
 
--- Demo Household
+-- Demo Household (for local dev)
 INSERT INTO households (id, name, created_at) VALUES
   ('00000000-0000-4000-8000-000000000001', 'Demo Household', NOW());
+
+-- Test Household (for automated tests)
+INSERT INTO households (id, name, created_at) VALUES
+  ('00000000-0000-4000-8000-000000000002', 'Test Household', NOW());
 
 -- NOTE: Auth users (auth.users) are NOT seeded!
 -- They are created by Supabase Auth when you login via magic-link.
