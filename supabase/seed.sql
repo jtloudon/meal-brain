@@ -3,31 +3,16 @@
 
 -- Demo Household
 INSERT INTO households (id, name, created_at) VALUES
-  ('00000000-0000-4000-8000-000000000001', 'Demo Household', NOW()),
-  ('00000000-0000-4000-8000-000000000002', 'Test Household', NOW());
+  ('00000000-0000-4000-8000-000000000001', 'Demo Household', NOW());
 
--- Demo Auth Users (for local development only)
--- In production, these are created by Supabase Auth via magic-link
-INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, role, aud, instance_id) VALUES
-  ('10000000-0000-4000-8000-000000000001', 'demo@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-4000-8000-000000000000'),
-  ('10000000-0000-4000-8000-000000000002', 'spouse@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-4000-8000-000000000000'),
-  ('10000000-0000-4000-8000-000000000003', 'test@mealbrain.app', '', NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated', '00000000-0000-4000-8000-000000000000');
-
--- Demo Users (link auth users to household)
-INSERT INTO users (id, email, household_id, created_at) VALUES
-  ('10000000-0000-4000-8000-000000000001', 'demo@mealbrain.app', '00000000-0000-4000-8000-000000000001', NOW()),
-  ('10000000-0000-4000-8000-000000000002', 'spouse@mealbrain.app', '00000000-0000-4000-8000-000000000001', NOW()),
-  ('10000000-0000-4000-8000-000000000003', 'test@mealbrain.app', '00000000-0000-4000-8000-000000000002', NOW());
-
--- Demo User Preferences (for first user)
-INSERT INTO user_preferences (user_id, household_context, dietary_constraints, ai_style, planning_preferences, ai_learning_enabled, created_at) VALUES
-  ('10000000-0000-4000-8000-000000000001',
-   'couple',
-   ARRAY['dairy-free'],
-   'collaborator',
-   ARRAY['week-by-week', 'batch-cooking'],
-   true,
-   NOW());
+-- NOTE: Auth users (auth.users) are NOT seeded!
+-- They are created by Supabase Auth when you login via magic-link.
+-- After first login, you'll go through onboarding to create your household.
+--
+-- For quick dev setup:
+-- 1. Login with any email via magic-link
+-- 2. Create household in onboarding
+-- 3. Your user will be linked to the Demo Household data below
 
 -- Demo Ingredients (canonical list)
 INSERT INTO ingredients (id, canonical_name) VALUES
@@ -49,13 +34,14 @@ INSERT INTO ingredients (id, canonical_name) VALUES
   ('a0000000-0000-0000-0000-000000000010', 'black pepper');
 
 -- Demo Recipes
-INSERT INTO recipes (id, household_id, title, rating, tags, notes, created_at) VALUES
+INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions, created_at) VALUES
   ('b0000000-0000-4000-8000-000000000001',
    '00000000-0000-4000-8000-000000000001',
    'Chicken Curry',
    5,
    ARRAY['chicken', 'dairy-free', 'asian'],
    'Family favorite! Double the sauce.',
+   E'1. Heat oil in large pan over medium-high heat\n2. Cook diced chicken until browned (5-7 min)\n3. Add diced onion and minced garlic, cook until softened (3 min)\n4. Stir in curry powder, cook 1 min until fragrant\n5. Add coconut milk, bring to simmer\n6. Reduce heat and simmer 15-20 min until chicken is cooked through\n7. Meanwhile, cook rice according to package directions\n8. Serve curry over rice',
    NOW()),
   ('b0000000-0000-4000-8000-000000000002',
    '00000000-0000-4000-8000-000000000001',
@@ -63,6 +49,7 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, created_at) V
    4,
    ARRAY['beef', 'mexican', 'quick'],
    '20 minute meal',
+   E'1. Brown ground beef in skillet over medium-high heat (8-10 min)\n2. Drain excess fat\n3. Season with taco seasoning and a splash of water\n4. Simmer 5 min until thickened\n5. Warm taco shells according to package\n6. Assemble: shells, beef, lettuce, tomato, cheese',
    NOW()),
   ('b0000000-0000-4000-8000-000000000003',
    '00000000-0000-4000-8000-000000000001',
@@ -70,6 +57,7 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, created_at) V
    4,
    ARRAY['vegetarian', 'mexican', 'dairy-free'],
    'Great for batch cooking',
+   E'1. Heat oil in skillet over medium heat\n2. Sauté diced onion and sliced bell pepper until softened (5-7 min)\n3. Add drained black beans, cumin, and chili powder\n4. Cook until heated through (3-5 min)\n5. Mash beans slightly with fork for better texture\n6. Warm taco shells\n7. Assemble: shells, black bean mixture, lettuce\n8. Top with salsa or hot sauce if desired',
    NOW());
 
 -- Recipe Ingredients (Chicken Curry)

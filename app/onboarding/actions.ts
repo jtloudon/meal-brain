@@ -28,16 +28,36 @@ export async function createHousehold(householdName: string) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Create household
-  const { data: household, error: householdError } = await serviceClient
-    .from('households')
-    .insert({ name: householdName })
-    .select('id')
-    .single();
+  // DEV MODE: If "Demo Household", join the SEEDED household (with recipes)
+  let household;
+  if (householdName === 'Demo Household') {
+    const SEEDED_HOUSEHOLD_ID = '00000000-0000-4000-8000-000000000001';
+    const { data: existingHousehold } = await serviceClient
+      .from('households')
+      .select('id')
+      .eq('id', SEEDED_HOUSEHOLD_ID)
+      .single();
 
-  if (householdError) {
-    console.error('[SERVER ACTION] Household error:', householdError);
-    return { error: householdError.message };
+    if (existingHousehold) {
+      console.log('[SERVER ACTION] Joining seeded Demo Household:', existingHousehold.id);
+      household = existingHousehold;
+    }
+  }
+
+  // If no existing household found, create new one
+  if (!household) {
+    const { data: newHousehold, error: householdError } = await serviceClient
+      .from('households')
+      .insert({ name: householdName })
+      .select('id')
+      .single();
+
+    if (householdError) {
+      console.error('[SERVER ACTION] Household error:', householdError);
+      return { error: householdError.message };
+    }
+
+    household = newHousehold;
   }
 
   // Create user record linked to household
