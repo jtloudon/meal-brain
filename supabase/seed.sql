@@ -1,22 +1,37 @@
--- Demo Data for Local Development
--- Run this with: supabase db reset
+-- ============================================================================
+-- SEED DATA STRATEGY
+-- ============================================================================
+--
+-- This file seeds TWO households for different purposes:
+--
+-- 1. DEMO HOUSEHOLD (00000000-0000-4000-8000-000000000001)
+--    - Purpose: Local development browsing
+--    - Contains: 3 recipes, ingredients, grocery list with items
+--    - Access: Use /dev-login page (dev mode only)
+--    - Users: Created dynamically via /dev-login
+--
+-- 2. TEST HOUSEHOLD (00000000-0000-4000-8000-000000000002)
+--    - Purpose: Automated tests (E2E, integration)
+--    - Contains: No recipes (tests create their own)
+--    - Access: Tests create temp users programmatically
+--    - Users: Created/deleted by test setup/teardown
+--
+-- IMPORTANT: We do NOT seed auth.users!
+-- - Auth users are managed by Supabase Auth
+-- - Seeding them causes "user already exists" conflicts
+-- - Dev: /dev-login creates them on-demand
+-- - Tests: Test helpers create/cleanup programmatically
+-- - Production: Magic link creates them naturally
+--
+-- ============================================================================
 
--- Demo Household (for local dev)
+-- Demo Household (for local dev via /dev-login)
 INSERT INTO households (id, name, created_at) VALUES
   ('00000000-0000-4000-8000-000000000001', 'Demo Household', NOW());
 
--- Test Household (for automated tests)
+-- Test Household (for automated tests only)
 INSERT INTO households (id, name, created_at) VALUES
   ('00000000-0000-4000-8000-000000000002', 'Test Household', NOW());
-
--- NOTE: Auth users (auth.users) are NOT seeded!
--- They are created by Supabase Auth when you login via magic-link.
--- After first login, you'll go through onboarding to create your household.
---
--- For quick dev setup:
--- 1. Login with any email via magic-link
--- 2. Create household in onboarding
--- 3. Your user will be linked to the Demo Household data below
 
 -- Demo Ingredients (canonical list)
 INSERT INTO ingredients (id, canonical_name) VALUES

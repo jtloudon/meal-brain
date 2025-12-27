@@ -217,6 +217,13 @@ Specs are strong but not yet exercised in code.
   - Navigation from Edit button on detail screen
 - ✅ Full CRUD flow working end-to-end
 
+**Completed (Phase 2 - Grocery List UI ✅)**:
+- ✅ Grocery list view (/groceries page)
+- ✅ List selector dropdown
+- ✅ Items display with check/uncheck
+- ✅ API routes (list_lists, get_list, check_item)
+- ✅ Mobile-first responsive design
+
 **Completed (Phase 2 - Meal Planner UI ✅)**:
 - ✅ Week view planner (`/planner`)
   - 7-day calendar with prev/next navigation
@@ -254,10 +261,22 @@ Specs are strong but not yet exercised in code.
 - ✅ **TDD workflow established**: Write test → Implement → Pass → Commit
 - ✅ **Bug fixed**: Seed data UUIDs were invalid per RFC 4122 (Zod .uuid() validation)
 
-**Next Steps**:
-- Grocery list UI (list selector, items, check off) - **TDD**
-- Wire up action buttons (Add to Planner, Push to Grocery from recipe detail) - **TDD**
-- Polish and refinements
+**Next Steps (CRITICAL - Auth Fix)**:
+1. **Fix /dev-login for reliable local development**
+   - Direct session creation (bypass magic link)
+   - Auto-join Demo Household
+   - Only works in dev mode
+2. **Update test helpers for Test Household**
+   - Programmatic user creation
+   - Cleanup after tests
+3. **Wire up action buttons** (Add to Planner, Push to Grocery)
+4. Polish and refinements
+
+**Auth Architecture Decision:**
+- THREE separate flows: Production (magic link), Development (/dev-login), Testing (programmatic)
+- ONE Demo Household, ONE Test Household
+- NO auth.users in seed data (prevents conflicts)
+- See docs/16_authentication_flow.md for full spec
 
 **Not Started**:
 - Agent SDK integration

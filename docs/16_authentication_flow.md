@@ -6,6 +6,34 @@ This document defines the magic-link flow, session management, household creatio
 
 ---
 
+## Architecture Overview: Three Separate Flows
+
+**Critical Design Decision:** We maintain three distinct authentication flows to balance production security, development speed, and test isolation.
+
+### 1. Production Flow
+- **Method:** Magic link email (secure, passwordless)
+- **Seed Data:** None (users create their own households)
+- **Purpose:** Real users in deployed environment
+
+### 2. Development Flow
+- **Method:** `/dev-login` page (direct session creation)
+- **Seed Data:** Demo Household with recipes, grocery lists
+- **Purpose:** Fast local development without email dependency
+- **Protection:** Only works when `NODE_ENV !== 'production'`
+
+### 3. Testing Flow
+- **Method:** Programmatic user creation in test setup
+- **Seed Data:** Test Household (isolated from Demo Household)
+- **Purpose:** Automated E2E and integration tests
+- **Cleanup:** Tests delete temp users after completion
+
+**Why This Matters:**
+- Production remains secure and clean
+- Developers don't wait for emails or manage magic links
+- Tests don't interfere with dev data or each other
+
+---
+
 ## Authentication Method: Magic-Link Email
 
 ### Why Magic-Link?
