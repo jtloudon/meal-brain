@@ -448,15 +448,17 @@ The MVP is complete when:
 
 ## Current Status
 
-**Active Phase**: Phase 2 In Progress - All 12 Tools Complete ✅
-**Completion**: 60/67 total tests passing (90%), all Tools at 100% (34/34), Recipe + Planner UI complete with full CRUD, E2E tests at 77%
-**Estimated Timeline to MVP**: 1-2 weeks (part-time)
+**Active Phase**: Phase 2 In Progress - Auth Architecture Fix Required ⚠️
+**Completion**: 60/67 total tests passing (90%), all Tools at 100% (34/34), Recipe + Planner + Grocery UI complete
+**Blocking Issue**: Dev login loop - need working /dev-login
+**Estimated Timeline to MVP**: 1 week (part-time) after auth fix
 
-**Recent Work (TDD)**:
-- ✅ 3 new Grocery Tools (check_item, list_lists, get_list) - 7/7 tests passing
-- ✅ Test UUIDs updated to RFC 4122 format
-- ✅ All 12 Tools complete with 100% coverage
-- ✅ Backend fully validated and ready for UI
+**Recent Work**:
+- ✅ Grocery List UI complete (list view, check/uncheck items)
+- ✅ All 12 Tools complete with 100% coverage (34/34 tests)
+- ✅ Auth architecture documented (3 separate flows)
+- ⚠️ Auth loop issue - magic links expire/reuse, blocking dev work
+- **NEXT**: Implement working /dev-login (direct session creation)
 
 ### Phase 0 Progress: ✅ COMPLETE
 - [x] Merge UI docs
@@ -521,16 +523,26 @@ The MVP is complete when:
 - [x] **Database & Infrastructure**
   - [x] Migrations consolidated (single schema file)
   - [x] Enhanced error handling (auth debugging)
-- [ ] **Next**: Grocery List UI + wire up action buttons
+- [x] **Grocery List UI** ✅
+  - [x] List selector dropdown
+  - [x] Items display with quantities
+  - [x] Check/uncheck functionality
+  - [x] API routes (list_lists, get_list, check_item)
+- [ ] **CRITICAL**: Fix /dev-login for local development
+  - [ ] Direct session creation (bypass magic link)
+  - [ ] Auto-join Demo Household
+  - [ ] Only works in NODE_ENV !== 'production'
+- [ ] **Next**: Wire up action buttons (Push to Grocery from recipes)
 
 **Phase 2 Progress Stats**:
 - **60/67 total tests passing (90% overall)** ✅
 - **All 12 backend Tools complete and validated** ✅ (34/34 tests, 100%)
 - **Recipe management: Full CRUD** ✅ (7/7 E2E tests, 100% coverage)
 - **Meal planner: Full CRUD** ✅ (4/5 E2E tests, 80% coverage)
+- **Grocery list: View + Check items** ✅ (UI complete, E2E pending)
 - **TDD workflow established** ✅ (Test-first development for all new features)
 - **E2E testing infrastructure complete** ✅ (13/17 tests passing, 77%)
-- Ready for: Grocery List UI (TDD), wire up action buttons (TDD)
+- **BLOCKER**: Auth loop issue - /dev-login needs fix for local dev
 
 ---
 
