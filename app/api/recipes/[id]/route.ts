@@ -67,6 +67,7 @@ export async function GET(
         tags,
         notes,
         instructions,
+        image_url,
         created_at,
         recipe_ingredients (
           id,

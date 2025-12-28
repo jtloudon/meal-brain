@@ -180,7 +180,7 @@ export default function NewRecipePage() {
         </button>
       }
     >
-      <form onSubmit={handleSubmit} className="px-4 py-4 pb-56">
+      <form onSubmit={handleSubmit} className="px-4 py-4 pb-64">
         {/* Error Message */}
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
