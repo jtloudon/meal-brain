@@ -94,7 +94,7 @@ export default function ImageUpload({
       <label className="block text-sm font-medium text-gray-700">Recipe Image</label>
 
       {preview ? (
-        <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
+        <div className="relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden">
           <img
             src={preview}
             alt="Recipe preview"
@@ -112,7 +112,7 @@ export default function ImageUpload({
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="w-full aspect-video bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-colors"
+          className="w-full h-40 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-colors"
         >
           {uploading ? (
             <div className="text-center">
