@@ -450,13 +450,15 @@ export default function EditRecipePage() {
         </div>
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={saving || !title}
-          className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+        <div className="mb-20">
+          <button
+            type="submit"
+            disabled={saving || !title}
+            className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
       </form>
     </AuthenticatedLayout>
   );
