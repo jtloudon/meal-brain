@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Calendar, CookingPot, ShoppingCart, Settings } from 'lucide-react';
 
 const tabs = [
-  { name: 'Planner', href: '/planner', icon: Calendar },
   { name: 'Recipes', href: '/recipes', icon: CookingPot },
+  { name: 'Planner', href: '/planner', icon: Calendar },
   { name: 'Groceries', href: '/groceries', icon: ShoppingCart },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];

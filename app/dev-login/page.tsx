@@ -64,7 +64,7 @@ export default function DevLoginPage() {
       }
 
       console.log('[DEV LOGIN] Session set successfully, redirecting...');
-      router.push('/planner');
+      router.push('/recipes');
     } catch (err) {
       console.error('Unexpected error:', err);
       alert(`Login failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
