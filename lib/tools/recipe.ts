@@ -272,6 +272,7 @@ export async function listRecipes(
       tags: string[];
       rating: number | null;
       created_at: string;
+      image_url: string | null;
     }>;
     total: number;
   }>
@@ -283,7 +284,7 @@ export async function listRecipes(
     // Build query - include ingredients, notes, and instructions for client-side search
     let query = supabase
       .from('recipes')
-      .select('id, title, tags, rating, created_at, notes, instructions, recipe_ingredients(display_name)', { count: 'exact' })
+      .select('id, title, tags, rating, created_at, image_url, notes, instructions, recipe_ingredients(display_name)', { count: 'exact' })
       .eq('household_id', context.householdId)
       .order('created_at', { ascending: false });
 
