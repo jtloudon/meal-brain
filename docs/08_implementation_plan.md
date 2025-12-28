@@ -543,12 +543,28 @@ The MVP is complete when:
   - [x] Push ingredients to grocery list (test passes)
   - [x] Full workflow test (test passes)
   - [x] **All 6/6 action button tests passing** ✅
-- [ ] **CRITICAL**: Fix /dev-login for local development
-  - [ ] Replace custom cookie with signInWithPassword()
-  - [ ] Return tokens to client
-  - [ ] Client calls setSession() with tokens
-  - [ ] Test with all three dev users (demo, spouse, test)
-  - [ ] Documented in docs/17_dev_login_blocker.md ✅
+- [x] **Dev-Login Fix** ✅ (Completed 2025-12-27)
+  - [x] Replace custom cookie with signInWithPassword()
+  - [x] Return tokens to client
+  - [x] Client calls setSession() with tokens
+  - [x] Test with all three dev users (demo, spouse, test)
+  - [x] All 3 E2E tests passing
+  - [x] User email shown in header for visibility
+
+### Phase 3: Enhancements & Polish
+
+- [ ] **Move Grocery Items Between Lists**
+  - [ ] Add dropdown/button on each grocery item to select destination list
+  - [ ] API endpoint: PATCH /api/grocery/items/[id] to update grocery_list_id
+  - [ ] Maintain item state (checked/unchecked, quantity, unit) during move
+  - [ ] Optimistic UI update with rollback on error
+  - [ ] E2E test: create 2 lists, add item to list A, move to list B, verify
+  - [ ] Tool update: Add grocery.move_item tool with validation
+- [ ] **UI/UX Polish**
+  - [ ] Mobile responsiveness testing
+  - [ ] Loading states
+  - [ ] Error handling improvements
+  - [ ] Accessibility audit (ARIA labels, keyboard navigation)
 
 **Phase 2 Progress Stats (Updated 2025-12-27)**:
 - **25/25 E2E tests passing (100%)** ✅ (after `supabase db reset`)

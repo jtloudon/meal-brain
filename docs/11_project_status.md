@@ -7,10 +7,11 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 2 Nearly Complete - All Features Working, Dev-Login Fix Pending ✅
-**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow + **Recipe UI (Full CRUD)** + **Meal Planner (Week View + Add/Remove)** + **Grocery List (Full CRUD)** + **Action Buttons (All Working)**
-**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Recipe Forms ✅ → Meal Planner ✅ → Grocery UI ✅ → Action Buttons ✅ → Dev-Login Fix pending)
+**Status:** Phase 2 Complete - All Core Features Working ✅
+**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Week View + Add/Remove)** + **Grocery List (Full CRUD)** + **Action Buttons (All Working)**
+**Phase:** Phase 1 ✅ → Phase 2 ✅ (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Recipe Forms ✅ → Meal Planner ✅ → Grocery UI ✅ → Action Buttons ✅ → Dev-Login ✅)
 **Tests:** 25/25 E2E tests passing (100%), 34/34 unit tests passing (100%)
+**Commit:** 8c675c6 (2025-12-27)
 
 ---
 
@@ -274,15 +275,27 @@ Specs are strong but not yet exercised in code.
 - ✅ React key warning fixed (API returns full objects)
 - ✅ All 6/6 action button E2E tests passing
 
-**Next Steps (Dev-Login Fix)**:
-1. **CRITICAL: Fix /dev-login implementation** (documented solution ready)
-   - Replace custom cookie with `signInWithPassword()` + `setSession()`
-   - Generate real Supabase JWT tokens
-   - Solution documented in docs/17_dev_login_blocker.md
+**Completed (Dev-Login Fix ✅ 2025-12-27)**:
+- ✅ Fixed /dev-login implementation with real Supabase session tokens
+- ✅ Replaced custom cookie with `signInWithPassword()` + `setSession()`
+- ✅ All 3 dev users work (demo, spouse, test)
+- ✅ API calls succeed, RLS policies work correctly
+- ✅ 3/3 dev-login E2E tests passing
+- ✅ Added user email to header for user visibility
+
+**Next Steps (Phase 3 - Enhancements)**:
+1. **Move grocery items between lists**
+   - Add UI control on grocery item to switch to different list
+   - Update grocery_items.grocery_list_id
+   - Maintain item state (checked/unchecked) during move
+   - E2E test for move functionality
 2. **Polish and refinements**
+   - UI/UX improvements
+   - Performance optimization
+   - Mobile responsiveness testing
 
 **Auth Architecture (Updated 2025-12-27)**:
-- THREE separate flows: Production (magic link ✅), Development (/dev-login ⏸️ fix pending), Testing (programmatic ✅)
+- THREE separate flows: Production (magic link ✅), Development (/dev-login ✅), Testing (programmatic ✅)
 - ONE Demo Household, ONE Test Household
 - NO auth.users in seed data (prevents conflicts)
 - **Issue Identified**: Dev-login was setting custom cookie instead of real session tokens
