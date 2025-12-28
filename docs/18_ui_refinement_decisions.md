@@ -176,22 +176,52 @@
 
 ## Mobile Testing Workflow
 
-### Browser DevTools (Quickest)
-1. **Chrome**: `Cmd+Option+I` → Click device icon → Select "iPhone 14 Pro"
-2. **Firefox**: `Cmd+Option+M` → Responsive Design Mode
-3. **Safari**: Develop menu → Enter Responsive Design Mode
+### Quick Start: Chrome DevTools (5 minutes)
 
-### Test on Real iPhone (Better)
+**Step 1: Start dev server**
+```bash
+npm run dev
+```
+Server starts at http://localhost:3000
+
+**Step 2: Open Chrome DevTools in Device Mode**
+1. Open Chrome and navigate to http://localhost:3000
+2. Press `Cmd+Option+I` (or `Cmd+Shift+C`) to open DevTools
+3. Click the **device toggle icon** (📱) in top-left of DevTools, or press `Cmd+Shift+M`
+4. In the device dropdown at top, select **"iPhone 14 Pro"** (390x844)
+   - If not listed, select "Edit..." and add it
+5. You're now viewing the mobile layout!
+
+**Step 3: Test key flows**
+- Bottom navigation works (tap Planner, Recipes, Groceries, Settings)
+- Forms are usable (tap inputs, buttons)
+- Touch targets are large enough (minimum 44x44px)
+- No horizontal scrolling
+- Text is readable without zooming
+
+**Pro tips**:
+- **Rotate device**: Click rotate icon to test landscape
+- **Throttle network**: Dropdown next to device name → "Fast 3G" to simulate slow connection
+- **Zoom out**: DevTools can zoom the viewport to fit your screen (useful for larger devices)
+- **Screenshot**: Click "..." menu → Capture screenshot (full size or visible area)
+
+### Alternative: Firefox Responsive Design Mode
+1. Press `Cmd+Option+M`
+2. Select "iPhone 14" from device dropdown
+3. Same testing workflow as Chrome
+
+### Test on Real iPhone (Better for final validation)
 1. Run `npm run dev` (starts on `http://localhost:3000`)
 2. Find your Mac's local IP: `ifconfig | grep inet` (look for `192.168.x.x`)
 3. On iPhone (same WiFi network): Open Safari → Navigate to `http://192.168.x.x:3000`
 4. Add to Home Screen for PWA testing
 
 ### Responsive Breakpoints to Test
-- **Mobile**: 375px (iPhone SE)
+- **Mobile**: 375px (iPhone SE - minimum supported)
+- **Mobile Default**: 390px (iPhone 14 Pro - design target)
 - **Mobile Large**: 428px (iPhone 14 Pro Max)
-- **Tablet**: 768px (iPad)
-- **Desktop**: 1024px+ (optional)
+- **Tablet**: 768px (iPad - Phase 3+)
+- **Desktop**: 1024px+ (optional enhancement)
 
 ---
 
