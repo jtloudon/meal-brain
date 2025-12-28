@@ -39,7 +39,10 @@ Optional later:
 - Supabase
   - Postgres (database)
   - Auth (magic-link with PKCE, household isolation)
-  - Storage (images, OCR inputs - Phase 3+)
+  - Storage (recipe images - Phase 3+, OCR inputs - Phase 5)
+    - Recipe images stored with `image_url` field in recipes table
+    - Supports user uploads (JPEG, PNG, WebP, HEIC)
+    - External URLs also supported (for imported recipes)
   - **Auth Pattern**: Server-side callback route (`app/auth/callback/route.ts`)
     - Uses Next.js Route Handler with `createServerClient`
     - Handles PKCE code exchange with cookie-based session storage
@@ -73,9 +76,15 @@ Optional later:
 - LLM reasoning layer (creative) - Claude 4.5 Sonnet
 - Tool execution layer (deterministic) - Agent SDK Skills
 
-**Media** (Phase 3+):
-- Voice ingestion (Web Speech API)
-- Photo ingestion (OCR pipeline)
+**Media**:
+- Recipe images (Phase 3 - in progress):
+  - User upload from device (JPEG, PNG, WebP, HEIC)
+  - External URL support (for future import feature)
+  - Stored in Supabase Storage bucket
+- Voice ingestion (Phase 5+):
+  - Web Speech API for voice input
+- Photo ingestion (Phase 5+):
+  - OCR pipeline for recipe extraction from images
 
 ---
 

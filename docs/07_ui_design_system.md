@@ -27,12 +27,30 @@ This document defines the complete UI/UX design system for the household meal pl
 ## Visual Design System
 
 ### Color Palette
-- **Background**: `#FFFFFF` (white)
-- **Primary**: `#4A90E2` (blue) - Primary actions, AI responses
-- **Secondary**: `#333333` (dark gray) - Text, secondary UI elements
+
+**Implementation**: All colors defined as CSS variables in `app/globals.css` for easy customization.
+
+**Primary Colors**:
+- **Primary**: `#4A90E2` (blue) - Primary actions, AI responses, active tab states
+  - Tailwind: `bg-primary`, `text-primary`, `border-primary`
+  - CSS var: `var(--primary)`, `var(--primary-hover)`
 - **Accent**: `#FFA500` (orange) - Call-to-action buttons, ratings
+  - Tailwind: `bg-accent`, `text-accent`, `border-accent`
+  - CSS var: `var(--accent)`, `var(--accent-hover)`
+
+**Neutral Colors**:
+- **Background**: `#FFFFFF` (white)
+- **Secondary**: `#333333` (dark gray) - Text, secondary UI elements
 - **Surface**: `#F9F9F9` (light gray) - Card backgrounds
 - **Border**: `#F0F0F0` (very light gray) - Dividers, input backgrounds
+
+**Semantic Colors**:
+- **Success**: `#10B981` (green) - Success states
+- **Error**: `#EF4444` (red) - Errors, destructive actions
+- **Warning**: `#F59E0B` (amber) - Warnings
+- **Info**: `#3B82F6` (blue) - Informational messages
+
+**To customize colors**: Edit `app/globals.css` `:root` section. Changes apply instantly without rebuild.
 
 ### Typography
 - **Font family**: System sans-serif (iOS defaults to San Francisco)

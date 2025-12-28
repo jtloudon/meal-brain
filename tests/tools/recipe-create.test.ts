@@ -184,4 +184,70 @@ describe('Tool: recipe.create', () => {
       await supabase.from('recipes').delete().eq('id', recipeId);
     });
   });
+
+  describe('Test Case 5: Create recipe with image_url and source_url', () => {
+    it('should store image_url and source_url fields correctly', async () => {
+      const input = {
+        title: 'Recipe with Image',
+        ingredients: [
+          { name: 'flour', quantity: 2, unit: 'cup' as const },
+        ],
+        image_url: 'https://example.com/images/recipe.jpg',
+        source_url: 'https://example.com/recipes/test-recipe',
+      };
+
+      const result = await recipe.create.execute(input, {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      });
+
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+
+      // Verify in database
+      const { data: recipeData } = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('id', result.data.recipe_id)
+        .single();
+
+      expect(recipeData?.image_url).toBe('https://example.com/images/recipe.jpg');
+      expect(recipeData?.source_url).toBe('https://example.com/recipes/test-recipe');
+
+      // Clean up
+      await supabase.from('recipes').delete().eq('id', result.data.recipe_id);
+    });
+
+    it('should allow null/empty image_url and source_url', async () => {
+      const input = {
+        title: 'Recipe without Media',
+        ingredients: [
+          { name: 'salt', quantity: 1, unit: 'tsp' as const },
+        ],
+        image_url: '',
+        source_url: '',
+      };
+
+      const result = await recipe.create.execute(input, {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      });
+
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+
+      // Verify in database
+      const { data: recipeData } = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('id', result.data.recipe_id)
+        .single();
+
+      expect(recipeData?.image_url).toBeNull();
+      expect(recipeData?.source_url).toBeNull();
+
+      // Clean up
+      await supabase.from('recipes').delete().eq('id', result.data.recipe_id);
+    });
+  });
 });
