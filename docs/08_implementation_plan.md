@@ -559,3 +559,31 @@ This plan prioritizes:
 
 ## Version History
 - **v1.0** (2025-12-22): Consolidated from `08_project_plan.md` and `12_implementation_plan.md`. Updated to reflect Agent SDK architecture and simplified phase structure.
+
+## Phase 2.5: Dev Login Implementation (BLOCKED - 2025-12-27)
+
+### Status: BLOCKED
+See `docs/17_dev_login_blocker.md` for details.
+
+**Current Workaround:**
+1. Go to http://localhost:3000/login
+2. Enter `demo@mealbrain.app`, `spouse@mealbrain.app`, or `test@mealbrain.app`  
+3. Check Mailpit: http://127.0.0.1:54324
+4. Click magic link in email
+5. Auto-links to seed data household (dev mode only)
+
+**What Works:**
+- ✅ Auth callback auto-links dev emails to Demo/Test households
+- ✅ Seed data: Demo Household has 3 recipes
+- ✅ Jest/Vitest tests work (programmatic auth)
+- ✅ Playwright E2E tests work (Mailpit API)
+- ✅ Production deployment unaffected
+
+**What's Blocked:**
+- ❌ Automated dev-login (no password/magic link/PKCE works in local Supabase)
+- ❌ Dev-login E2E test (skip for now)
+
+**Next Steps:**
+- Option A: Continue with manual magic link (current)
+- Option B: Implement custom auth bypass middleware (future)
+- Option C: Debug Supabase local config (time intensive)

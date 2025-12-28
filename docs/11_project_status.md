@@ -370,3 +370,11 @@ The goal is to:
 - Enable AI-assisted implementation without confusion
 
 This file should be reviewed before any major build step.
+
+## Current Blockers (Added 2025-12-27)
+
+### Dev Login Auth Bypass
+- **Status**: BLOCKED - No working automated dev login
+- **Workaround**: Use production magic link (check Mailpit at http://127.0.0.1:54324)
+- **Details**: See `docs/17_dev_login_blocker.md`
+- **Next**: Decide on Option A (manual), B (custom bypass), or C (debug Supabase)

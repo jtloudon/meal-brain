@@ -31,7 +31,6 @@ const DEV_USERS = [
 export default function DevLoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   // Only allow in development
   if (process.env.NODE_ENV === 'production') {

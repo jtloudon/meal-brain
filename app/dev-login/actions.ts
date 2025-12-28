@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -13,6 +14,9 @@ export async function devLogin(userId: string) {
   }
 
   const email = getEmailForUserId(userId);
+  const householdId = getHouseholdIdForUserId(userId);
+
+  console.log('[DEV LOGIN] Starting dev login for:', email, 'household:', householdId);
 
   // Create admin client with service role
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
@@ -22,54 +26,96 @@ export async function devLogin(userId: string) {
     },
   });
 
-  // Try to get existing user by email (not ID, since seed data may have different IDs)
+  // Step 1: Get or create user in auth.users
   const { data: users } = await supabaseAdmin.auth.admin.listUsers();
   const existingUser = users?.users.find((u) => u.email === email);
 
   let authUserId = existingUser?.id;
 
+  // Dev-only password (NEVER use in production!)
+  const DEV_PASSWORD = 'dev-password-12345';
+
   if (!existingUser) {
-    // User doesn't exist in auth, create them
+    console.log('[DEV LOGIN] Creating new auth user with password');
     const { data: newUser, error: createError } =
       await supabaseAdmin.auth.admin.createUser({
         email,
         email_confirm: true,
+        password: DEV_PASSWORD,
         user_metadata: {},
       });
 
     if (createError) {
-      console.error('Error creating user:', createError);
+      console.error('[DEV LOGIN] Error creating auth user:', createError);
       throw new Error(`Failed to create user: ${createError.message}`);
     }
 
     authUserId = newUser.user?.id;
+    console.log('[DEV LOGIN] Created auth user:', authUserId);
+  } else {
+    console.log('[DEV LOGIN] Found existing auth user:', authUserId);
   }
 
-  // Now generate a magic link
-  console.log('[DEV LOGIN] Generating link for:', email);
-  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-    type: 'magiclink',
-    email,
+  if (!authUserId) {
+    throw new Error('Failed to get auth user ID');
+  }
+
+  // Step 2: Create or update user in users table with household_id
+  // Check if user record exists
+  const { data: existingUserRecord } = await supabaseAdmin
+    .from('users')
+    .select('id, household_id')
+    .eq('id', authUserId)
+    .single();
+
+  if (!existingUserRecord) {
+    console.log('[DEV LOGIN] Creating users table record');
+    const { error: insertError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        id: authUserId,
+        household_id: householdId,
+        email: email,
+      });
+
+    if (insertError) {
+      console.error('[DEV LOGIN] Error creating user record:', insertError);
+      throw new Error(`Failed to create user record: ${insertError.message}`);
+    }
+  } else if (existingUserRecord.household_id !== householdId) {
+    console.log('[DEV LOGIN] Updating household_id for existing user');
+    const { error: updateError } = await supabaseAdmin
+      .from('users')
+      .update({ household_id: householdId })
+      .eq('id', authUserId);
+
+    if (updateError) {
+      console.error('[DEV LOGIN] Error updating user record:', updateError);
+      throw new Error(`Failed to update user record: ${updateError.message}`);
+    }
+  }
+
+  console.log('[DEV LOGIN] User record ready with household:', householdId);
+
+  // Step 3: BYPASS AUTH - Set dev session cookie directly
+  console.log('[DEV LOGIN] Setting dev session cookie...');
+  const cookieStore = await cookies();
+
+  // Set a simple dev-only cookie with the user ID
+  cookieStore.set('dev-session', JSON.stringify({
+    userId: authUserId,
+    email: email,
+    householdId: householdId,
+  }), {
+    httpOnly: true,
+    secure: false, // dev only
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   });
 
-  if (error || !data) {
-    console.error('[DEV LOGIN] Error generating link:', error);
-    throw new Error(`Failed to generate login link: ${error?.message || 'unknown error'}`);
-  }
-
-  console.log('[DEV LOGIN] Link generated:', data.properties.action_link);
-
-  // Extract the token from the URL
-  const url = new URL(data.properties.action_link);
-  const token = url.searchParams.get('token');
-  const type = url.searchParams.get('type');
-
-  if (!token || !type) {
-    throw new Error('Invalid magic link generated');
-  }
-
-  // Redirect to the auth callback with the token
-  redirect(`/auth/callback?token=${token}&type=${type}`);
+  console.log('[DEV LOGIN] Dev session set, redirecting to planner');
+  redirect('/planner');
 }
 
 function getEmailForUserId(userId: string): string {
@@ -80,4 +126,16 @@ function getEmailForUserId(userId: string): string {
   };
 
   return userMap[userId] || 'demo@mealbrain.app';
+}
+
+function getHouseholdIdForUserId(userId: string): string {
+  const householdMap: Record<string, string> = {
+    // Demo users → Demo Household
+    '10000000-0000-4000-8000-000000000001': '00000000-0000-4000-8000-000000000001',
+    '10000000-0000-4000-8000-000000000002': '00000000-0000-4000-8000-000000000001',
+    // Test user → Test Household
+    '10000000-0000-4000-8000-000000000003': '00000000-0000-4000-8000-000000000002',
+  };
+
+  return householdMap[userId] || '00000000-0000-4000-8000-000000000001';
 }

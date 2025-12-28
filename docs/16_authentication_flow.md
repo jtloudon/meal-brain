@@ -561,3 +561,61 @@ test('magic-link authentication flow', async ({ page }) => {
 
 ## Version History
 - **v1.0** (2025-12-22): Initial authentication flow specification
+
+---
+
+## Current Implementation (2025-12-27)
+
+### Production Flow (Magic Link)
+**Status:** ✅ Working
+
+1. User enters email at `/login`
+2. Magic link sent to email
+3. User clicks link → `/auth/callback`
+4. Callback creates session, redirects to `/onboarding`
+5. User creates household → redirects to `/planner`
+
+### Development Flow (Manual Magic Link)
+**Status:** ⚠️ Workaround (automated dev-login blocked)
+
+**Workaround Steps:**
+1. Go to http://localhost:3000/login
+2. Enter dev email: `demo@mealbrain.app`, `spouse@mealbrain.app`, or `test@mealbrain.app`
+3. Check Mailpit: http://127.0.0.1:54324
+4. Click magic link
+5. Callback auto-links to seed household (dev mode only, see `app/auth/callback/route.ts:62`)
+6. Redirects to `/planner` with seed data
+
+**Auto-Linking Logic (Dev Mode Only):**
+```typescript
+// app/auth/callback/route.ts
+if (process.env.NODE_ENV === 'development') {
+  demo@mealbrain.app → Demo Household (3 recipes)
+  spouse@mealbrain.app → Demo Household (3 recipes)
+  test@mealbrain.app → Test Household (empty)
+}
+```
+
+**Blocked:** Automated `/dev-login` page. See `docs/17_dev_login_blocker.md`.
+
+### Testing Flow (Programmatic)
+**Status:** ✅ Working
+
+**Jest/Vitest Tests:**
+- Direct database operations
+- Use Test Household: `00000000-0000-4000-8000-000000000002`
+- No auth needed
+
+**Playwright E2E Tests:**
+- Magic link flow + Mailpit API
+- `mockEmailService.getLatestEmail()` fetches link programmatically
+- See `e2e/authentication.spec.ts`
+
+---
+
+## Households in Seed Data
+
+| Household ID | Name | Purpose | Recipes |
+|--------------|------|---------|---------|
+| `00000000-0000-4000-8000-000000000001` | Demo Household | Development browsing | 3 (Chicken Curry, Beef Tacos, Black Bean Tacos) |
+| `00000000-0000-4000-8000-000000000002` | Test Household | Automated tests | 0 (tests create their own) |

@@ -59,6 +59,29 @@ export async function GET(request: NextRequest) {
 
     console.log('[CALLBACK ROUTE] User record:', userRecord);
 
+    // Auto-link dev emails to Demo/Test households (dev mode only)
+    if ((!userRecord || !userRecord.household_id) && process.env.NODE_ENV === 'development') {
+      const devEmailMap: Record<string, string> = {
+        'demo@mealbrain.app': '00000000-0000-4000-8000-000000000001', // Demo Household
+        'spouse@mealbrain.app': '00000000-0000-4000-8000-000000000001', // Demo Household
+        'test@mealbrain.app': '00000000-0000-4000-8000-000000000002', // Test Household
+      };
+
+      const householdId = devEmailMap[user.email || ''];
+
+      if (householdId) {
+        console.log('[CALLBACK ROUTE] Auto-linking', user.email, 'to household', householdId);
+        await supabase.from('users').upsert({
+          id: user.id,
+          email: user.email,
+          household_id: householdId,
+        });
+
+        // Continue to planner
+        return NextResponse.redirect(`${requestUrl.origin}/planner`);
+      }
+    }
+
     if (!userRecord || !userRecord.household_id) {
       return NextResponse.redirect(`${requestUrl.origin}/onboarding`);
     }
