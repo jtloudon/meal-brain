@@ -21,6 +21,7 @@ interface Recipe {
   tags: string[];
   notes: string | null;
   instructions: string | null;
+  image_url: string | null;
   created_at: string;
   recipe_ingredients: RecipeIngredient[];
 }
@@ -232,13 +233,25 @@ export default function RecipeDetailPage() {
         </button>
       }
     >
-      <div className="px-4 py-4">
-        {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <h1 className="text-lg font-bold text-gray-900">{recipe.title}</h1>
-            {renderStars(recipe.rating)}
+      <div className="pb-4">
+        {/* Recipe Image */}
+        {recipe.image_url && (
+          <div className="w-full h-48 bg-gray-100 mb-4">
+            <img
+              src={recipe.image_url}
+              alt={recipe.title}
+              className="w-full h-full object-cover"
+            />
           </div>
+        )}
+
+        <div className="px-4">
+          {/* Header */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-lg font-bold text-gray-900">{recipe.title}</h1>
+              {renderStars(recipe.rating)}
+            </div>
 
           {/* Tags */}
           {recipe.tags.length > 0 && (
@@ -450,6 +463,7 @@ export default function RecipeDetailPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </AuthenticatedLayout>
   );

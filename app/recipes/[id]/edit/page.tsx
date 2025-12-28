@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
+import ImageUpload from '@/components/ImageUpload';
+import { createClient } from '@/lib/auth/supabase-client';
 import { ArrowLeft, Plus, Trash2, Star } from 'lucide-react';
 
 const VALID_UNITS = [
@@ -47,6 +49,7 @@ interface Recipe {
   tags: string[];
   notes: string | null;
   instructions: string | null;
+  image_url: string | null;
   created_at: string;
   recipe_ingredients: RecipeIngredient[];
 }
@@ -57,6 +60,7 @@ export default function EditRecipePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [householdId, setHouseholdId] = useState<string>('');
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -64,9 +68,29 @@ export default function EditRecipePage() {
   const [tags, setTags] = useState('');
   const [notes, setNotes] = useState('');
   const [instructions, setInstructions] = useState('');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([
     { id: '1', name: '', quantity: '', unit: 'cup', prep_state: '' },
   ]);
+
+  // Get household ID on mount
+  useEffect(() => {
+    const getHouseholdId = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('users')
+          .select('household_id')
+          .eq('id', user.id)
+          .single();
+        if (data) {
+          setHouseholdId(data.household_id);
+        }
+      }
+    };
+    getHouseholdId();
+  }, []);
 
   useEffect(() => {
     if (params.id) {
@@ -93,6 +117,7 @@ export default function EditRecipePage() {
       setTags(recipe.tags.join(', '));
       setNotes(recipe.notes || '');
       setInstructions(recipe.instructions || '');
+      setImageUrl(recipe.image_url);
       setIngredients(
         recipe.recipe_ingredients.map((ing, index) => ({
           id: (index + 1).toString(),
@@ -168,6 +193,7 @@ export default function EditRecipePage() {
           tags: tagArray.length > 0 ? tagArray : undefined,
           rating: rating || undefined,
           notes: notes || undefined,
+          image_url: imageUrl || undefined,
         }),
       });
 
@@ -269,6 +295,18 @@ export default function EditRecipePage() {
             placeholder="Recipe name"
           />
         </div>
+
+        {/* Image Upload */}
+        {householdId && params.id && (
+          <div className="mb-4">
+            <ImageUpload
+              currentImageUrl={imageUrl}
+              onImageChange={setImageUrl}
+              householdId={householdId}
+              recipeId={params.id as string}
+            />
+          </div>
+        )}
 
         {/* Rating */}
         <div className="mb-4">
