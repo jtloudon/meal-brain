@@ -45,6 +45,8 @@ export const CreateRecipeSchema = z.object({
   tags: z.array(z.string()).optional(),
   rating: z.number().min(1).max(5).optional(),
   notes: z.string().optional(),
+  image_url: z.string().url().optional().or(z.literal('')),
+  source_url: z.string().url().optional().or(z.literal('')),
 });
 
 export type CreateRecipeInput = z.infer<typeof CreateRecipeSchema>;
@@ -86,6 +88,8 @@ export const UpdateRecipeSchema = z.object({
   tags: z.array(z.string()).optional(),
   rating: z.number().min(1).max(5).optional(),
   notes: z.string().optional(),
+  image_url: z.string().url().optional().or(z.literal('')),
+  source_url: z.string().url().optional().or(z.literal('')),
 });
 
 export type UpdateRecipeInput = z.infer<typeof UpdateRecipeSchema>;
@@ -143,6 +147,8 @@ export async function createRecipe(
         tags: validated.tags ?? [],
         notes: validated.notes ?? null,
         instructions: validated.instructions ?? null,
+        image_url: validated.image_url || null,
+        source_url: validated.source_url || null,
       })
       .select('id')
       .single();
@@ -399,6 +405,10 @@ export async function updateRecipe(
     if (validated.notes !== undefined) updateData.notes = validated.notes;
     if (validated.instructions !== undefined)
       updateData.instructions = validated.instructions;
+    if (validated.image_url !== undefined)
+      updateData.image_url = validated.image_url || null;
+    if (validated.source_url !== undefined)
+      updateData.source_url = validated.source_url || null;
 
     // Update recipe if there are fields to update
     if (Object.keys(updateData).length > 0) {
