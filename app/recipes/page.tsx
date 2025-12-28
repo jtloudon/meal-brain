@@ -13,6 +13,7 @@ interface Recipe {
   created_at: string;
   notes?: string | null;
   instructions?: string | null;
+  image_url?: string | null;
   recipe_ingredients?: Array<{ display_name: string }>;
 }
 
@@ -210,26 +211,40 @@ export default function RecipesPage() {
               <div
                 key={recipe.id}
                 onClick={() => router.push(`/recipes/${recipe.id}`)}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer active:bg-gray-50"
+                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer active:bg-gray-50"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    {recipe.title}
-                  </h3>
-                  {renderStars(recipe.rating)}
-                </div>
-                {recipe.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {recipe.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                {/* Recipe Image */}
+                {recipe.image_url && (
+                  <div className="w-full h-32 bg-gray-100">
+                    <img
+                      src={recipe.image_url}
+                      alt={recipe.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 )}
+
+                {/* Recipe Info */}
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-sm font-semibold text-gray-900">
+                      {recipe.title}
+                    </h3>
+                    {renderStars(recipe.rating)}
+                  </div>
+                  {recipe.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {recipe.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

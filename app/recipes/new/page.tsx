@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
+import ImageUpload from '@/components/ImageUpload';
+import { createClient } from '@/lib/auth/supabase-client';
 import { ArrowLeft, Plus, Trash2, Star } from 'lucide-react';
 
 const VALID_UNITS = [
@@ -35,6 +37,7 @@ export default function NewRecipePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [householdId, setHouseholdId] = useState<string>('');
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -42,9 +45,29 @@ export default function NewRecipePage() {
   const [tags, setTags] = useState('');
   const [notes, setNotes] = useState('');
   const [instructions, setInstructions] = useState('');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([
     { id: '1', name: '', quantity: '', unit: 'cup', prep_state: '' },
   ]);
+
+  // Get household ID on mount
+  useEffect(() => {
+    const getHouseholdId = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('users')
+          .select('household_id')
+          .eq('id', user.id)
+          .single();
+        if (data) {
+          setHouseholdId(data.household_id);
+        }
+      }
+    };
+    getHouseholdId();
+  }, []);
 
   const addIngredient = () => {
     const newId = (Math.max(...ingredients.map((i) => parseInt(i.id))) + 1).toString();
@@ -105,6 +128,7 @@ export default function NewRecipePage() {
           tags: tagArray.length > 0 ? tagArray : undefined,
           rating: rating || undefined,
           notes: notes || undefined,
+          image_url: imageUrl || undefined,
         }),
       });
 
@@ -179,6 +203,17 @@ export default function NewRecipePage() {
             placeholder="Recipe name"
           />
         </div>
+
+        {/* Image Upload */}
+        {householdId && (
+          <div className="mb-4">
+            <ImageUpload
+              currentImageUrl={imageUrl}
+              onImageChange={setImageUrl}
+              householdId={householdId}
+            />
+          </div>
+        )}
 
         {/* Rating */}
         <div className="mb-4">
