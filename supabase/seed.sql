@@ -53,7 +53,7 @@ INSERT INTO ingredients (id, canonical_name) VALUES
   ('a0000000-0000-0000-0000-000000000010', 'black pepper');
 
 -- Demo Recipes
-INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions, created_at) VALUES
+INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions, image_url, created_at) VALUES
   ('b0000000-0000-4000-8000-000000000001',
    '00000000-0000-4000-8000-000000000001',
    'Chicken Curry',
@@ -61,6 +61,7 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions,
    ARRAY['chicken', 'dairy-free', 'asian'],
    'Family favorite! Double the sauce.',
    E'1. Heat oil in large pan over medium-high heat\n2. Cook diced chicken until browned (5-7 min)\n3. Add diced onion and minced garlic, cook until softened (3 min)\n4. Stir in curry powder, cook 1 min until fragrant\n5. Add coconut milk, bring to simmer\n6. Reduce heat and simmer 15-20 min until chicken is cooked through\n7. Meanwhile, cook rice according to package directions\n8. Serve curry over rice',
+   'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&q=80',
    NOW()),
   ('b0000000-0000-4000-8000-000000000002',
    '00000000-0000-4000-8000-000000000001',
@@ -69,6 +70,7 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions,
    ARRAY['beef', 'mexican', 'quick'],
    '20 minute meal',
    E'1. Brown ground beef in skillet over medium-high heat (8-10 min)\n2. Drain excess fat\n3. Season with taco seasoning and a splash of water\n4. Simmer 5 min until thickened\n5. Warm taco shells according to package\n6. Assemble: shells, beef, lettuce, tomato, cheese',
+   'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=800&q=80',
    NOW()),
   ('b0000000-0000-4000-8000-000000000003',
    '00000000-0000-4000-8000-000000000001',
@@ -77,6 +79,7 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions,
    ARRAY['vegetarian', 'mexican', 'dairy-free'],
    'Great for batch cooking',
    E'1. Heat oil in skillet over medium heat\n2. Sauté diced onion and sliced bell pepper until softened (5-7 min)\n3. Add drained black beans, cumin, and chili powder\n4. Cook until heated through (3-5 min)\n5. Mash beans slightly with fork for better texture\n6. Warm taco shells\n7. Assemble: shells, black bean mixture, lettuce\n8. Top with salsa or hot sauce if desired',
+   NULL,
    NOW());
 
 -- Recipe Ingredients (Chicken Curry)

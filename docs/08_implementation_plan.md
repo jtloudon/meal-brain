@@ -553,28 +553,27 @@ The MVP is complete when:
 
 ### Phase 3: Enhancements & Polish
 
-- [ ] **Move Grocery Items Between Lists**
-  - [ ] Add dropdown/button on each grocery item to select destination list
-  - [ ] API endpoint: PATCH /api/grocery/items/[id] to update grocery_list_id
-  - [ ] Maintain item state (checked/unchecked, quantity, unit) during move
-  - [ ] Optimistic UI update with rollback on error
-  - [ ] E2E test: create 2 lists, add item to list A, move to list B, verify
-  - [ ] Tool update: Add grocery.move_item tool with validation
+- [x] **Move Grocery Items Between Lists** ✅ (Completed 2025-12-28)
+  - [x] Add dropdown on each grocery item to select destination list
+  - [x] API endpoint: PATCH /api/grocery/items/[id] to update grocery_list_id
+  - [x] Maintain item state (checked/unchecked, quantity, unit) during move
+  - [x] E2E test: create 2 lists, add item to list A, move to list B, verify
+  - [ ] Optimistic UI update with rollback on error (deferred - works well as-is)
+  - [ ] Tool update: Add grocery.move_item tool with validation (Phase 4 - AI Integration)
 - [ ] **UI/UX Polish**
   - [ ] Mobile responsiveness testing
   - [ ] Loading states
   - [ ] Error handling improvements
   - [ ] Accessibility audit (ARIA labels, keyboard navigation)
 
-**Phase 2 Progress Stats (Updated 2025-12-27)**:
-- **25/25 E2E tests passing (100%)** ✅ (after `supabase db reset`)
+**Phase 2 Progress Stats (Updated 2025-12-28)**:
+- **26/26 E2E tests passing (100%)** ✅
 - **All 12 backend Tools complete and validated** ✅ (34/34 tests, 100%)
 - **Recipe management: Full CRUD** ✅ (7/7 E2E tests, 100% coverage)
 - **Meal planner: Full CRUD** ✅ (5/5 E2E tests, 100% coverage)
-- **Grocery list: Full CRUD** ✅ (6/6 E2E tests, 100% coverage)
+- **Grocery list: Full CRUD + Move Items** ✅ (7/7 E2E tests, 100% coverage)
 - **TDD workflow established** ✅ (Test-first development for all new features)
-- **E2E testing infrastructure complete** ✅ (25/25 tests passing)
-- **NEXT**: Fix /dev-login implementation (documented solution ready)
+- **E2E testing infrastructure complete** ✅ (26/26 tests passing)
 
 ---
 

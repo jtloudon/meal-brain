@@ -101,6 +101,25 @@ export default function GroceriesPage() {
     }
   };
 
+  const moveItem = async (itemId: string, targetListId: string) => {
+    try {
+      const res = await fetch(`/api/grocery/items/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grocery_list_id: targetListId,
+        }),
+      });
+
+      if (res.ok) {
+        // Remove item from current list
+        setItems((prev) => prev.filter((item) => item.id !== itemId));
+      }
+    } catch (error) {
+      console.error('Error moving item:', error);
+    }
+  };
+
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
 
@@ -258,6 +277,29 @@ export default function GroceriesPage() {
                     {item.quantity} {item.unit}
                   </p>
                 </div>
+
+                {/* Move to dropdown (only show if multiple lists exist) */}
+                {lists.length > 1 && (
+                  <select
+                    aria-label={`Move ${item.display_name} to list`}
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        moveItem(item.id, e.target.value);
+                      }
+                    }}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Move to...</option>
+                    {lists
+                      .filter((list) => list.id !== selectedListId)
+                      .map((list) => (
+                        <option key={list.id} value={list.id}>
+                          {list.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
               </div>
             ))
           )}

@@ -149,6 +149,45 @@ test.describe('Action Buttons - Complete Flow', () => {
     });
   });
 
+  test.describe('Move Items Between Lists', () => {
+    test('should move item from one list to another while preserving state', async ({ page }) => {
+      // Step 1: Go to groceries page (seeded data has "This Week" list)
+      await page.goto('http://localhost:3000/groceries');
+
+      // Create a second list to move items to
+      await page.click('text=New List');
+      await page.fill('input[placeholder*="List name"]', 'Next Week');
+      await page.click('button:has-text("Create")', { force: true });
+      await expect(page.locator('select#list-selector')).toContainText('Next Week');
+
+      // Step 2: Select the seeded "This Week" list
+      await page.selectOption('select#list-selector', { label: 'This Week' });
+
+      // Verify at least one item exists (from seed data)
+      await expect(page.locator('text=chicken breast')).toBeVisible({ timeout: 5000 });
+
+      // Step 3: Move item to "Next Week" list using dropdown
+      // Find the item row and select the "Move to" dropdown
+      const itemRow = page.locator('text=chicken breast').locator('..').locator('..');
+      await itemRow.locator('select[aria-label*="Move"]').selectOption({ label: 'Next Week' });
+
+      // Wait for move to complete and UI to update
+      await page.waitForTimeout(1000);
+
+      // Verify item disappears from current view
+      await expect(page.locator('text=chicken breast')).not.toBeVisible({ timeout: 3000 });
+
+      // Step 5: Verify item no longer in "This Week" list
+      await page.selectOption('select#list-selector', { label: 'This Week' });
+      await expect(page.locator('text=chicken breast')).not.toBeVisible();
+
+      // Step 4: Verify item appears in "Next Week" list
+      await page.selectOption('select#list-selector', { label: 'Next Week' });
+      await expect(page.locator('text=chicken breast')).toBeVisible();
+      await expect(page.locator('text=1.5 lb')).toBeVisible();
+    });
+  });
+
   test.describe('Complete User Flow', () => {
     test('full workflow: create list -> add recipe to planner -> push ingredients', async ({ page }) => {
       // Step 1: Create a new grocery list

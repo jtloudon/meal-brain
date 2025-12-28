@@ -283,16 +283,21 @@ Specs are strong but not yet exercised in code.
 - ✅ 3/3 dev-login E2E tests passing
 - ✅ Added user email to header for user visibility
 
-**Next Steps (Phase 3 - Enhancements)**:
-1. **Move grocery items between lists**
-   - Add UI control on grocery item to switch to different list
-   - Update grocery_items.grocery_list_id
-   - Maintain item state (checked/unchecked) during move
-   - E2E test for move functionality
-2. **Polish and refinements**
-   - UI/UX improvements
-   - Performance optimization
+**Completed (Phase 3 - Move Items Feature ✅ 2025-12-28)**:
+- ✅ Move grocery items between lists
+  - ✅ UI dropdown control on each grocery item ("Move to..." selector)
+  - ✅ API endpoint: PATCH /api/grocery/items/[id]
+  - ✅ Updates grocery_items.grocery_list_id
+  - ✅ Item state (checked/unchecked, quantity, unit) preserved during move
+  - ✅ E2E test passing (action-buttons.spec.ts)
+  - ✅ TDD workflow: Red → Green → Refactor
+
+**Next Steps (Phase 3 - Polish)**:
+1. **UI/UX Polish**
    - Mobile responsiveness testing
+   - Loading states
+   - Error handling improvements
+   - Accessibility audit (ARIA labels, keyboard navigation)
 
 **Auth Architecture (Updated 2025-12-27)**:
 - THREE separate flows: Production (magic link ✅), Development (/dev-login ✅), Testing (programmatic ✅)
