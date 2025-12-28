@@ -95,7 +95,9 @@ export default function AuthenticatedLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 overflow-y-auto overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+        {children}
+      </main>
 
       {/* Bottom Navigation */}
       <BottomNav />
