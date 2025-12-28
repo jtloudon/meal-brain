@@ -97,25 +97,25 @@ export async function devLogin(userId: string) {
 
   console.log('[DEV LOGIN] User record ready with household:', householdId);
 
-  // Step 3: BYPASS AUTH - Set dev session cookie directly
-  console.log('[DEV LOGIN] Setting dev session cookie...');
-  const cookieStore = await cookies();
-
-  // Set a simple dev-only cookie with the user ID
-  cookieStore.set('dev-session', JSON.stringify({
-    userId: authUserId,
-    email: email,
-    householdId: householdId,
-  }), {
-    httpOnly: true,
-    secure: false, // dev only
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+  // Step 3: Generate REAL Supabase session tokens
+  console.log('[DEV LOGIN] Generating session tokens...');
+  const { data: sessionData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+    email,
+    password: DEV_PASSWORD,
   });
 
-  console.log('[DEV LOGIN] Dev session set, redirecting to planner');
-  redirect('/planner');
+  if (signInError || !sessionData.session) {
+    console.error('[DEV LOGIN] Failed to generate session:', signInError);
+    throw new Error(`Failed to generate session: ${signInError?.message || 'No session returned'}`);
+  }
+
+  console.log('[DEV LOGIN] Session tokens generated successfully');
+
+  // Return tokens to client for setSession()
+  return {
+    access_token: sessionData.session.access_token,
+    refresh_token: sessionData.session.refresh_token,
+  };
 }
 
 function getEmailForUserId(userId: string): string {

@@ -76,9 +76,11 @@ export default function AuthenticatedLayout({
         <div className="flex justify-between items-center px-4 py-3">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-            {household && (
-              <p className="text-xs text-gray-600">{household.name}</p>
-            )}
+            <div className="flex gap-2 items-center text-xs text-gray-600">
+              {user && <span>{user.email}</span>}
+              {household && user && <span>•</span>}
+              {household && <span>{household.name}</span>}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {action}

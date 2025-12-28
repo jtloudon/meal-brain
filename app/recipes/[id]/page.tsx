@@ -37,6 +37,10 @@ export default function RecipeDetailPage() {
   );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showPushModal, setShowPushModal] = useState(false);
+  const [groceryLists, setGroceryLists] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedGroceryList, setSelectedGroceryList] = useState<string | null>(null);
+  const [pushing, setPushing] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -95,6 +99,64 @@ export default function RecipeDetailPage() {
       setError(err instanceof Error ? err.message : 'Failed to delete recipe');
       setDeleting(false);
       setShowDeleteConfirm(false);
+    }
+  };
+
+  const fetchGroceryLists = async () => {
+    try {
+      const response = await fetch('/api/grocery/lists');
+      if (!response.ok) throw new Error('Failed to fetch grocery lists');
+      const data = await response.json();
+      setGroceryLists(data.lists || []);
+      if (data.lists && data.lists.length > 0) {
+        setSelectedGroceryList(data.lists[0].id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load grocery lists');
+    }
+  };
+
+  const handleOpenPushModal = () => {
+    setShowPushModal(true);
+    fetchGroceryLists();
+  };
+
+  const handlePushIngredients = async () => {
+    if (!recipe || !selectedGroceryList) return;
+
+    try {
+      setPushing(true);
+      setError(null);
+
+      // Transform recipe ingredients to the format expected by the API
+      const ingredients = recipe.recipe_ingredients.map((ing) => ({
+        ingredient_id: null, // Will be looked up by the tool
+        display_name: ing.display_name,
+        quantity: ing.quantity,
+        unit: ing.unit,
+      }));
+
+      const response = await fetch('/api/grocery/push-ingredients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grocery_list_id: selectedGroceryList,
+          ingredients,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to push ingredients');
+      }
+
+      // Success! Close modal and show success message
+      setShowPushModal(false);
+      alert('Ingredients pushed to grocery list!');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to push ingredients');
+    } finally {
+      setPushing(false);
     }
   };
 
@@ -289,11 +351,17 @@ export default function RecipeDetailPage() {
             <Trash2 size={18} />
             Delete Recipe
           </button>
-          <button className="w-full px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+          <button
+            onClick={() => router.push('/planner/add')}
+            className="w-full px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          >
             <Calendar size={18} />
             Add to Planner
           </button>
-          <button className="w-full px-4 py-3 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2">
+          <button
+            onClick={handleOpenPushModal}
+            className="w-full px-4 py-3 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+          >
             <ShoppingCart size={18} />
             Push Ingredients to Grocery List
           </button>
@@ -323,6 +391,60 @@ export default function RecipeDetailPage() {
                   className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
                   {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Push Ingredients Modal */}
+        {showPushModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Push Ingredients to Grocery List
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Select which grocery list to add these ingredients to:
+              </p>
+
+              {groceryLists.length === 0 ? (
+                <p className="text-sm text-gray-500 mb-6">
+                  No grocery lists available. Create one first.
+                </p>
+              ) : (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Grocery List
+                  </label>
+                  <select
+                    value={selectedGroceryList || ''}
+                    onChange={(e) => setSelectedGroceryList(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {groceryLists.map((list) => (
+                      <option key={list.id} value={list.id}>
+                        {list.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPushModal(false)}
+                  disabled={pushing}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePushIngredients}
+                  disabled={pushing || groceryLists.length === 0}
+                  className="flex-1 px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:bg-gray-300"
+                >
+                  {pushing ? 'Pushing...' : 'Push'}
                 </button>
               </div>
             </div>

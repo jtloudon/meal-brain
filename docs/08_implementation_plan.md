@@ -528,21 +528,37 @@ The MVP is complete when:
   - [x] Items display with quantities
   - [x] Check/uncheck functionality
   - [x] API routes (list_lists, get_list, check_item)
+  - [x] New List button + modal
+  - [x] Add Item button + modal (with quantity/unit)
+  - [x] AuthenticatedLayout wrapper (consistent navigation)
+- [x] **Recipe Action Buttons** ✅
+  - [x] "Add to Planner" navigation
+  - [x] "Push Ingredients to Grocery" with list selector modal
+  - [x] API route for push_ingredients
+- [x] **E2E Tests for Action Buttons** ✅
+  - [x] Create grocery list (test passes)
+  - [x] Add items to list (test passes)
+  - [x] Check/uncheck items (test passes)
+  - [x] Navigate to planner from recipe (test passes)
+  - [x] Push ingredients to grocery list (test passes)
+  - [x] Full workflow test (test passes)
+  - [x] **All 6/6 action button tests passing** ✅
 - [ ] **CRITICAL**: Fix /dev-login for local development
-  - [ ] Direct session creation (bypass magic link)
-  - [ ] Auto-join Demo Household
-  - [ ] Only works in NODE_ENV !== 'production'
-- [ ] **Next**: Wire up action buttons (Push to Grocery from recipes)
+  - [ ] Replace custom cookie with signInWithPassword()
+  - [ ] Return tokens to client
+  - [ ] Client calls setSession() with tokens
+  - [ ] Test with all three dev users (demo, spouse, test)
+  - [ ] Documented in docs/17_dev_login_blocker.md ✅
 
-**Phase 2 Progress Stats**:
-- **60/67 total tests passing (90% overall)** ✅
+**Phase 2 Progress Stats (Updated 2025-12-27)**:
+- **25/25 E2E tests passing (100%)** ✅ (after `supabase db reset`)
 - **All 12 backend Tools complete and validated** ✅ (34/34 tests, 100%)
 - **Recipe management: Full CRUD** ✅ (7/7 E2E tests, 100% coverage)
-- **Meal planner: Full CRUD** ✅ (4/5 E2E tests, 80% coverage)
-- **Grocery list: View + Check items** ✅ (UI complete, E2E pending)
+- **Meal planner: Full CRUD** ✅ (5/5 E2E tests, 100% coverage)
+- **Grocery list: Full CRUD** ✅ (6/6 E2E tests, 100% coverage)
 - **TDD workflow established** ✅ (Test-first development for all new features)
-- **E2E testing infrastructure complete** ✅ (13/17 tests passing, 77%)
-- **BLOCKER**: Auth loop issue - /dev-login needs fix for local dev
+- **E2E testing infrastructure complete** ✅ (25/25 tests passing)
+- **NEXT**: Fix /dev-login implementation (documented solution ready)
 
 ---
 

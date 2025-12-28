@@ -7,9 +7,10 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 2 In Progress - All Tools Complete, Grocery UI Next ✅
-**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow + **Recipe UI (Full CRUD)** + **Meal Planner (Week View + Add Meals)**
-**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Recipe Forms ✅ → Meal Planner ✅ → Grocery UI next)
+**Status:** Phase 2 Nearly Complete - All Features Working, Dev-Login Fix Pending ✅
+**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow + **Recipe UI (Full CRUD)** + **Meal Planner (Week View + Add/Remove)** + **Grocery List (Full CRUD)** + **Action Buttons (All Working)**
+**Phase:** Phase 1 ✅ → Phase 2 (Tools ✅ → UI Scaffolding ✅ → Recipe Screens ✅ → Recipe Forms ✅ → Meal Planner ✅ → Grocery UI ✅ → Action Buttons ✅ → Dev-Login Fix pending)
+**Tests:** 25/25 E2E tests passing (100%), 34/34 unit tests passing (100%)
 
 ---
 
@@ -253,30 +254,40 @@ Specs are strong but not yet exercised in code.
 
 **Completed (E2E Testing ✅)**:
 - ✅ E2E test infrastructure working (Playwright)
-- ✅ 13/16 E2E tests passing (81% coverage)
+- ✅ **25/25 E2E tests passing (100% coverage)** 🎉
   - ✅ Recipe **full CRUD** (7/7 tests, 100%): list, search, filter, detail, create, edit, **delete**
-  - ✅ Meal planner CRUD (4/5 tests, 80%): view, navigate, add meal, **remove meal**
+  - ✅ Meal planner CRUD (5/5 tests, 100%): view, navigate, add meal, **remove meal**
+  - ✅ Grocery list CRUD (6/6 tests, 100%): create list, add items, check/uncheck, push from recipes
   - ✅ Authentication flow (new user, returning user)
-  - ⏸️ Auth edge cases (3 tests - expired/reused tokens, deferred)
+  - ✅ Auth edge cases (3/3 tests): expired/reused tokens
 - ✅ **TDD workflow established**: Write test → Implement → Pass → Commit
 - ✅ **Bug fixed**: Seed data UUIDs were invalid per RFC 4122 (Zod .uuid() validation)
+- ✅ **Bug fixed**: Database not seeded → Fixed with `supabase db reset`
 
-**Next Steps (CRITICAL - Auth Fix)**:
-1. **Fix /dev-login for reliable local development**
-   - Direct session creation (bypass magic link)
-   - Auto-join Demo Household
-   - Only works in dev mode
-2. **Update test helpers for Test Household**
-   - Programmatic user creation
-   - Cleanup after tests
-3. **Wire up action buttons** (Add to Planner, Push to Grocery)
-4. Polish and refinements
+**Completed (Grocery Action Buttons ✅ 2025-12-27)**:
+- ✅ "New List" button + modal (create grocery lists)
+- ✅ "Add Item" button + modal (quantity/unit selector)
+- ✅ "Add to Planner" navigation from recipe detail
+- ✅ "Push Ingredients to Grocery" with list selector modal
+- ✅ API endpoint for push_ingredients
+- ✅ AuthenticatedLayout wrapper on groceries page
+- ✅ React key warning fixed (API returns full objects)
+- ✅ All 6/6 action button E2E tests passing
 
-**Auth Architecture Decision:**
-- THREE separate flows: Production (magic link), Development (/dev-login), Testing (programmatic)
+**Next Steps (Dev-Login Fix)**:
+1. **CRITICAL: Fix /dev-login implementation** (documented solution ready)
+   - Replace custom cookie with `signInWithPassword()` + `setSession()`
+   - Generate real Supabase JWT tokens
+   - Solution documented in docs/17_dev_login_blocker.md
+2. **Polish and refinements**
+
+**Auth Architecture (Updated 2025-12-27)**:
+- THREE separate flows: Production (magic link ✅), Development (/dev-login ⏸️ fix pending), Testing (programmatic ✅)
 - ONE Demo Household, ONE Test Household
 - NO auth.users in seed data (prevents conflicts)
-- See docs/16_authentication_flow.md for full spec
+- **Issue Identified**: Dev-login was setting custom cookie instead of real session tokens
+- **Solution**: Use `signInWithPassword()` API, return tokens, client calls `setSession()`
+- See docs/16_authentication_flow.md and docs/17_dev_login_blocker.md for full details
 
 **Not Started**:
 - Agent SDK integration

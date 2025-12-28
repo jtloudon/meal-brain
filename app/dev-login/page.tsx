@@ -45,12 +45,29 @@ export default function DevLoginPage() {
     setLoading(user.email);
 
     try {
-      // Use server action to generate magic link and redirect
+      // Get session tokens from server
       const { devLogin } = await import('./actions');
-      await devLogin(user.userId);
+      const tokens = await devLogin(user.userId);
+
+      // Set REAL Supabase session
+      const supabase = createClient();
+      const { error } = await supabase.auth.setSession({
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+      });
+
+      if (error) {
+        console.error('[DEV LOGIN] Failed to set session:', error);
+        alert(`Failed to set session: ${error.message}`);
+        setLoading(null);
+        return;
+      }
+
+      console.log('[DEV LOGIN] Session set successfully, redirecting...');
+      router.push('/planner');
     } catch (err) {
       console.error('Unexpected error:', err);
-      alert('Login failed');
+      alert(`Login failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setLoading(null);
     }
   };

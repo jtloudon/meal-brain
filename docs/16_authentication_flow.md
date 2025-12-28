@@ -559,8 +559,97 @@ test('magic-link authentication flow', async ({ page }) => {
 
 ---
 
+---
+
+## Architecture Deep Dive: Dev-Login Implementation (2025-12-27)
+
+### Problem Identified
+
+The `/dev-login` implementation was **setting a custom cookie instead of creating a valid Supabase session**, causing API calls to fail.
+
+**What Was Wrong:**
+```typescript
+// ❌ INCORRECT (app/dev-login/actions.ts:100-118)
+cookieStore.set('dev-session', JSON.stringify({
+  userId: authUserId,
+  email: email,
+  householdId: householdId,
+}))
+```
+
+**Why This Failed:**
+1. Supabase client SDK doesn't recognize custom cookies
+2. API calls using `createClient()` have no valid session
+3. RLS policies can't authenticate the user
+4. `auth.uid()` returns NULL in RLS policies
+
+### Correct Implementation (Per Supabase Docs)
+
+**Server-Side (Service Role):**
+```typescript
+// 1. Create/verify user exists
+const supabaseAdmin = createClient(url, SERVICE_ROLE_KEY)
+await supabaseAdmin.auth.admin.createUser({
+  email,
+  password: 'dev-password-12345', // Dev only!
+  email_confirm: true
+})
+
+// 2. Sign in to generate REAL session tokens
+const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+  email,
+  password: 'dev-password-12345'
+})
+
+// 3. Return tokens to client
+return {
+  access_token: data.session.access_token,
+  refresh_token: data.session.refresh_token
+}
+```
+
+**Client-Side:**
+```typescript
+// Set REAL Supabase session
+await supabase.auth.setSession({
+  access_token,
+  refresh_token
+})
+```
+
+### Why E2E Tests Work But Dev-Login Doesn't
+
+**E2E Tests (Correct):**
+1. Create user with service role
+2. **Use magic link flow** → generates real Supabase session
+3. Session recognized by SDK → API calls work
+
+**Dev-Login (Broken):**
+1. Create user with service role ✅
+2. **Set custom cookie** ❌ → not a Supabase session
+3. Session NOT recognized by SDK → API calls fail
+
+### Database Seeding
+
+**Official Supabase Guidance:**
+- Seed file: `supabase/seed.sql`
+- Runs automatically on `supabase start` (first time)
+- Runs on every `supabase db reset`
+- **Only INSERT statements** (no schema)
+
+**Our Implementation:**
+- ✅ Seed file at correct location
+- ✅ Contains only INSERTs
+- ⚠️ **Issue:** Tests failed when DB not seeded
+- ✅ **Fix:** Run `supabase db reset` before test suite
+
+**Source:** [Supabase Seeding Docs](https://supabase.com/docs/guides/local-development/seeding-your-database)
+
+---
+
 ## Version History
 - **v1.0** (2025-12-22): Initial authentication flow specification
+- **v1.1** (2025-12-27): Added dev-login architecture analysis and fix
 
 ---
 
