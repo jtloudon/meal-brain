@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Star } from 'lucide-react';
+import ImageUpload from '@/components/ImageUpload';
+import { createClient } from '@/lib/auth/supabase-client';
 
 type RecipeFormMode = 'create' | 'edit';
-type TabSection = 'details' | 'ingredients' | 'directions' | 'notes' | 'photos';
+type TabSection = 'overview' | 'ingredients' | 'directions' | 'notes' | 'photos';
 
 interface RecipeFormProps {
   mode: RecipeFormMode;
@@ -37,9 +39,10 @@ export default function RecipeFormWithTabs({
   onSubmit,
 }: RecipeFormProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabSection>('details');
+  const [activeTab, setActiveTab] = useState<TabSection>('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [householdId, setHouseholdId] = useState<string>('');
 
   // Form fields
   const [title, setTitle] = useState(initialData?.title || '');
@@ -48,6 +51,26 @@ export default function RecipeFormWithTabs({
   const [notes, setNotes] = useState(initialData?.notes || '');
   const [instructions, setInstructions] = useState(initialData?.instructions || '');
   const [ingredientsText, setIngredientsText] = useState(initialData?.ingredientsText || '');
+  const [imageUrl, setImageUrl] = useState<string | null>(initialData?.imageUrl || null);
+
+  // Get household ID for photo uploads
+  useEffect(() => {
+    const getHouseholdId = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('users')
+          .select('household_id')
+          .eq('id', user.id)
+          .single();
+        if (data) {
+          setHouseholdId(data.household_id);
+        }
+      }
+    };
+    getHouseholdId();
+  }, []);
 
   const handleCancel = () => {
     if (mode === 'edit' && recipeId) {
@@ -62,7 +85,6 @@ export default function RecipeFormWithTabs({
     setError(null);
 
     try {
-      // Basic validation
       if (!title.trim()) {
         throw new Error('Title is required');
       }
@@ -70,7 +92,6 @@ export default function RecipeFormWithTabs({
         throw new Error('At least one ingredient is required');
       }
 
-      // Parse tags
       const tagArray = tags
         .split(',')
         .map((t) => t.trim())
@@ -83,7 +104,7 @@ export default function RecipeFormWithTabs({
         notes: notes.trim(),
         instructions: instructions.trim(),
         ingredientsText: ingredientsText.trim(),
-        imageUrl: initialData?.imageUrl || null,
+        imageUrl,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save recipe');
@@ -99,7 +120,7 @@ export default function RecipeFormWithTabs({
             key={star}
             type="button"
             onClick={() => setRating(star === rating ? null : star)}
-            className="focus:outline-none"
+            style={{ outline: 'none' }}
           >
             <Star
               size={24}
@@ -114,7 +135,7 @@ export default function RecipeFormWithTabs({
   };
 
   const tabs: { id: TabSection; label: string }[] = [
-    { id: 'details', label: 'Overview' },
+    { id: 'overview', label: 'Overview' },
     { id: 'ingredients', label: 'Ingredients' },
     { id: 'directions', label: 'Directions' },
     { id: 'notes', label: 'Notes' },
@@ -122,23 +143,59 @@ export default function RecipeFormWithTabs({
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div style={{
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: '#f3f4f6',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}>
       {/* Top Navigation Bar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-300">
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 16px',
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
         <button
           onClick={handleCancel}
           disabled={loading}
-          className="text-orange-500 font-normal text-lg disabled:opacity-50"
+          style={{
+            color: '#f97316',
+            fontSize: '17px',
+            fontWeight: '400',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            opacity: loading ? 0.5 : 1
+          }}
         >
           Cancel
         </button>
-        <h1 className="text-xl font-semibold text-gray-900">
+        <h1 style={{
+          fontSize: '20px',
+          fontWeight: '600',
+          color: '#111827',
+          margin: 0
+        }}>
           {mode === 'create' ? 'New recipe' : 'Edit recipe'}
         </h1>
         <button
           onClick={handleSave}
           disabled={loading || !title.trim()}
-          className="text-orange-500 font-normal text-lg disabled:opacity-50"
+          style={{
+            color: '#f97316',
+            fontSize: '17px',
+            fontWeight: '400',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            opacity: (loading || !title.trim()) ? 0.5 : 1
+          }}
         >
           {loading ? 'Saving...' : 'Save'}
         </button>
@@ -146,22 +203,40 @@ export default function RecipeFormWithTabs({
 
       {/* Error Message */}
       {error && (
-        <div className="mx-4 mt-3 bg-red-50 border border-red-200 rounded-lg p-3">
-          <p className="text-sm text-red-600">{error}</p>
+        <div style={{
+          margin: '12px 16px 0',
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          padding: '12px'
+        }}>
+          <p style={{ fontSize: '14px', color: '#dc2626', margin: 0 }}>{error}</p>
         </div>
       )}
 
       {/* Tab Bar */}
-      <div className="flex bg-white border-b border-gray-300 overflow-x-auto">
+      <div style={{
+        display: 'flex',
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e5e7eb',
+        overflowX: 'auto'
+      }}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-shrink-0 px-5 py-3 font-normal text-base transition-colors ${
-              activeTab === tab.id
-                ? 'text-white bg-orange-500 rounded-t-lg'
-                : 'text-gray-900 bg-white'
-            }`}
+            style={{
+              flexShrink: 0,
+              padding: '12px 20px',
+              fontSize: '15px',
+              fontWeight: '400',
+              color: activeTab === tab.id ? 'white' : '#111827',
+              backgroundColor: activeTab === tab.id ? '#f97316' : 'transparent',
+              border: 'none',
+              borderRadius: activeTab === tab.id ? '8px 8px 0 0' : '0',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
           >
             {tab.label}
           </button>
@@ -169,43 +244,67 @@ export default function RecipeFormWithTabs({
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto bg-white">
+      <div style={{ flex: 1, overflowY: 'auto', backgroundColor: 'white' }}>
         {/* Overview Tab */}
-        {activeTab === 'details' && (
-          <div className="p-4 space-y-1">
+        {activeTab === 'overview' && (
+          <div style={{ padding: '16px' }}>
             {/* Title */}
-            <div className="border-b border-gray-200 pb-3">
+            <div style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '12px' }}>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={100}
-                className="w-full text-2xl font-normal px-0 py-2 border-0 focus:outline-none focus:ring-0"
                 placeholder="Recipe name"
+                style={{
+                  width: '100%',
+                  fontSize: '28px',
+                  fontWeight: '400',
+                  border: 'none',
+                  outline: 'none',
+                  padding: '8px 0',
+                  backgroundColor: 'transparent'
+                }}
               />
             </div>
 
             {/* Tags */}
-            <div className="border-b border-gray-200 py-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500 text-base">Tags</span>
-                <input
-                  type="text"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  className="text-right text-base flex-1 ml-4 border-0 focus:outline-none focus:ring-0 bg-transparent"
-                  placeholder="dinner, vegetarian"
-                />
-              </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Tags</span>
+              <input
+                type="text"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="dinner, vegetarian"
+                style={{
+                  textAlign: 'right',
+                  fontSize: '17px',
+                  flex: 1,
+                  marginLeft: '16px',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent'
+                }}
+              />
             </div>
 
             {/* Rating */}
-            <div className="border-b border-gray-200 py-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500 text-base">Rating</span>
-                <div className="flex-1 flex justify-end">
-                  {renderStarRating()}
-                </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Rating</span>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
+                {renderStarRating()}
               </div>
             </div>
           </div>
@@ -213,15 +312,30 @@ export default function RecipeFormWithTabs({
 
         {/* Ingredients Tab */}
         {activeTab === 'ingredients' && (
-          <div className="h-full flex flex-col">
-            <p className="px-4 pt-3 pb-2 text-sm text-gray-500 bg-gray-50 border-b border-gray-200">
+          <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <p style={{
+              padding: '12px 16px',
+              fontSize: '14px',
+              color: '#6b7280',
+              backgroundColor: '#f9fafb',
+              borderBottom: '1px solid #e5e7eb',
+              margin: 0
+            }}>
               Enter one ingredient per line (e.g., "¼ cup flour" or "2 tbsp vanilla extract")
             </p>
             <textarea
               value={ingredientsText}
               onChange={(e) => setIngredientsText(e.target.value)}
-              className="flex-1 px-4 py-3 border-0 focus:outline-none focus:ring-0 resize-none text-base"
               placeholder="¼ cup egg white&#10;⅓ cup flour&#10;2 tbsp vanilla extract"
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                fontSize: '17px',
+                fontFamily: 'monospace',
+                border: 'none',
+                outline: 'none',
+                resize: 'none'
+              }}
             />
           </div>
         )}
@@ -231,8 +345,16 @@ export default function RecipeFormWithTabs({
           <textarea
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
-            className="w-full h-full px-4 py-3 border-0 focus:outline-none focus:ring-0 resize-none text-base"
             placeholder="Step-by-step cooking instructions..."
+            style={{
+              width: '100%',
+              height: '100%',
+              padding: '12px 16px',
+              fontSize: '17px',
+              border: 'none',
+              outline: 'none',
+              resize: 'none'
+            }}
           />
         )}
 
@@ -241,33 +363,51 @@ export default function RecipeFormWithTabs({
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full h-full px-4 py-3 border-0 focus:outline-none focus:ring-0 resize-none text-base"
             placeholder="Any additional notes..."
+            style={{
+              width: '100%',
+              height: '100%',
+              padding: '12px 16px',
+              fontSize: '17px',
+              border: 'none',
+              outline: 'none',
+              resize: 'none'
+            }}
           />
         )}
 
         {/* Photos Tab */}
         {activeTab === 'photos' && (
-          <div className="h-full flex flex-col items-center justify-center">
-            <button
-              type="button"
-              className="text-orange-500 text-lg font-normal"
-            >
-              + Add photo
-            </button>
-            <p className="text-sm text-gray-500 mt-2">Photo upload coming soon</p>
+          <div style={{ padding: '16px' }}>
+            {householdId && (
+              <ImageUpload
+                currentImageUrl={imageUrl}
+                onImageChange={setImageUrl}
+                householdId={householdId}
+                recipeId={recipeId}
+              />
+            )}
+            {!householdId && (
+              <p style={{ textAlign: 'center', color: '#9ca3af' }}>Loading...</p>
+            )}
           </div>
         )}
       </div>
 
-      {/* Keyboard Accessory Toolbar (Fixed at bottom) */}
-      <div className="border-t border-gray-300 bg-gray-200 px-2 py-2 flex gap-2 overflow-x-auto">
+      {/* Keyboard Accessory Toolbar */}
+      <div style={{
+        borderTop: '1px solid #d1d5db',
+        backgroundColor: '#e5e7eb',
+        padding: '8px',
+        display: 'flex',
+        gap: '8px',
+        overflowX: 'auto'
+      }}>
         {['⅛', '¼', '⅓', '½', '⅔', '¾', '°', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'can'].map((symbol) => (
           <button
             key={symbol}
             type="button"
             onClick={() => {
-              // Insert symbol at cursor position in ingredients textarea
               if (activeTab === 'ingredients') {
                 const textarea = document.querySelector('textarea');
                 if (textarea) {
@@ -278,7 +418,6 @@ export default function RecipeFormWithTabs({
                     symbol +
                     ingredientsText.substring(end);
                   setIngredientsText(newValue);
-                  // Move cursor after inserted symbol
                   setTimeout(() => {
                     textarea.selectionStart = textarea.selectionEnd = start + symbol.length;
                     textarea.focus();
@@ -286,7 +425,18 @@ export default function RecipeFormWithTabs({
                 }
               }
             }}
-            className="flex-shrink-0 px-3 py-1.5 bg-white border border-gray-400 rounded shadow-sm text-sm font-normal text-gray-900 hover:bg-gray-50 active:bg-gray-100"
+            style={{
+              flexShrink: 0,
+              padding: '6px 12px',
+              backgroundColor: 'white',
+              border: '1px solid #9ca3af',
+              borderRadius: '4px',
+              fontSize: '15px',
+              fontWeight: '400',
+              color: '#111827',
+              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+            }}
           >
             {symbol}
           </button>
