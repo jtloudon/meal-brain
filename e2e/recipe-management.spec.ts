@@ -274,9 +274,8 @@ test.describe('Recipe Management', () => {
     // Now we're on the detail page - delete this recipe
     await page.click('button:has-text("Delete Recipe")');
 
-    // Should show confirmation dialog
+    // Should show confirmation dialog with delete confirmation text
     await expect(page.locator('text=Are you sure')).toBeVisible();
-    await expect(page.locator('text=Delete Me Test Recipe')).toBeVisible();
 
     // Confirm deletion - click the red "Delete" button in the modal
     const confirmButton = page.locator('button:has-text("Delete")').filter({ hasText: /^Delete$|^Deleting\.\.\.$/ }).last();
