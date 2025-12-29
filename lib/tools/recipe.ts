@@ -598,12 +598,17 @@ export async function deleteRecipe(
     }
 
     // Delete recipe (cascade will delete recipe_ingredients)
-    const { error: deleteError } = await supabase
+    const { data: deleteData, error: deleteError } = await supabase
       .from('recipes')
       .delete()
-      .eq('id', validated.recipe_id);
+      .eq('id', validated.recipe_id)
+      .select();
+
+    console.log('[DELETE RECIPE] Attempt to delete recipe:', validated.recipe_id);
+    console.log('[DELETE RECIPE] Delete result:', { deleteData, deleteError });
 
     if (deleteError) {
+      console.error('[DELETE RECIPE] Delete failed:', deleteError);
       return {
         success: false,
         error: {
@@ -613,6 +618,7 @@ export async function deleteRecipe(
       };
     }
 
+    console.log('[DELETE RECIPE] Successfully deleted recipe:', validated.recipe_id);
     return {
       success: true,
       data: { recipe_id: validated.recipe_id },
