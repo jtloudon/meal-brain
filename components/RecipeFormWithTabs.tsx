@@ -20,6 +20,10 @@ interface RecipeFormProps {
     instructions: string;
     ingredientsText: string;
     imageUrl: string | null;
+    source: string;
+    servingSize: string;
+    prepTime: string;
+    cookTime: string;
   };
   onSubmit: (data: {
     title: string;
@@ -29,6 +33,10 @@ interface RecipeFormProps {
     instructions: string;
     ingredientsText: string;
     imageUrl: string | null;
+    source: string;
+    servingSize: string;
+    prepTime: string;
+    cookTime: string;
   }) => Promise<void>;
 }
 
@@ -53,11 +61,11 @@ export default function RecipeFormWithTabs({
   const [ingredientsText, setIngredientsText] = useState(initialData?.ingredientsText || '');
   const [imageUrl, setImageUrl] = useState<string | null>(initialData?.imageUrl || null);
 
-  // Additional fields (not yet in DB - UI only for now)
-  const [source, setSource] = useState('');
-  const [servingSize, setServingSize] = useState('');
-  const [prepTime, setPrepTime] = useState('');
-  const [cookTime, setCookTime] = useState('');
+  // Additional recipe metadata fields
+  const [source, setSource] = useState(initialData?.source || '');
+  const [servingSize, setServingSize] = useState(initialData?.servingSize || '');
+  const [prepTime, setPrepTime] = useState(initialData?.prepTime || '');
+  const [cookTime, setCookTime] = useState(initialData?.cookTime || '');
 
   // Get household ID for photo uploads
   useEffect(() => {
@@ -111,6 +119,10 @@ export default function RecipeFormWithTabs({
         instructions: instructions.trim(),
         ingredientsText: ingredientsText.trim(),
         imageUrl,
+        source: source.trim(),
+        servingSize: servingSize.trim(),
+        prepTime: prepTime.trim(),
+        cookTime: cookTime.trim(),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save recipe');
@@ -239,8 +251,8 @@ export default function RecipeFormWithTabs({
             onClick={() => setActiveTab(tab.id)}
             style={{
               flexShrink: 0,
-              padding: '10px 14px',
-              fontSize: '15px',
+              padding: '10px 12px',
+              fontSize: '14px',
               fontWeight: '400',
               color: activeTab === tab.id ? 'white' : '#111827',
               backgroundColor: activeTab === tab.id ? '#f97316' : 'transparent',

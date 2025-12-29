@@ -46,7 +46,10 @@ export const CreateRecipeSchema = z.object({
   rating: z.number().min(1).max(5).optional(),
   notes: z.string().optional(),
   image_url: z.string().url().optional().or(z.literal('')),
-  source_url: z.string().url().optional().or(z.literal('')),
+  source: z.string().optional(),
+  serving_size: z.string().optional(),
+  prep_time: z.string().optional(),
+  cook_time: z.string().optional(),
 });
 
 export type CreateRecipeInput = z.infer<typeof CreateRecipeSchema>;
@@ -89,7 +92,10 @@ export const UpdateRecipeSchema = z.object({
   rating: z.number().min(1).max(5).optional(),
   notes: z.string().optional(),
   image_url: z.string().url().optional().or(z.literal('')),
-  source_url: z.string().url().optional().or(z.literal('')),
+  source: z.string().optional(),
+  serving_size: z.string().optional(),
+  prep_time: z.string().optional(),
+  cook_time: z.string().optional(),
 });
 
 export type UpdateRecipeInput = z.infer<typeof UpdateRecipeSchema>;
@@ -148,7 +154,10 @@ export async function createRecipe(
         notes: validated.notes ?? null,
         instructions: validated.instructions ?? null,
         image_url: validated.image_url || null,
-        source_url: validated.source_url || null,
+        source: validated.source || null,
+        serving_size: validated.serving_size || null,
+        prep_time: validated.prep_time || null,
+        cook_time: validated.cook_time || null,
       })
       .select('id')
       .single();
@@ -408,8 +417,14 @@ export async function updateRecipe(
       updateData.instructions = validated.instructions;
     if (validated.image_url !== undefined)
       updateData.image_url = validated.image_url || null;
-    if (validated.source_url !== undefined)
-      updateData.source_url = validated.source_url || null;
+    if (validated.source !== undefined)
+      updateData.source = validated.source || null;
+    if (validated.serving_size !== undefined)
+      updateData.serving_size = validated.serving_size || null;
+    if (validated.prep_time !== undefined)
+      updateData.prep_time = validated.prep_time || null;
+    if (validated.cook_time !== undefined)
+      updateData.cook_time = validated.cook_time || null;
 
     // Update recipe if there are fields to update
     if (Object.keys(updateData).length > 0) {

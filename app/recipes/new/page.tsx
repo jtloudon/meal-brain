@@ -15,6 +15,10 @@ export default function NewRecipePage() {
     instructions: string;
     ingredientsText: string;
     imageUrl: string | null;
+    source: string;
+    servingSize: string;
+    prepTime: string;
+    cookTime: string;
   }) => {
     // Parse ingredients from free-form text
     const parsedIngredients = parseIngredientsText(data.ingredientsText);
@@ -40,6 +44,10 @@ export default function NewRecipePage() {
         rating: data.rating || undefined,
         notes: data.notes || undefined,
         image_url: data.imageUrl || undefined,
+        source: data.source || undefined,
+        serving_size: data.servingSize || undefined,
+        prep_time: data.prepTime || undefined,
+        cook_time: data.cookTime || undefined,
       }),
     });
 
