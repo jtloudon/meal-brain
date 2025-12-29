@@ -65,6 +65,7 @@ export async function seedDatabase(options: SeedDatabaseOptions) {
       });
 
     if (authError && !authError.message.includes('already registered')) {
+      console.error('[SEED-DATABASE] Auth error details:', authError);
       throw new Error(`Failed to create auth user: ${authError.message}`);
     }
 

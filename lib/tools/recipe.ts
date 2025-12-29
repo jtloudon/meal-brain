@@ -545,6 +545,104 @@ export async function updateRecipe(
 }
 
 /**
+ * Zod schema for deleting a recipe.
+ */
+export const DeleteRecipeSchema = z.object({
+  recipe_id: z.string().uuid('Invalid recipe ID format'),
+});
+
+export type DeleteRecipeInput = z.infer<typeof DeleteRecipeSchema>;
+
+/**
+ * Deletes a recipe and all its associated ingredients.
+ * Enforces household isolation.
+ *
+ * @param input - Recipe ID to delete
+ * @param context - User and household context for RLS
+ * @returns Tool result with success status
+ */
+export async function deleteRecipe(
+  input: DeleteRecipeInput,
+  context: ToolContext
+): Promise<ToolResult<{ recipe_id: string }>> {
+  try {
+    // Validate input
+    const validated = DeleteRecipeSchema.parse(input);
+
+    // Check if recipe exists and belongs to household
+    const { data: existingRecipe, error: fetchError } = await supabase
+      .from('recipes')
+      .select('household_id')
+      .eq('id', validated.recipe_id)
+      .single();
+
+    if (fetchError || !existingRecipe) {
+      return {
+        success: false,
+        error: {
+          type: 'NOT_FOUND',
+          message: 'Recipe not found',
+        },
+      };
+    }
+
+    // Check permission (household isolation)
+    if (existingRecipe.household_id !== context.householdId) {
+      return {
+        success: false,
+        error: {
+          type: 'PERMISSION_DENIED',
+          message: 'You do not have permission to delete this recipe',
+        },
+      };
+    }
+
+    // Delete recipe (cascade will delete recipe_ingredients)
+    const { error: deleteError } = await supabase
+      .from('recipes')
+      .delete()
+      .eq('id', validated.recipe_id);
+
+    if (deleteError) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: deleteError.message,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: { recipe_id: validated.recipe_id },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
  * Recipe tools namespace (for future expansion).
  */
 export const recipe = {
@@ -559,5 +657,9 @@ export const recipe = {
   update: {
     execute: updateRecipe,
     schema: UpdateRecipeSchema,
+  },
+  delete: {
+    execute: deleteRecipe,
+    schema: DeleteRecipeSchema,
   },
 };
