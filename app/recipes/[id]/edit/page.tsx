@@ -272,7 +272,7 @@ export default function EditRecipePage() {
         </button>
       }
     >
-      <form onSubmit={handleSubmit} className="px-4 py-4 pb-64">
+      <form id="edit-recipe-form" onSubmit={handleSubmit} className="px-4 py-4 pb-4">
         {/* Error Message */}
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
@@ -450,15 +450,13 @@ export default function EditRecipePage() {
         </div>
 
         {/* Submit Button */}
-        <div className="fixed bottom-20 left-4 right-4 z-30">
-          <button
-            type="submit"
-            disabled={saving || !title}
-            className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-lg"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={saving || !title}
+          className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-lg"
+        >
+          {saving ? 'Saving...' : 'Save Changes'}
+        </button>
       </form>
     </AuthenticatedLayout>
   );

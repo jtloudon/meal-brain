@@ -70,7 +70,7 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-14">
+    <div className="flex flex-col min-h-screen">
       {/* Header */}
       <header className="sticky top-0 bg-white border-b border-gray-200 z-40">
         <div className="flex justify-between items-center px-4 py-3">
@@ -95,7 +95,7 @@ export default function AuthenticatedLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-40" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
         {children}
       </main>
 

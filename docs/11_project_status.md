@@ -292,12 +292,27 @@ Specs are strong but not yet exercised in code.
   - ✅ E2E test passing (action-buttons.spec.ts)
   - ✅ TDD workflow: Red → Green → Refactor
 
+**In Progress (Phase 3 - UI Polish 2025-12-29)**:
+- 🔄 Bottom navigation refinement
+  - ✅ Removed text labels (icon-only for cleaner mobile UX)
+  - ✅ Increased icon size (20px → 24px)
+  - ✅ Added aria-labels for accessibility
+- 🔄 Submit button visibility fix
+  - **Issue**: Button hidden behind fixed nav bar with 7+ ingredients
+  - **Root cause**: Main scroll container padding insufficient (pb-14 = 56px)
+  - **Attempted fixes**: Form padding (pb-72), fixed positioning, portals
+  - **Current state**: Testing main container padding (pb-40 = 160px)
+  - **Test coverage**: Added E2E test for button accessibility with many ingredients
+  - **Status**: IN PROGRESS - Requires manual testing
+
 **Next Steps (Phase 3 - Polish)**:
 1. **UI/UX Polish**
+   - ✅ Bottom nav icon-only design
+   - 🔄 Submit button positioning (in progress)
    - Mobile responsiveness testing
    - Loading states
    - Error handling improvements
-   - Accessibility audit (ARIA labels, keyboard navigation)
+   - Accessibility audit (keyboard navigation)
 
 **Auth Architecture (Updated 2025-12-27)**:
 - THREE separate flows: Production (magic link ✅), Development (/dev-login ✅), Testing (programmatic ✅)

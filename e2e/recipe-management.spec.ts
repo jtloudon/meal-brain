@@ -165,6 +165,124 @@ test.describe('Recipe Management', () => {
     await expect(page.locator('h1:has-text("Chicken Curry Updated")').first()).toBeVisible();
   });
 
+  test('should keep submit button accessible with many ingredients', async ({ page }) => {
+    // Click Plus button to create new recipe
+    await page.locator('header button').first().click();
+    await page.waitForURL('**/recipes/new');
+
+    // Fill required fields
+    await page.fill('input[placeholder*="Recipe name"]', 'Many Ingredients Test');
+
+    // Add 7 ingredients to make form long
+    for (let i = 0; i < 6; i++) {
+      await page.click('button:has-text("Add")');
+      await page.waitForTimeout(100);
+    }
+
+    // Fill all 7 ingredient fields
+    const ingredientNames = page.locator('input[placeholder="Name"]');
+    const ingredientQtys = page.locator('input[placeholder="Qty"]');
+
+    for (let i = 0; i < 7; i++) {
+      await ingredientNames.nth(i).fill(`Ingredient ${i + 1}`);
+      await ingredientQtys.nth(i).fill('1');
+    }
+
+    // Scroll to bottom of the main scroll container
+    await page.evaluate(() => {
+      const main = document.querySelector('main');
+      if (main) {
+        main.scrollTop = main.scrollHeight;
+      }
+    });
+    await page.waitForTimeout(500);
+
+    // Verify submit button is visible and clickable
+    const submitButton = page.locator('button:has-text("Create Recipe")');
+    await expect(submitButton).toBeVisible();
+
+    // Check button is not behind nav bar
+    const buttonBox = await submitButton.boundingBox();
+    const bottomNav = page.locator('nav').last();
+    const navBox = await bottomNav.boundingBox();
+
+    expect(buttonBox).not.toBeNull();
+    expect(navBox).not.toBeNull();
+
+    const buttonBottom = buttonBox!.y + buttonBox!.height;
+    const navTop = navBox!.y;
+
+    console.log(`Button bottom: ${buttonBottom}px, Nav top: ${navTop}px, Gap: ${navTop - buttonBottom}px`);
+
+    // Button should be fully above nav with comfortable gap
+    expect(buttonBottom).toBeLessThan(navTop - 10);
+  });
+
+  test('should keep submit button visible after image upload', async ({ page }) => {
+    // Click Plus button to create new recipe
+    await page.locator('header button').first().click();
+    await page.waitForURL('**/recipes/new');
+
+    // Fill required fields
+    await page.fill('input[placeholder*="Recipe name"]', 'Image Upload Test');
+    await page.fill('input[placeholder="Name"]', 'test ingredient');
+    await page.fill('input[placeholder="Qty"]', '1');
+
+    // Verify submit button is visible before image upload
+    const submitButton = page.locator('button:has-text("Create Recipe")');
+    await expect(submitButton).toBeVisible();
+
+    // Upload an image (simulate file selection)
+    // Create a simple test image file
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles({
+      name: 'test-image.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+    });
+
+    // Wait for upload to complete (preview should appear)
+    await page.waitForTimeout(2000);
+
+    // Verify submit button is STILL visible after image upload
+    await expect(submitButton).toBeVisible();
+
+    // Check button position relative to bottom nav and viewport
+    const buttonBox = await submitButton.boundingBox();
+    const bottomNav = page.locator('nav').last();
+    const navBox = await bottomNav.boundingBox();
+    const viewportSize = page.viewportSize();
+
+    expect(buttonBox).not.toBeNull();
+    expect(navBox).not.toBeNull();
+    expect(viewportSize).not.toBeNull();
+
+    const buttonBottom = buttonBox!.y + buttonBox!.height;
+    const buttonTop = buttonBox!.y;
+    const navTop = navBox!.y;
+    const viewportHeight = viewportSize!.height;
+
+    console.log(`Viewport height: ${viewportHeight}px`);
+    console.log(`Button top: ${buttonTop}px, Button bottom: ${buttonBottom}px`);
+    console.log(`Nav top: ${navTop}px`);
+    console.log(`Button distance from viewport bottom: ${viewportHeight - buttonBottom}px`);
+
+    // Button should be near the bottom of viewport (within 60-120px from bottom)
+    const distanceFromBottom = viewportHeight - buttonBottom;
+    expect(distanceFromBottom).toBeGreaterThan(60); // At least 60px from bottom (above nav)
+    expect(distanceFromBottom).toBeLessThan(120); // But not more than 120px (should be visible)
+
+    // Button should be above the nav
+    expect(buttonBottom).toBeLessThan(navTop - 4);
+
+    // Check button's z-index is high enough
+    const zIndex = await submitButton.evaluate((el) => {
+      return window.getComputedStyle(el.parentElement!).zIndex;
+    });
+    console.log('Submit button z-index:', zIndex);
+    expect(parseInt(zIndex)).toBeGreaterThanOrEqual(50);
+  });
+
   test('should delete a recipe', async ({ page }) => {
     // First, create a test recipe to delete (so we don't delete seed data)
     await page.click('header button:has-text("Plus")');

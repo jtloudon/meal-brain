@@ -28,14 +28,14 @@ export default function BottomNav() {
             <Link
               key={tab.name}
               href={tab.href}
-              className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
+              className={`flex items-center justify-center flex-1 h-full transition-colors ${
                 isActive
                   ? 'text-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
+              aria-label={tab.name}
             >
-              <Icon size={20} strokeWidth={2} />
-              <span className="text-xs font-medium">{tab.name}</span>
+              <Icon size={24} strokeWidth={2} />
             </Link>
           );
         })}
