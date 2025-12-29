@@ -271,6 +271,20 @@ test.describe('Recipe Management', () => {
     await page.click('button:has-text("Save")');
     await page.waitForURL(/\/recipes\/[^/]+$/);
 
+    // Monitor API requests
+    const apiCalls: Array<{ url: string; method: string; status: number }> = [];
+    page.on('response', async response => {
+      if (response.url().includes('/api/recipes/')) {
+        const call = {
+          url: response.url(),
+          method: response.request().method(),
+          status: response.status()
+        };
+        apiCalls.push(call);
+        console.log(`[API CALL] ${call.method} ${call.url.split('/api')[1]} - Status: ${call.status}`);
+      }
+    });
+
     // Now we're on the detail page - delete this recipe
     await page.click('button:has-text("Delete Recipe")');
 
@@ -281,22 +295,28 @@ test.describe('Recipe Management', () => {
     const confirmButton = page.locator('button:has-text("Delete")').filter({ hasText: /^Delete$|^Deleting\.\.\.$/ }).last();
     await confirmButton.click();
 
+    // Wait for delete API call
+    await page.waitForTimeout(1000);
+
     // Should redirect to recipe list
     await page.waitForURL('/recipes', { timeout: 10000 });
 
     // Wait for recipe list to reload after deletion
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     // The test recipe should no longer exist in the recipe list
     const recipeCards = page.locator('div.cursor-pointer h3');
     const recipeCount = await recipeCards.count();
+    console.log(`[DELETE TEST] Found ${recipeCount} recipe cards`);
+
     let foundDeletedRecipe = false;
     for (let i = 0; i < recipeCount; i++) {
       const text = await recipeCards.nth(i).textContent();
+      console.log(`[DELETE TEST] Recipe ${i}: ${text}`);
       if (text === 'Delete Me Test Recipe') {
         foundDeletedRecipe = true;
-        break;
+        console.log(`[DELETE TEST] ERROR: Found deleted recipe still in list!`);
       }
     }
     expect(foundDeletedRecipe).toBe(false);

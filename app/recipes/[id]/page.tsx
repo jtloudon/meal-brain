@@ -94,8 +94,9 @@ export default function RecipeDetailPage() {
         throw new Error('Failed to delete recipe');
       }
 
-      // Redirect to recipe list
+      // Redirect to recipe list and force refresh to clear cache
       router.push('/recipes');
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete recipe');
       setDeleting(false);
