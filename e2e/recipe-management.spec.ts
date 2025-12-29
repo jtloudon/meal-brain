@@ -115,26 +115,30 @@ test.describe('Recipe Management', () => {
     await page.locator('header button').first().click();
     await page.waitForURL('**/recipes/new');
 
-    // Fill out recipe form
+    // Should start on Overview tab - fill out title
     await page.fill('input[placeholder*="Recipe name"]', 'Test Recipe');
+
+    // Add tags (still on Overview tab)
+    await page.fill('input[placeholder*="dinner, vegetarian"]', 'test, dinner');
 
     // Select rating (click 4th star)
     const stars = page.locator('button:has(svg)').filter({ has: page.locator('svg') });
     await stars.nth(3).click();
 
-    // Add tags
-    await page.fill('input[placeholder*="Comma separated"]', 'test, dinner');
+    // Switch to Ingredients tab
+    await page.click('button:has-text("Ingredients")');
 
-    // Fill ingredient (first row should exist)
-    await page.fill('input[placeholder="Name"]', 'flour');
-    await page.fill('input[placeholder="Qty"]', '2');
-    await page.selectOption('select', 'cup');
+    // Fill ingredients as free-form text (one per line)
+    await page.fill('textarea', '2 cup flour\n1 tsp salt');
+
+    // Switch to Directions tab
+    await page.click('button:has-text("Directions")');
 
     // Fill instructions
     await page.fill('textarea[placeholder*="instructions"]', 'Mix and bake');
 
-    // Submit
-    await page.click('button:has-text("Create Recipe")');
+    // Submit using Save button at top
+    await page.click('button:has-text("Save")');
 
     // Should redirect to recipe detail
     await page.waitForURL('**/recipes/**');
@@ -153,12 +157,12 @@ test.describe('Recipe Management', () => {
     await page.click('button:has-text("Edit Recipe")');
     await page.waitForURL('**/edit');
 
-    // Modify title (use fill to completely replace the value)
+    // Should be on Overview tab - modify title
     const titleInput = page.locator('input[placeholder*="Recipe name"]');
     await titleInput.fill('Chicken Curry Updated');
 
-    // Save changes
-    await page.click('button:has-text("Save Changes")');
+    // Save changes using Save button at top
+    await page.click('button:has-text("Save")');
 
     // Should redirect back to detail
     await page.waitForURL(/\/recipes\/[^/]+$/, { timeout: 10000 });
@@ -170,52 +174,40 @@ test.describe('Recipe Management', () => {
     await page.locator('header button').first().click();
     await page.waitForURL('**/recipes/new');
 
-    // Fill required fields
+    // Fill required fields on Overview tab
     await page.fill('input[placeholder*="Recipe name"]', 'Many Ingredients Test');
 
-    // Add 7 ingredients to make form long
-    for (let i = 0; i < 6; i++) {
-      await page.click('button:has-text("Add")');
-      await page.waitForTimeout(100);
-    }
+    // Switch to Ingredients tab
+    await page.click('button:has-text("Ingredients")');
 
-    // Fill all 7 ingredient fields
-    const ingredientNames = page.locator('input[placeholder="Name"]');
-    const ingredientQtys = page.locator('input[placeholder="Qty"]');
+    // Add 7 ingredients as free-form text (one per line)
+    const ingredientsList = [
+      '1 cup flour',
+      '2 tbsp sugar',
+      '1 tsp salt',
+      '½ cup milk',
+      '¼ cup butter',
+      '3 whole eggs',
+      '1 tsp vanilla'
+    ].join('\n');
 
-    for (let i = 0; i < 7; i++) {
-      await ingredientNames.nth(i).fill(`Ingredient ${i + 1}`);
-      await ingredientQtys.nth(i).fill('1');
-    }
+    await page.fill('textarea', ingredientsList);
 
-    // Scroll to bottom of the main scroll container
+    // Scroll to bottom
     await page.evaluate(() => {
-      const main = document.querySelector('main');
-      if (main) {
-        main.scrollTop = main.scrollHeight;
+      const textarea = document.querySelector('textarea');
+      if (textarea) {
+        textarea.scrollTop = textarea.scrollHeight;
       }
     });
     await page.waitForTimeout(500);
 
-    // Verify submit button is visible and clickable
-    const submitButton = page.locator('button:has-text("Create Recipe")');
-    await expect(submitButton).toBeVisible();
+    // Save button should ALWAYS be visible (it's at the top!)
+    const saveButton = page.locator('button:has-text("Save")');
+    await expect(saveButton).toBeVisible();
 
-    // Check button is not behind nav bar
-    const buttonBox = await submitButton.boundingBox();
-    const bottomNav = page.locator('nav').last();
-    const navBox = await bottomNav.boundingBox();
-
-    expect(buttonBox).not.toBeNull();
-    expect(navBox).not.toBeNull();
-
-    const buttonBottom = buttonBox!.y + buttonBox!.height;
-    const navTop = navBox!.y;
-
-    console.log(`Button bottom: ${buttonBottom}px, Nav top: ${navTop}px, Gap: ${navTop - buttonBottom}px`);
-
-    // Button should be fully above nav with comfortable gap
-    expect(buttonBottom).toBeLessThan(navTop - 10);
+    // Note: Bottom nav is HIDDEN during create/edit, so no need to check for it
+    // This is the new expected behavior - cleaner, focused editing experience
   });
 
   test('should keep submit button visible after image upload', async ({ page }) => {
@@ -223,17 +215,21 @@ test.describe('Recipe Management', () => {
     await page.locator('header button').first().click();
     await page.waitForURL('**/recipes/new');
 
-    // Fill required fields
+    // Fill required fields on Overview tab
     await page.fill('input[placeholder*="Recipe name"]', 'Image Upload Test');
-    await page.fill('input[placeholder="Name"]', 'test ingredient');
-    await page.fill('input[placeholder="Qty"]', '1');
 
-    // Verify submit button is visible before image upload
-    const submitButton = page.locator('button:has-text("Create Recipe")');
-    await expect(submitButton).toBeVisible();
+    // Switch to Ingredients tab and add ingredients
+    await page.click('button:has-text("Ingredients")');
+    await page.fill('textarea', '1 cup test ingredient');
 
-    // Upload an image (simulate file selection)
-    // Create a simple test image file
+    // Switch to Photos tab
+    await page.click('button:has-text("Photos")');
+
+    // Save button should be visible before image upload
+    const saveButton = page.locator('button:has-text("Save")');
+    await expect(saveButton).toBeVisible();
+
+    // Upload an image
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: 'test-image.png',
@@ -241,46 +237,21 @@ test.describe('Recipe Management', () => {
       buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
     });
 
-    // Wait for upload to complete (preview should appear)
+    // Wait for upload to complete
     await page.waitForTimeout(2000);
 
-    // Verify submit button is STILL visible after image upload
-    await expect(submitButton).toBeVisible();
+    // Save button should STILL be visible (it's at the top!)
+    await expect(saveButton).toBeVisible();
 
-    // Check button position relative to bottom nav and viewport
-    const buttonBox = await submitButton.boundingBox();
-    const bottomNav = page.locator('nav').last();
-    const navBox = await bottomNav.boundingBox();
-    const viewportSize = page.viewportSize();
-
+    // The Save button is now at the top of the screen, so it's always accessible
+    // No need to check position relative to bottom nav since nav is hidden during edit
+    const buttonBox = await saveButton.boundingBox();
     expect(buttonBox).not.toBeNull();
-    expect(navBox).not.toBeNull();
-    expect(viewportSize).not.toBeNull();
 
-    const buttonBottom = buttonBox!.y + buttonBox!.height;
+    // Button should be near the top of the viewport (within first 100px)
     const buttonTop = buttonBox!.y;
-    const navTop = navBox!.y;
-    const viewportHeight = viewportSize!.height;
-
-    console.log(`Viewport height: ${viewportHeight}px`);
-    console.log(`Button top: ${buttonTop}px, Button bottom: ${buttonBottom}px`);
-    console.log(`Nav top: ${navTop}px`);
-    console.log(`Button distance from viewport bottom: ${viewportHeight - buttonBottom}px`);
-
-    // Button should be near the bottom of viewport (within 60-120px from bottom)
-    const distanceFromBottom = viewportHeight - buttonBottom;
-    expect(distanceFromBottom).toBeGreaterThan(60); // At least 60px from bottom (above nav)
-    expect(distanceFromBottom).toBeLessThan(120); // But not more than 120px (should be visible)
-
-    // Button should be above the nav
-    expect(buttonBottom).toBeLessThan(navTop - 4);
-
-    // Check button's z-index is high enough
-    const zIndex = await submitButton.evaluate((el) => {
-      return window.getComputedStyle(el.parentElement!).zIndex;
-    });
-    console.log('Submit button z-index:', zIndex);
-    expect(parseInt(zIndex)).toBeGreaterThanOrEqual(50);
+    console.log(`Save button top position: ${buttonTop}px`);
+    expect(buttonTop).toBeLessThan(100);
   });
 
   test('should delete a recipe', async ({ page }) => {
@@ -290,9 +261,13 @@ test.describe('Recipe Management', () => {
 
     // Create a recipe called "Delete Me Test Recipe"
     await page.fill('input[placeholder*="Recipe name"]', 'Delete Me Test Recipe');
-    await page.fill('input[placeholder="Name"]', 'test ingredient');
-    await page.fill('input[placeholder="Qty"]', '1');
-    await page.click('button:has-text("Create Recipe")');
+
+    // Switch to Ingredients tab
+    await page.click('button:has-text("Ingredients")');
+    await page.fill('textarea', '1 cup test ingredient');
+
+    // Save the recipe
+    await page.click('button:has-text("Save")');
     await page.waitForURL(/\/recipes\/[^/]+$/);
 
     // Now we're on the detail page - delete this recipe
