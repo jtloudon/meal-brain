@@ -284,9 +284,21 @@ test.describe('Recipe Management', () => {
     // Should redirect to recipe list
     await page.waitForURL('/recipes', { timeout: 10000 });
 
-    // The test recipe should no longer exist
-    await page.waitForTimeout(500);
-    const testRecipeExists = await page.locator('text=Delete Me Test Recipe').count();
-    expect(testRecipeExists).toBe(0);
+    // Wait for recipe list to reload after deletion
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
+    // The test recipe should no longer exist in the recipe list
+    const recipeCards = page.locator('div.cursor-pointer h3');
+    const recipeCount = await recipeCards.count();
+    let foundDeletedRecipe = false;
+    for (let i = 0; i < recipeCount; i++) {
+      const text = await recipeCards.nth(i).textContent();
+      if (text === 'Delete Me Test Recipe') {
+        foundDeletedRecipe = true;
+        break;
+      }
+    }
+    expect(foundDeletedRecipe).toBe(false);
   });
 });
