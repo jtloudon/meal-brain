@@ -53,6 +53,12 @@ export default function RecipeFormWithTabs({
   const [ingredientsText, setIngredientsText] = useState(initialData?.ingredientsText || '');
   const [imageUrl, setImageUrl] = useState<string | null>(initialData?.imageUrl || null);
 
+  // Additional fields (not yet in DB - UI only for now)
+  const [source, setSource] = useState('');
+  const [servingSize, setServingSize] = useState('');
+  const [prepTime, setPrepTime] = useState('');
+  const [cookTime, setCookTime] = useState('');
+
   // Get household ID for photo uploads
   useEffect(() => {
     const getHouseholdId = async () => {
@@ -114,19 +120,25 @@ export default function RecipeFormWithTabs({
 
   const renderStarRating = () => {
     return (
-      <div className="flex gap-1">
+      <div style={{ display: 'flex', gap: '4px' }}>
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
             onClick={() => setRating(star === rating ? null : star)}
-            style={{ outline: 'none' }}
+            style={{
+              outline: 'none',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer'
+            }}
           >
             <Star
-              size={24}
+              size={22}
               fill={rating && star <= rating ? '#f97316' : 'none'}
               stroke={rating && star <= rating ? '#f97316' : '#d1d5db'}
-              strokeWidth={1.5}
+              strokeWidth={1}
             />
           </button>
         ))}
@@ -227,7 +239,7 @@ export default function RecipeFormWithTabs({
             onClick={() => setActiveTab(tab.id)}
             style={{
               flexShrink: 0,
-              padding: '12px 20px',
+              padding: '10px 14px',
               fontSize: '15px',
               fontWeight: '400',
               color: activeTab === tab.id ? 'white' : '#111827',
@@ -235,7 +247,8 @@ export default function RecipeFormWithTabs({
               border: 'none',
               borderRadius: activeTab === tab.id ? '8px 8px 0 0' : '0',
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
             }}
           >
             {tab.label}
@@ -268,6 +281,32 @@ export default function RecipeFormWithTabs({
               />
             </div>
 
+            {/* Source */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Source</span>
+              <input
+                type="text"
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+                placeholder="URL or notes"
+                style={{
+                  textAlign: 'right',
+                  fontSize: '17px',
+                  flex: 1,
+                  marginLeft: '16px',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </div>
+
             {/* Tags */}
             <div style={{
               display: 'flex',
@@ -282,6 +321,84 @@ export default function RecipeFormWithTabs({
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="dinner, vegetarian"
+                style={{
+                  textAlign: 'right',
+                  fontSize: '17px',
+                  flex: 1,
+                  marginLeft: '16px',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </div>
+
+            {/* Serving Size */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Serving size</span>
+              <input
+                type="text"
+                value={servingSize}
+                onChange={(e) => setServingSize(e.target.value)}
+                placeholder="Serves 4-6"
+                style={{
+                  textAlign: 'right',
+                  fontSize: '17px',
+                  flex: 1,
+                  marginLeft: '16px',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </div>
+
+            {/* Prep Time */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Prep time</span>
+              <input
+                type="text"
+                value={prepTime}
+                onChange={(e) => setPrepTime(e.target.value)}
+                placeholder="15 mins"
+                style={{
+                  textAlign: 'right',
+                  fontSize: '17px',
+                  flex: 1,
+                  marginLeft: '16px',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </div>
+
+            {/* Cook Time */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Cook time</span>
+              <input
+                type="text"
+                value={cookTime}
+                onChange={(e) => setCookTime(e.target.value)}
+                placeholder="30 mins"
                 style={{
                   textAlign: 'right',
                   fontSize: '17px',
