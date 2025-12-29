@@ -324,4 +324,69 @@ test.describe('Recipe Management', () => {
 
     expect(foundDeletedRecipe).toBe(false);
   });
+
+  test('should filter recipes by meal type', async ({ page }) => {
+    // Use seed data which already has meal_types set
+    // Seed data: Chicken Curry (dinner), Beef Tacos (dinner), Black Bean Tacos (lunch)
+    console.log('[FILTER TEST] Testing meal type filtering with seed data...');
+
+    // Test filtering by Dinner
+    console.log('[FILTER TEST] Clicking Dinner filter...');
+    await page.click('button:has-text("Dinner")');
+    await page.waitForTimeout(500); // Wait for filter to apply
+
+    // Verify only dinner recipes shown
+    const dinnerRecipes = page.locator('div.cursor-pointer h3');
+    const dinnerCount = await dinnerRecipes.count();
+    console.log(`[FILTER TEST] Found ${dinnerCount} dinner recipes`);
+
+    // Collect recipe names
+    const dinnerNames: string[] = [];
+    for (let i = 0; i < dinnerCount; i++) {
+      const text = await dinnerRecipes.nth(i).textContent();
+      dinnerNames.push(text || '');
+    }
+    console.log(`[FILTER TEST] Dinner recipes:`, dinnerNames);
+
+    // Verify dinner recipes are shown
+    expect(dinnerNames).toContain('Chicken Curry');
+    expect(dinnerNames).toContain('Beef Tacos');
+    // Verify lunch recipe is NOT shown
+    expect(dinnerNames).not.toContain('Black Bean Tacos');
+
+    // Test filtering by Lunch
+    console.log('[FILTER TEST] Clicking Lunch filter...');
+    await page.click('button:has-text("Lunch")');
+    await page.waitForTimeout(500); // Wait for filter to apply
+
+    const lunchRecipes = page.locator('div.cursor-pointer h3');
+    const lunchCount = await lunchRecipes.count();
+    console.log(`[FILTER TEST] Found ${lunchCount} lunch recipes`);
+
+    // Collect recipe names
+    const lunchNames: string[] = [];
+    for (let i = 0; i < lunchCount; i++) {
+      const text = await lunchRecipes.nth(i).textContent();
+      lunchNames.push(text || '');
+    }
+    console.log(`[FILTER TEST] Lunch recipes:`, lunchNames);
+
+    // Verify lunch recipe is shown
+    expect(lunchNames).toContain('Black Bean Tacos');
+    // Verify dinner recipes are NOT shown
+    expect(lunchNames).not.toContain('Chicken Curry');
+    expect(lunchNames).not.toContain('Beef Tacos');
+
+    // Test "All" filter shows all recipes
+    console.log('[FILTER TEST] Clicking All filter...');
+    await page.click('button:has-text("All")');
+    await page.waitForTimeout(500); // Wait for filter to apply
+
+    const allRecipes = page.locator('div.cursor-pointer h3');
+    const allCount = await allRecipes.count();
+    console.log(`[FILTER TEST] Found ${allCount} total recipes`);
+
+    // Verify all recipes are shown
+    expect(allCount).toBeGreaterThanOrEqual(3);
+  });
 });

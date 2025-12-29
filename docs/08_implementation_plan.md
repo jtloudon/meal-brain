@@ -560,7 +560,38 @@ The MVP is complete when:
   - [x] E2E test: create 2 lists, add item to list A, move to list B, verify
   - [ ] Optimistic UI update with rollback on error (deferred - works well as-is)
   - [ ] Tool update: Add grocery.move_item tool with validation (Phase 4 - AI Integration)
-- [ ] **UI/UX Polish**
+- [x] **Grocery List Redesign** ✅ (Completed 2025-12-29)
+  - [x] Recipe Source Tracking
+    - [x] Database migration: Add source_recipe_id and prep_state columns
+    - [x] Foreign key constraint with ON DELETE SET NULL
+    - [x] Index on source_recipe_id for query performance
+  - [x] Enhanced API Endpoints
+    - [x] GET list: JOIN with recipes table to return recipe names
+    - [x] PATCH item: Expand to edit quantity, unit, display_name
+    - [x] DELETE item: New endpoint to remove items
+    - [x] pushIngredients: Store source_recipe_id and prep_state
+  - [x] UI Redesign
+    - [x] Larger checkboxes (w-7 h-7) for mobile-friendly tapping
+    - [x] "quantity unit name" display format
+    - [x] Clickable "from [Recipe Name]" links in orange
+    - [x] Strikethrough when checked
+    - [x] Pencil icon edit button per item
+  - [x] Edit Modal
+    - [x] Edit name, quantity, unit
+    - [x] Move to different list dropdown
+    - [x] View source recipe (read-only with link)
+    - [x] Delete button with confirmation
+    - [x] Save/Cancel with loading states
+  - [x] Recipe Integration
+    - [x] Pass source_recipe_id when pushing from recipes
+    - [x] Support separate line items from different recipes
+- [x] **UI/UX Polish** ✅ (Completed 2025-12-29)
+  - [x] Bottom nav: All icons orange, selected has faint background
+  - [x] Recipe page: "Meal Brain" branding instead of household name
+  - [x] Meal type tracking with filters
+  - [x] Second grocery list in seed data
+  - [x] Test coverage for meal_type CRUD (5 new unit tests)
+- [ ] **Future Polish Items**
   - [ ] Mobile responsiveness testing
   - [ ] Loading states
   - [ ] Error handling improvements

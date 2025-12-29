@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { ArrowLeft, Search } from 'lucide-react';
 
@@ -18,6 +18,7 @@ const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 
 export default function AddMealPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<'select-recipe' | 'select-details'>('select-recipe');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
@@ -34,6 +35,18 @@ export default function AddMealPage() {
   useEffect(() => {
     fetchRecipes();
   }, []);
+
+  // Check for recipeId in query params and auto-select
+  useEffect(() => {
+    const recipeId = searchParams.get('recipeId');
+    if (recipeId && recipes.length > 0) {
+      const recipe = recipes.find(r => r.id === recipeId);
+      if (recipe) {
+        setSelectedRecipe(recipe);
+        setStep('select-details');
+      }
+    }
+  }, [searchParams, recipes]);
 
   useEffect(() => {
     // Filter recipes by search

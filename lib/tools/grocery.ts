@@ -61,7 +61,7 @@ export const PushIngredientsSchema = z.object({
   ingredients: z
     .array(
       z.object({
-        ingredient_id: z.string(),
+        ingredient_id: z.string().nullable(),
         display_name: z.string().min(1, 'Display name is required'),
         quantity: z.number().positive('Quantity must be positive'),
         unit: z.string().min(1, 'Unit is required'),
@@ -218,6 +218,8 @@ export async function pushIngredients(
             quantity: ingredient.quantity,
             unit: ingredient.unit,
             checked: false,
+            source_recipe_id: ingredient.source_recipe_id || null,
+            prep_state: ingredient.prep_state || null,
           });
 
         if (insertError) {
@@ -627,6 +629,10 @@ export async function getList(
       unit: string;
       checked: boolean;
       ingredient_id: string | null;
+      source_recipe_id: string | null;
+      prep_state: string | null;
+      recipes: { id: string; title: string } | null;
+      ingredients: { category: string } | null;
     }>;
   }>
 > {
@@ -652,10 +658,10 @@ export async function getList(
       };
     }
 
-    // Fetch all items in the list
+    // Fetch all items in the list with recipe and ingredient category information
     const { data: items, error: itemsError } = await supabase
       .from('grocery_items')
-      .select('id, display_name, quantity, unit, checked, ingredient_id')
+      .select('id, display_name, quantity, unit, checked, ingredient_id, source_recipe_id, prep_state, recipes:source_recipe_id(id, title), ingredients:ingredient_id(category)')
       .eq('grocery_list_id', validated.grocery_list_id)
       .order('created_at', { ascending: true });
 
@@ -675,7 +681,11 @@ export async function getList(
         id: list.id,
         name: list.name,
         created_at: list.created_at,
-        items: items || [],
+        items: (items || []).map((item: any) => ({
+          ...item,
+          recipes: Array.isArray(item.recipes) ? item.recipes[0] || null : item.recipes,
+          ingredients: Array.isArray(item.ingredients) ? item.ingredients[0] || null : item.ingredients,
+        })),
       },
     };
   } catch (error) {

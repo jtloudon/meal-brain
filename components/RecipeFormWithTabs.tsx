@@ -24,6 +24,7 @@ interface RecipeFormProps {
     servingSize: string;
     prepTime: string;
     cookTime: string;
+    mealType: string | null;
   };
   onSubmit: (data: {
     title: string;
@@ -37,6 +38,7 @@ interface RecipeFormProps {
     servingSize: string;
     prepTime: string;
     cookTime: string;
+    mealType: string | null;
   }) => Promise<void>;
 }
 
@@ -66,6 +68,7 @@ export default function RecipeFormWithTabs({
   const [servingSize, setServingSize] = useState(initialData?.servingSize || '');
   const [prepTime, setPrepTime] = useState(initialData?.prepTime || '');
   const [cookTime, setCookTime] = useState(initialData?.cookTime || '');
+  const [mealType, setMealType] = useState<string>(initialData?.mealType || '');
 
   // Get household ID for photo uploads
   useEffect(() => {
@@ -123,6 +126,7 @@ export default function RecipeFormWithTabs({
         servingSize: servingSize.trim(),
         prepTime: prepTime.trim(),
         cookTime: cookTime.trim(),
+        mealType: mealType || null,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save recipe');
@@ -421,6 +425,37 @@ export default function RecipeFormWithTabs({
                   backgroundColor: 'transparent'
                 }}
               />
+            </div>
+
+            {/* Meal Type */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Meal type</span>
+              <select
+                value={mealType}
+                onChange={(e) => setMealType(e.target.value)}
+                style={{
+                  textAlign: 'right',
+                  fontSize: '17px',
+                  flex: 1,
+                  marginLeft: '16px',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent',
+                  color: mealType ? '#111827' : '#9ca3af'
+                }}
+              >
+                <option value="">Select...</option>
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+                <option value="snack">Snack</option>
+              </select>
             </div>
 
             {/* Rating */}

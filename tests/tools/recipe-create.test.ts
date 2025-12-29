@@ -250,4 +250,92 @@ describe('Tool: recipe.create', () => {
       await supabase.from('recipes').delete().eq('id', result.data.recipe_id);
     });
   });
+
+  describe('Test Case 6: Create recipe with meal_type', () => {
+    it('should create recipe with meal_type and store in database', async () => {
+      const input = {
+        title: 'Fluffy Pancakes',
+        ingredients: [
+          { name: 'flour', quantity: 2, unit: 'cup' as const },
+          { name: 'eggs', quantity: 2, unit: 'whole' as const },
+        ],
+        instructions: 'Mix ingredients and cook on griddle.',
+        tags: ['breakfast', 'quick'],
+        rating: 5,
+        meal_type: 'breakfast' as const,
+      };
+
+      const result = await recipe.create.execute(input, {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      });
+
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+
+      expect(result.data.recipe_id).toBeDefined();
+
+      // Verify meal_type stored correctly
+      const { data: recipeData } = await supabase
+        .from('recipes')
+        .select('meal_type')
+        .eq('id', result.data.recipe_id)
+        .single();
+
+      expect(recipeData?.meal_type).toBe('breakfast');
+
+      // Clean up
+      await supabase.from('recipes').delete().eq('id', result.data.recipe_id);
+    });
+
+    it('should allow null meal_type (optional field)', async () => {
+      const input = {
+        title: 'Generic Recipe',
+        ingredients: [
+          { name: 'salt', quantity: 1, unit: 'tsp' as const },
+        ],
+      };
+
+      const result = await recipe.create.execute(input, {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      });
+
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+
+      // Verify meal_type is null when not provided
+      const { data: recipeData } = await supabase
+        .from('recipes')
+        .select('meal_type')
+        .eq('id', result.data.recipe_id)
+        .single();
+
+      expect(recipeData?.meal_type).toBeNull();
+
+      // Clean up
+      await supabase.from('recipes').delete().eq('id', result.data.recipe_id);
+    });
+
+    it('should reject invalid meal_type values', async () => {
+      const input = {
+        title: 'Test Recipe',
+        ingredients: [
+          { name: 'test', quantity: 1, unit: 'cup' as const },
+        ],
+        meal_type: 'midnight-snack' as any, // Invalid meal type
+      };
+
+      const result = await recipe.create.execute(input, {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      });
+
+      expect(result.success).toBe(false);
+      if (result.success) return;
+
+      expect(result.error.type).toBe('VALIDATION_ERROR');
+      expect(result.error.field).toBe('meal_type');
+    });
+  });
 });

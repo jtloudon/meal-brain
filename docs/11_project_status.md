@@ -292,23 +292,92 @@ Specs are strong but not yet exercised in code.
   - ✅ E2E test passing (action-buttons.spec.ts)
   - ✅ TDD workflow: Red → Green → Refactor
 
-**In Progress (Phase 3 - UI Polish 2025-12-29)**:
-- 🔄 Bottom navigation refinement
-  - ✅ Removed text labels (icon-only for cleaner mobile UX)
-  - ✅ Increased icon size (20px → 24px)
-  - ✅ Added aria-labels for accessibility
-- 🔄 Submit button visibility fix
-  - **Issue**: Button hidden behind fixed nav bar with 7+ ingredients
-  - **Root cause**: Main scroll container padding insufficient (pb-14 = 56px)
-  - **Attempted fixes**: Form padding (pb-72), fixed positioning, portals
-  - **Current state**: Testing main container padding (pb-40 = 160px)
-  - **Test coverage**: Added E2E test for button accessibility with many ingredients
-  - **Status**: IN PROGRESS - Requires manual testing
+**Completed (Phase 3 - Grocery List Redesign ✅ 2025-12-29)**:
+- ✅ Recipe source tracking for grocery items
+  - ✅ Database migration: Added source_recipe_id and prep_state columns to grocery_items
+  - ✅ Foreign key to recipes table with ON DELETE SET NULL
+  - ✅ Index created on source_recipe_id for query performance
+- ✅ Enhanced API endpoints
+  - ✅ GET list: Now JOINs with recipes table to return recipe names
+  - ✅ PATCH item: Expanded to edit quantity, unit, display_name, and list
+  - ✅ DELETE item: New endpoint to delete grocery items
+  - ✅ pushIngredients: Now stores source_recipe_id and prep_state
+- ✅ Redesigned grocery list UI
+  - ✅ Larger checkboxes (w-7 h-7) for mobile-friendly tapping
+  - ✅ Display format: "quantity unit name" (e.g., "1.5 lb chicken breast")
+  - ✅ Clickable "from [Recipe Name]" links in orange color
+  - ✅ Strikethrough styling when items checked
+  - ✅ Pencil icon edit button per item
+- ✅ Edit modal with full CRUD
+  - ✅ Edit item name, quantity, and unit
+  - ✅ Move item to different list via dropdown
+  - ✅ View source recipe (read-only with clickable link)
+  - ✅ Delete item with confirmation
+  - ✅ Save/Cancel buttons with loading states
+- ✅ Recipe integration
+  - ✅ When pushing ingredients from recipes, source_recipe_id is tracked
+  - ✅ Separate line items for same ingredient from different recipes
+- ✅ Updated canonical plan and documentation
+  - ✅ Data models updated with new grocery_items schema
+  - ✅ Implementation plan updated with completion status
 
-**Next Steps (Phase 3 - Polish)**:
-1. **UI/UX Polish**
-   - ✅ Bottom nav icon-only design
-   - 🔄 Submit button positioning (in progress)
+**Completed (Phase 3 - UI Polish 2025-12-29)**:
+- ✅ Bottom navigation refinement
+  - ✅ All icons orange by default (#f97316)
+  - ✅ Selected tab has faint orange background (10% opacity)
+  - ✅ Removed text labels (icon-only for cleaner mobile UX)
+  - ✅ Increased icon size for better visibility
+  - ✅ Added aria-labels for accessibility
+- ✅ Recipe page header
+  - ✅ Replaced "Demo Household" with "🍳 Meal Brain"
+  - ✅ Clean, branded header design
+- ✅ Meal type tracking
+  - ✅ Database migration: Added meal_type column to recipes
+  - ✅ Zod schemas updated to allow null values
+  - ✅ UI: Meal type selector in recipe forms (breakfast, lunch, dinner, snack)
+  - ✅ Pill filters on recipes page by meal type
+  - ✅ Test coverage: 5 new unit tests for meal_type CRUD
+- ✅ Seed data enhancements
+  - ✅ Second grocery list added: "Pantry Staples"
+  - ✅ Recipes include meal_type values
+
+**Completed (Phase 3 - Grocery List UX Overhaul ✅ 2025-12-29)**:
+- ✅ MealBrain branding
+  - ✅ "MealBrain" as single word with larger font (24px, bold 700)
+  - ✅ Light orange pill background (#fff7ed) for visual distinction
+  - ✅ Applied across grocery and recipe pages
+- ✅ Grocery list page redesign
+  - ✅ Clickable list name with dropdown arrow (replaces always-visible dropdown)
+  - ✅ List selector modal (mobile-friendly)
+  - ✅ "Add Item" and "New List" as orange text buttons in header
+  - ✅ Inline add item form (shows below button, not modal)
+  - ✅ Form layout: quantity/unit on top row, item name on second row
+  - ✅ Orange "Add" button (matches brand)
+- ✅ New List page
+  - ✅ Full-page view at /groceries/new
+  - ✅ Matches edit item UX pattern
+  - ✅ Cancel/Create header buttons
+- ✅ Edit item enhancements
+  - ✅ Added quantity and unit fields
+  - ✅ Added list selector (move items between lists)
+  - ✅ Mobile-friendly delete confirmation modal (no browser confirm dialog)
+- ✅ Visual improvements
+  - ✅ Better spacing between items (14px padding, accommodates recipe sources)
+  - ✅ Improved alignment (checkbox, text, pencil icon)
+  - ✅ Recipe source links visible and styled
+  - ✅ Removed horizontal borders between items
+  - ✅ 80px bottom padding (prevents nav bar overlap on long lists)
+- ✅ Bug fixes
+  - ✅ Push ingredients error fixed (prep_state null handling)
+  - ✅ Proper spacing with recipe source links
+
+**Next Steps (Phase 3 - Settings & Polish)**:
+1. **Settings Page (Full Implementation)**
+   - User preferences (household context, dietary constraints, AI style, planning preferences, AI learning)
+   - Shopping list category management
+   - Meal planner settings (week start day)
+   - About/Help section
+2. **Remaining UI/UX Polish**
    - Mobile responsiveness testing
    - Loading states
    - Error handling improvements

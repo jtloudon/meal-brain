@@ -14,6 +14,7 @@ interface Recipe {
   notes?: string | null;
   instructions?: string | null;
   image_url?: string | null;
+  meal_type?: string | null;
   recipe_ingredients?: Array<{ display_name: string }>;
 }
 
@@ -24,10 +25,14 @@ export default function RecipesPage() {
   const [search, setSearch] = useState('');
   const [minRating, setMinRating] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [showSearch, setShowSearch] = useState(false);
+  const [householdName, setHouseholdName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     fetchRecipes();
-  }, [search, minRating]);
+  }, [search, minRating, selectedCategory]);
 
   const fetchRecipes = async () => {
     try {
@@ -49,10 +54,10 @@ export default function RecipesPage() {
 
       let recipes = data.recipes || [];
 
-      // Client-side filtering (search text + rating)
+      // Client-side filtering (search text + rating + category)
       // Note: We fetch all recipes and filter client-side for simplicity
       // and to enable case-insensitive search across all content
-      if (search || minRating !== null) {
+      if (search || minRating !== null || selectedCategory !== 'All') {
         recipes = recipes.filter((recipe: Recipe) => {
           // Search filter
           let matchesSearch = true;
@@ -77,7 +82,13 @@ export default function RecipesPage() {
             matchesRating = recipe.rating !== null && recipe.rating >= minRating;
           }
 
-          return matchesSearch && matchesRating;
+          // Category filter (meal type)
+          let matchesCategory = true;
+          if (selectedCategory !== 'All') {
+            matchesCategory = recipe.meal_type?.toLowerCase() === selectedCategory.toLowerCase();
+          }
+
+          return matchesSearch && matchesRating && matchesCategory;
         });
       }
 
@@ -107,48 +118,121 @@ export default function RecipesPage() {
     );
   };
 
+  // Fixed meal type categories
+  const categories = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snack'];
+
   return (
     <AuthenticatedLayout
-      title="Recipes"
+      title={
+        <span style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          color: '#f97316',
+          backgroundColor: '#fff7ed',
+          padding: '4px 12px',
+          borderRadius: '8px'
+        }}>
+          MealBrain
+        </span>
+      }
       action={
-        <button
-          onClick={() => router.push('/recipes/new')}
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-        >
-          <Plus size={20} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            onClick={() => setShowSearch(!showSearch)}
+            style={{
+              padding: '8px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Search size={22} style={{ color: '#f97316' }} />
+          </button>
+          <button
+            onClick={() => router.push('/recipes/new')}
+            style={{
+              padding: '8px 12px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Plus size={24} style={{ color: '#f97316' }} />
+          </button>
+        </div>
       }
     >
-      <div className="px-4 py-4">
-        {/* Search Bar */}
-        <div className="relative mb-4">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Search recipes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      <div style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
+        {/* Search Bar - Collapsible */}
+        {showSearch && (
+          <div style={{ position: 'relative', marginBottom: '16px' }}>
+            <Search
+              size={18}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9ca3af'
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Search recipes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: '100%',
+                paddingLeft: '40px',
+                paddingRight: '16px',
+                paddingTop: '10px',
+                paddingBottom: '10px',
+                backgroundColor: '#f3f4f6',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
+              autoFocus
+            />
+          </div>
+        )}
 
-        {/* Rating Filter */}
-        <div className="mb-4">
-          <select
-            value={minRating ?? ''}
-            onChange={(e) => setMinRating(e.target.value ? parseInt(e.target.value) : null)}
-            className="w-full px-3 py-2 bg-gray-100 border-none rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All ratings</option>
-            <option value="5">⭐⭐⭐⭐⭐ 5 stars</option>
-            <option value="4">⭐⭐⭐⭐ 4+ stars</option>
-            <option value="3">⭐⭐⭐ 3+ stars</option>
-            <option value="2">⭐⭐ 2+ stars</option>
-            <option value="1">⭐ 1+ stars</option>
-          </select>
+        {/* Category Filter Pills */}
+        <div style={{
+          display: 'flex',
+          gap: '6px',
+          marginBottom: '16px',
+          justifyContent: 'space-between'
+        }}>
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '16px',
+                border: 'none',
+                backgroundColor: selectedCategory === category ? '#f97316' : '#f3f4f6',
+                color: selectedCategory === category ? 'white' : '#6b7280',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                flex: 1,
+                minWidth: 0
+              }}
+            >
+              {category}
+            </button>
+          ))}
         </div>
 
         {/* Loading State */}
@@ -206,38 +290,87 @@ export default function RecipesPage() {
 
         {/* Recipe List */}
         {!loading && !error && recipes.length > 0 && (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}
                 onClick={() => router.push(`/recipes/${recipe.id}`)}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer active:bg-gray-50"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  padding: '12px'
+                }}
               >
-                {/* Recipe Image */}
-                {recipe.image_url && (
-                  <div className="w-full h-32 bg-gray-100">
+                {/* Recipe Image - Square thumbnail on left */}
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  flexShrink: 0,
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  backgroundColor: '#f3f4f6'
+                }}>
+                  {recipe.image_url ? (
                     <img
                       src={recipe.image_url}
                       alt={recipe.title}
-                      className="w-full h-full object-cover"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
                     />
-                  </div>
-                )}
+                  ) : (
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#9ca3af',
+                      fontSize: '12px'
+                    }}>
+                      No image
+                    </div>
+                  )}
+                </div>
 
-                {/* Recipe Info */}
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      {recipe.title}
-                    </h3>
-                    {renderStars(recipe.rating)}
-                  </div>
+                {/* Recipe Info - Title and tags on right */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{
+                    fontSize: '17px',
+                    fontWeight: '600',
+                    color: '#f97316',
+                    marginBottom: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {recipe.title}
+                  </h3>
                   {recipe.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '6px',
+                      marginTop: '4px'
+                    }}>
                       {recipe.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded"
+                          style={{
+                            fontSize: '12px',
+                            color: '#6b7280',
+                            backgroundColor: '#f3f4f6',
+                            padding: '2px 8px',
+                            borderRadius: '4px'
+                          }}
                         >
                           {tag}
                         </span>

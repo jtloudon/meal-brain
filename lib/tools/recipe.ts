@@ -50,6 +50,7 @@ export const CreateRecipeSchema = z.object({
   serving_size: z.string().optional(),
   prep_time: z.string().optional(),
   cook_time: z.string().optional(),
+  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).nullable().optional(),
 });
 
 export type CreateRecipeInput = z.infer<typeof CreateRecipeSchema>;
@@ -96,6 +97,7 @@ export const UpdateRecipeSchema = z.object({
   serving_size: z.string().optional(),
   prep_time: z.string().optional(),
   cook_time: z.string().optional(),
+  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).nullable().optional(),
 });
 
 export type UpdateRecipeInput = z.infer<typeof UpdateRecipeSchema>;
@@ -158,6 +160,7 @@ export async function createRecipe(
         serving_size: validated.serving_size || null,
         prep_time: validated.prep_time || null,
         cook_time: validated.cook_time || null,
+        meal_type: validated.meal_type || null,
       })
       .select('id')
       .single();
@@ -282,6 +285,7 @@ export async function listRecipes(
       rating: number | null;
       created_at: string;
       image_url: string | null;
+      meal_type: string | null;
     }>;
     total: number;
   }>
@@ -293,7 +297,7 @@ export async function listRecipes(
     // Build query - include ingredients, notes, and instructions for client-side search
     let query = supabase
       .from('recipes')
-      .select('id, title, tags, rating, created_at, image_url, notes, instructions, recipe_ingredients(display_name)', { count: 'exact' })
+      .select('id, title, tags, rating, created_at, image_url, notes, instructions, meal_type, recipe_ingredients(display_name)', { count: 'exact' })
       .eq('household_id', context.householdId)
       .order('created_at', { ascending: false });
 
@@ -425,6 +429,8 @@ export async function updateRecipe(
       updateData.prep_time = validated.prep_time || null;
     if (validated.cook_time !== undefined)
       updateData.cook_time = validated.cook_time || null;
+    if (validated.meal_type !== undefined)
+      updateData.meal_type = validated.meal_type || null;
 
     // Update recipe if there are fields to update
     if (Object.keys(updateData).length > 0) {

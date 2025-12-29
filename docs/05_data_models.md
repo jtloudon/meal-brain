@@ -142,7 +142,7 @@ Multiple lists are allowed per household.
 
 ## GroceryItem
 
-Aggregated grocery items with deterministic quantities.
+Aggregated grocery items with deterministic quantities and source recipe tracking.
 
 ```json
 {
@@ -153,9 +153,18 @@ Aggregated grocery items with deterministic quantities.
   "quantity": 3.25,
   "unit": "cup",
   "checked": false,
+  "source_recipe_id": "uuid | null",
+  "prep_state": "string | null",
   "created_at": "timestamp"
 }
 ```
+
+**Notes**:
+- `source_recipe_id` tracks which recipe the item was pushed from (null for manually added items)
+- Foreign key to recipes table with ON DELETE SET NULL (orphaned items preserved)
+- `prep_state` stores preparation instructions from recipe (e.g., "chopped", "diced")
+- Multiple items from different recipes can have the same ingredient_id but different source_recipe_id
+- UI displays "from [Recipe Name]" as a clickable link when source_recipe_id is present
 
 ---
 

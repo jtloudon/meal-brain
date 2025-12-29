@@ -69,7 +69,7 @@ export async function DELETE(
       const statusCode =
         result.error.type === 'NOT_FOUND'
           ? 404
-          : result.error.type === 'PERMISSION_DENIED'
+          : result.error.type === 'AUTHORIZATION_ERROR'
           ? 403
           : 500;
 

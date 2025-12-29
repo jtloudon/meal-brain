@@ -26,6 +26,7 @@ interface Recipe {
   serving_size: string | null;
   prep_time: string | null;
   cook_time: string | null;
+  meal_type: string | null;
   created_at: string;
   recipe_ingredients: RecipeIngredient[];
 }
@@ -47,6 +48,7 @@ export default function EditRecipePage() {
     servingSize: string;
     prepTime: string;
     cookTime: string;
+    mealType: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -83,6 +85,7 @@ export default function EditRecipePage() {
         servingSize: recipe.serving_size || '',
         prepTime: recipe.prep_time || '',
         cookTime: recipe.cook_time || '',
+        mealType: recipe.meal_type || null,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load recipe');
@@ -103,6 +106,7 @@ export default function EditRecipePage() {
     servingSize: string;
     prepTime: string;
     cookTime: string;
+    mealType: string | null;
   }) => {
     // Parse ingredients from free-form text
     const parsedIngredients = parseIngredientsText(data.ingredientsText);
@@ -132,6 +136,7 @@ export default function EditRecipePage() {
         serving_size: data.servingSize || undefined,
         prep_time: data.prepTime || undefined,
         cook_time: data.cookTime || undefined,
+        meal_type: data.mealType || undefined,
       }),
     });
 

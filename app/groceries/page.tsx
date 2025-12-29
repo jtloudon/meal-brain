@@ -1,9 +1,10 @@
 'use client';
 
+// Updated styling to match reference design
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown } from 'lucide-react';
 
 interface GroceryItem {
   id: string;
@@ -12,6 +13,15 @@ interface GroceryItem {
   unit: string;
   checked: boolean;
   ingredient_id: string | null;
+  source_recipe_id: string | null;
+  prep_state: string | null;
+  recipes?: {
+    id: string;
+    title: string;
+  } | null;
+  ingredients?: {
+    category: string;
+  } | null;
 }
 
 interface GroceryList {
@@ -28,11 +38,23 @@ export default function GroceriesPage() {
   const [loading, setLoading] = useState(true);
   const [showNewListModal, setShowNewListModal] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const [showListSelector, setShowListSelector] = useState(false);
+  const [showInlineAddForm, setShowInlineAddForm] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState('1');
   const [newItemUnit, setNewItemUnit] = useState('whole');
   const [saving, setSaving] = useState(false);
+
+  // Edit view state
+  const [currentView, setCurrentView] = useState<'list' | 'edit'>('list');
+  const [editingItem, setEditingItem] = useState<GroceryItem | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editQuantity, setEditQuantity] = useState('1');
+  const [editUnit, setEditUnit] = useState('whole');
+  const [editListId, setEditListId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Fetch all lists on mount
   useEffect(() => {
@@ -120,6 +142,75 @@ export default function GroceriesPage() {
     }
   };
 
+
+  const handleUpdateItem = async () => {
+    if (!editingItem || !editName.trim()) return;
+
+    try {
+      setSaving(true);
+      const updateData: any = {
+        display_name: editName,
+        quantity: parseFloat(editQuantity),
+        unit: editUnit,
+      };
+
+      // If list changed, add grocery_list_id to update
+      if (editListId && editListId !== selectedListId) {
+        updateData.grocery_list_id = editListId;
+      }
+
+      const res = await fetch(`/api/grocery/items/${editingItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      });
+
+      if (res.ok) {
+        // If list changed, remove from current list
+        if (editListId && editListId !== selectedListId) {
+          setItems((prev) => prev.filter((item) => item.id !== editingItem.id));
+        } else {
+          // Update in place
+          setItems((prev) =>
+            prev.map((item) =>
+              item.id === editingItem.id
+                ? { ...item, display_name: editName, quantity: parseFloat(editQuantity), unit: editUnit }
+                : item
+            )
+          );
+        }
+        setCurrentView('list');
+        setEditingItem(null);
+      }
+    } catch (error) {
+      console.error('Error updating item:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    if (!editingItem) return;
+
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/grocery/items/${editingItem.id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setItems((prev) => prev.filter((item) => item.id !== editingItem.id));
+        setCurrentView('list');
+        setEditingItem(null);
+        setShowDeleteConfirm(false);
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
 
@@ -178,7 +269,20 @@ export default function GroceriesPage() {
 
   if (loading) {
     return (
-      <AuthenticatedLayout title="Groceries">
+      <AuthenticatedLayout
+        title={
+          <span style={{
+            fontSize: '24px',
+            fontWeight: '700',
+            color: '#f97316',
+            backgroundColor: '#fff7ed',
+            padding: '4px 12px',
+            borderRadius: '8px'
+          }}>
+            MealBrain
+          </span>
+        }
+      >
         <div className="p-4">
           <p className="text-gray-500">Loading grocery lists...</p>
         </div>
@@ -189,19 +293,40 @@ export default function GroceriesPage() {
   if (lists.length === 0) {
     return (
       <AuthenticatedLayout
-        title="Groceries"
+        title={
+          <span style={{
+            fontSize: '24px',
+            fontWeight: '700',
+            color: '#f97316',
+            backgroundColor: '#fff7ed',
+            padding: '4px 12px',
+            borderRadius: '8px'
+          }}>
+            MealBrain
+          </span>
+        }
         action={
           <button
-            onClick={() => setShowNewListModal(true)}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            onClick={() => router.push('/groceries/new')}
+            style={{
+              color: '#f97316',
+              fontWeight: 500,
+              background: 'none',
+              border: 'none',
+              fontSize: '16px',
+              cursor: 'pointer'
+            }}
           >
-            <Plus size={20} />
+            New List
           </button>
         }
       >
         <div className="p-4">
           <p className="text-gray-500">No grocery lists yet.</p>
-          <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">
+          <button
+            onClick={() => setShowNewListModal(true)}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+          >
             Create List
           </button>
         </div>
@@ -211,115 +336,391 @@ export default function GroceriesPage() {
 
   return (
     <AuthenticatedLayout
-      title="Groceries"
-      action={
-        <button
-          onClick={() => setShowNewListModal(true)}
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-        >
-          <Plus size={20} />
-        </button>
+      title={
+        <span style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          color: '#f97316',
+          backgroundColor: '#fff7ed',
+          padding: '4px 12px',
+          borderRadius: '8px'
+        }}>
+          MealBrain
+        </span>
       }
-    >
-      <div className="px-4 py-4">
-        {/* List Selector */}
-        <div className="mb-6">
-          <label htmlFor="list-selector" className="block text-sm font-medium text-gray-700 mb-2">
-            Select List
-          </label>
-          <select
-            id="list-selector"
-            value={selectedListId || ''}
-            onChange={(e) => setSelectedListId(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {lists.map((list) => (
-              <option key={list.id} value={list.id}>
-                {list.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Items List */}
-        <div className="space-y-2">
-          {items.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">This list is empty</p>
-          ) : (
-            items.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                {/* Checkbox */}
-                <button
-                  onClick={() => toggleItem(item.id, item.checked)}
-                  className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
-                    item.checked
-                      ? 'bg-green-600 border-green-600'
-                      : 'border-gray-300 hover:border-green-600'
-                  }`}
-                  aria-label={`${item.checked ? 'Uncheck' : 'Check'} ${item.display_name}`}
-                >
-                  {item.checked && <Check className="w-4 h-4 text-white" />}
-                </button>
-
-                {/* Item Details */}
-                <div className="flex-1">
-                  <p
-                    className={`font-medium ${
-                      item.checked ? 'line-through text-gray-400' : 'text-gray-900'
-                    }`}
-                  >
-                    {item.display_name}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {item.quantity} {item.unit}
-                  </p>
-                </div>
-
-                {/* Move to dropdown (only show if multiple lists exist) */}
-                {lists.length > 1 && (
-                  <select
-                    aria-label={`Move ${item.display_name} to list`}
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        moveItem(item.id, e.target.value);
-                      }
-                    }}
-                    className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Move to...</option>
-                    {lists
-                      .filter((list) => list.id !== selectedListId)
-                      .map((list) => (
-                        <option key={list.id} value={list.id}>
-                          {list.name}
-                        </option>
-                      ))}
-                  </select>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-6 flex gap-3">
+      action={
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <button
-            onClick={() => setShowAddItemModal(true)}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            onClick={() => setShowInlineAddForm(!showInlineAddForm)}
+            style={{
+              color: '#f97316',
+              fontWeight: 500,
+              background: 'none',
+              border: 'none',
+              fontSize: '16px',
+              cursor: 'pointer'
+            }}
           >
             Add Item
           </button>
           <button
-            onClick={() => setShowNewListModal(true)}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            onClick={() => router.push('/groceries/new')}
+            style={{
+              color: '#f97316',
+              fontWeight: 500,
+              background: 'none',
+              border: 'none',
+              fontSize: '16px',
+              cursor: 'pointer'
+            }}
           >
             New List
           </button>
         </div>
+      }
+    >
+      <div style={{ padding: '8px 16px 80px 16px' }}>
+        {/* List Selector - Clickable name with arrow */}
+        <button
+          onClick={() => setShowListSelector(true)}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 0',
+            marginBottom: '16px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <span style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
+            {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
+          </span>
+          <ChevronDown size={24} style={{ color: '#9ca3af' }} />
+        </button>
+
+        {/* Inline Add Item Form */}
+        {showInlineAddForm && (
+          <div style={{
+            backgroundColor: '#f9fafb',
+            padding: '16px',
+            borderRadius: '8px',
+            marginBottom: '24px'
+          }}>
+            {/* Quantity and Unit - Top Row */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <input
+                type="number"
+                value={newItemQuantity}
+                onChange={(e) => setNewItemQuantity(e.target.value)}
+                placeholder="Qty"
+                min="0"
+                step="0.01"
+                style={{
+                  width: '80px',
+                  padding: '10px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  outline: 'none'
+                }}
+              />
+              <select
+                value={newItemUnit}
+                onChange={(e) => setNewItemUnit(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: '10px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  outline: 'none'
+                }}
+              >
+                <option value="whole">whole</option>
+                <option value="lb">lb</option>
+                <option value="oz">oz</option>
+                <option value="cup">cup</option>
+                <option value="tbsp">tbsp</option>
+                <option value="tsp">tsp</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="l">l</option>
+                <option value="can">can</option>
+                <option value="package">package</option>
+              </select>
+            </div>
+
+            {/* Item Name - Second Row */}
+            <div style={{ marginBottom: '12px' }}>
+              <input
+                type="text"
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                placeholder="Item name (e.g., Milk)"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => {
+                  setShowInlineAddForm(false);
+                  setNewItemName('');
+                  setNewItemQuantity('1');
+                  setNewItemUnit('whole');
+                }}
+                disabled={saving}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  backgroundColor: '#e5e7eb',
+                  color: '#374151',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  opacity: saving ? 0.5 : 1
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await handleAddItem();
+                  setShowInlineAddForm(false);
+                }}
+                disabled={saving || !newItemName.trim()}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  backgroundColor: (saving || !newItemName.trim()) ? '#e5e7eb' : '#f97316',
+                  color: (saving || !newItemName.trim()) ? '#9ca3af' : 'white',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: (saving || !newItemName.trim()) ? 'not-allowed' : 'pointer',
+                  opacity: (saving || !newItemName.trim()) ? 0.5 : 1
+                }}
+              >
+                {saving ? 'Adding...' : 'Add'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Items List - Grouped by Category */}
+        <div className="space-y-4">
+          {items.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">This list is empty</p>
+          ) : (
+            (() => {
+              // Group items by category
+              const grouped = items.reduce((acc, item) => {
+                const category = item.ingredients?.category || 'Other';
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(item);
+                return acc;
+              }, {} as Record<string, GroceryItem[]>);
+
+              // Render each category group
+              return Object.entries(grouped).map(([category, categoryItems], index) => (
+                <div key={category} className={index > 0 ? 'mt-6' : ''}>
+                  {/* Category Header */}
+                  <h3 style={{ fontSize: '17px', fontWeight: 'bold', color: '#f97316', marginBottom: '8px' }}>
+                    {category}
+                  </h3>
+
+                  {/* Items in this category */}
+                  <div className="space-y-0">
+                    {categoryItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex"
+                        style={{ gap: '12px', alignItems: 'flex-start', paddingTop: '14px', paddingBottom: '14px' }}
+                      >
+                        {/* Checkbox */}
+                        <button
+                          onClick={() => toggleItem(item.id, item.checked)}
+                          style={{
+                            flexShrink: 0,
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '3px',
+                            border: item.checked ? 'none' : '1px solid #d1d5db',
+                            backgroundColor: item.checked ? '#f97316' : 'transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            marginTop: '1px'
+                          }}
+                          aria-label={`${item.checked ? 'Uncheck' : 'Check'} ${item.display_name}`}
+                        >
+                          {item.checked && <Check style={{ width: '14px', height: '14px', color: 'white', strokeWidth: 3 }} />}
+                        </button>
+
+                        {/* Item Details */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p
+                            style={{
+                              fontSize: '15px',
+                              lineHeight: '1.4',
+                              textDecoration: item.checked ? 'line-through' : 'none',
+                              color: item.checked ? '#9ca3af' : '#111827',
+                              marginBottom: item.recipes ? '6px' : '0',
+                              margin: 0
+                            }}
+                          >
+                            {item.quantity} {item.unit} {item.display_name}
+                          </p>
+
+                          {/* Recipe source link */}
+                          {item.recipes && (
+                            <a
+                              href={`/recipes/${item.recipes.id}`}
+                              style={{
+                                fontSize: '13px',
+                                color: '#f97316',
+                                display: 'block',
+                                textDecoration: 'none',
+                                lineHeight: '1.2'
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              onMouseEnter={(e) => e.currentTarget.style.color = '#d97316'}
+                              onMouseLeave={(e) => e.currentTarget.style.color = '#f97316'}
+                            >
+                              {item.recipes.title}
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Edit button */}
+                        <button
+                          onClick={() => {
+                            setEditingItem(item);
+                            setEditName(item.display_name);
+                            setEditCategory(item.ingredients?.category || 'Other');
+                            setEditQuantity(item.quantity.toString());
+                            setEditUnit(item.unit);
+                            setEditListId(selectedListId);
+                            setCurrentView('edit');
+                          }}
+                          style={{
+                            flexShrink: 0,
+                            color: '#9ca3af',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            paddingRight: '4px',
+                            marginTop: '1px',
+                            transition: 'color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.color = '#6b7280'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
+                          aria-label={`Edit ${item.display_name}`}
+                        >
+                          <Pencil style={{ width: '20px', height: '20px' }} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ));
+            })()
+          )}
+        </div>
+
+        {/* List Selector Modal */}
+        {showListSelector && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '0 16px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '100%'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: '16px'
+              }}>
+                Select Grocery List
+              </h3>
+              <div style={{ marginBottom: '20px' }}>
+                {lists.map((list) => (
+                  <button
+                    key={list.id}
+                    onClick={() => {
+                      setSelectedListId(list.id);
+                      setShowListSelector(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      backgroundColor: list.id === selectedListId ? '#f0f9ff' : 'white',
+                      border: list.id === selectedListId ? '2px solid #4A90E2' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      color: '#111827',
+                      cursor: 'pointer',
+                      marginBottom: '8px',
+                      textAlign: 'left',
+                      fontWeight: list.id === selectedListId ? '600' : '400'
+                    }}
+                  >
+                    {list.name}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowListSelector(false)}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  backgroundColor: '#e5e7eb',
+                  color: '#374151',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* New List Modal */}
         {showNewListModal && (
@@ -426,6 +827,271 @@ export default function GroceriesPage() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Edit View - Full Screen */}
+        {currentView === 'edit' && editingItem && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'white', zIndex: 50 }}>
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '16px',
+              borderBottom: '1px solid #e5e7eb'
+            }}>
+              <button
+                onClick={() => setCurrentView('list')}
+                disabled={saving}
+                style={{
+                  color: '#f97316',
+                  fontWeight: 500,
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
+                Edit shopping list item
+              </h3>
+              <button
+                onClick={handleUpdateItem}
+                disabled={saving || !editName.trim()}
+                style={{
+                  color: saving || !editName.trim() ? '#d1d5db' : '#f97316',
+                  fontWeight: 500,
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '16px',
+                  cursor: saving || !editName.trim() ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+
+            {/* Content */}
+            <div style={{ padding: '16px' }}>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Item name"
+                style={{
+                  width: '100%',
+                  fontSize: '16px',
+                  padding: '12px 0',
+                  border: 'none',
+                  borderBottom: '1px solid #e5e7eb',
+                  outline: 'none'
+                }}
+              />
+
+              {/* Quantity and Unit */}
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                marginTop: '16px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid #e5e7eb'
+              }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '8px' }}>
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={editQuantity}
+                    onChange={(e) => setEditQuantity(e.target.value)}
+                    min="0"
+                    step="0.01"
+                    style={{
+                      width: '100%',
+                      fontSize: '16px',
+                      padding: '8px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '8px' }}>
+                    Unit
+                  </label>
+                  <select
+                    value={editUnit}
+                    onChange={(e) => setEditUnit(e.target.value)}
+                    style={{
+                      width: '100%',
+                      fontSize: '16px',
+                      padding: '8px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value="whole">whole</option>
+                    <option value="lb">lb</option>
+                    <option value="oz">oz</option>
+                    <option value="cup">cup</option>
+                    <option value="tbsp">tbsp</option>
+                    <option value="tsp">tsp</option>
+                    <option value="g">g</option>
+                    <option value="kg">kg</option>
+                    <option value="ml">ml</option>
+                    <option value="l">l</option>
+                    <option value="can">can</option>
+                    <option value="package">package</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* List Selector */}
+              <div style={{
+                padding: '12px 0',
+                borderBottom: '1px solid #e5e7eb',
+                marginTop: '16px'
+              }}>
+                <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '8px' }}>
+                  List
+                </label>
+                <select
+                  value={editListId || ''}
+                  onChange={(e) => setEditListId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    fontSize: '16px',
+                    padding: '8px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    outline: 'none'
+                  }}
+                >
+                  {lists.map((list) => (
+                    <option key={list.id} value={list.id}>
+                      {list.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '12px 0',
+                borderBottom: '1px solid #e5e7eb',
+                marginTop: '16px'
+              }}>
+                <span style={{ color: '#9ca3af', fontSize: '16px' }}>Category</span>
+                <span style={{ color: '#111827', fontSize: '16px' }}>{editCategory}</span>
+              </div>
+
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={saving}
+                style={{
+                  marginTop: '32px',
+                  width: '100%',
+                  padding: '12px',
+                  color: '#ef4444',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  borderRadius: '8px',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => !saving && (e.currentTarget.style.backgroundColor = '#fef2f2')}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                Delete item
+              </button>
+            </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 100,
+                padding: '0 16px'
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  maxWidth: '400px',
+                  width: '100%'
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#111827',
+                    marginBottom: '8px'
+                  }}>
+                    Delete Item?
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    marginBottom: '24px'
+                  }}>
+                    Are you sure you want to delete "{editingItem?.display_name}"? This action cannot be undone.
+                  </p>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={saving}
+                      style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        backgroundColor: '#e5e7eb',
+                        color: '#374151',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        opacity: saving ? 0.5 : 1
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteItem}
+                      disabled={saving}
+                      style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        backgroundColor: '#dc2626',
+                        color: 'white',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        opacity: saving ? 0.5 : 1
+                      }}
+                    >
+                      {saving ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

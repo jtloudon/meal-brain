@@ -53,7 +53,7 @@ INSERT INTO ingredients (id, canonical_name) VALUES
   ('a0000000-0000-0000-0000-000000000010', 'black pepper');
 
 -- Demo Recipes
-INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions, image_url, created_at) VALUES
+INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions, image_url, source, serving_size, prep_time, cook_time, meal_type, created_at) VALUES
   ('b0000000-0000-4000-8000-000000000001',
    '00000000-0000-4000-8000-000000000001',
    'Chicken Curry',
@@ -62,6 +62,11 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions,
    'Family favorite! Double the sauce.',
    E'1. Heat oil in large pan over medium-high heat\n2. Cook diced chicken until browned (5-7 min)\n3. Add diced onion and minced garlic, cook until softened (3 min)\n4. Stir in curry powder, cook 1 min until fragrant\n5. Add coconut milk, bring to simmer\n6. Reduce heat and simmer 15-20 min until chicken is cooked through\n7. Meanwhile, cook rice according to package directions\n8. Serve curry over rice',
    'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&q=80',
+   'from claude code',
+   '5',
+   '10 mins',
+   '30 mins',
+   'dinner',
    NOW()),
   ('b0000000-0000-4000-8000-000000000002',
    '00000000-0000-4000-8000-000000000001',
@@ -71,6 +76,11 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions,
    '20 minute meal',
    E'1. Brown ground beef in skillet over medium-high heat (8-10 min)\n2. Drain excess fat\n3. Season with taco seasoning and a splash of water\n4. Simmer 5 min until thickened\n5. Warm taco shells according to package\n6. Assemble: shells, beef, lettuce, tomato, cheese',
    'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=800&q=80',
+   'Family recipe',
+   'Serves 4',
+   '5 mins',
+   '15 mins',
+   'dinner',
    NOW()),
   ('b0000000-0000-4000-8000-000000000003',
    '00000000-0000-4000-8000-000000000001',
@@ -79,7 +89,12 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions,
    ARRAY['vegetarian', 'mexican', 'dairy-free'],
    'Great for batch cooking',
    E'1. Heat oil in skillet over medium heat\n2. Sauté diced onion and sliced bell pepper until softened (5-7 min)\n3. Add drained black beans, cumin, and chili powder\n4. Cook until heated through (3-5 min)\n5. Mash beans slightly with fork for better texture\n6. Warm taco shells\n7. Assemble: shells, black bean mixture, lettuce\n8. Top with salsa or hot sauce if desired',
-   NULL,
+   'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80',
+   'Budget Bytes',
+   'Serves 4-6',
+   '10 mins',
+   '20 mins',
+   'lunch',
    NOW());
 
 -- Recipe Ingredients (Chicken Curry)
@@ -113,11 +128,12 @@ INSERT INTO planner_meals (household_id, recipe_id, date, meal_type) VALUES
   ('00000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000002', CURRENT_DATE + INTERVAL '1 day', 'dinner'),
   ('00000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000003', CURRENT_DATE + INTERVAL '2 days', 'dinner');
 
--- Demo Grocery List
+-- Demo Grocery Lists
 INSERT INTO grocery_lists (id, household_id, name, created_at) VALUES
-  ('c0000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000001', 'This Week', NOW());
+  ('c0000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000001', 'This Week', NOW()),
+  ('c0000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'Pantry Staples', NOW());
 
--- Demo Grocery Items (from planner meals)
+-- Demo Grocery Items for "This Week" list
 INSERT INTO grocery_items (grocery_list_id, ingredient_id, display_name, quantity, unit, checked) VALUES
   ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'chicken breast', 1.5, 'lb', false),
   ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002', 'rice', 2, 'cup', false),
@@ -126,3 +142,9 @@ INSERT INTO grocery_items (grocery_list_id, ingredient_id, display_name, quantit
   ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000008', 'taco shells', 16, 'whole', true),
   ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-00000000000c', 'black beans', 2, 'can', false),
   ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000005', 'onion', 2, 'whole', false);
+
+-- Demo Grocery Items for "Pantry Staples" list
+INSERT INTO grocery_items (grocery_list_id, ingredient_id, display_name, quantity, unit, checked) VALUES
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000e', 'olive oil', 1, 'bottle', false),
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000f', 'salt', 1, 'container', false),
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-0000-0000-000000000010', 'black pepper', 1, 'container', false);

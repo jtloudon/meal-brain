@@ -7,7 +7,7 @@ import BottomNav from './BottomNav';
 
 interface AuthenticatedLayoutProps {
   children: React.ReactNode;
-  title: string;
+  title: string | React.ReactNode;
   action?: React.ReactNode;
 }
 
@@ -72,24 +72,17 @@ export default function AuthenticatedLayout({
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 bg-white border-b border-gray-200 z-40">
+      <header className="sticky top-0 bg-white z-40">
         <div className="flex justify-between items-center px-4 py-3">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-            <div className="flex gap-2 items-center text-xs text-gray-600">
-              {user && <span>{user.email}</span>}
-              {household && user && <span>•</span>}
-              {household && <span>{household.name}</span>}
-            </div>
+          <div style={{ flex: 1 }}>
+            {typeof title === 'string' ? (
+              <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+            ) : (
+              title
+            )}
           </div>
           <div className="flex items-center gap-2">
             {action}
-            <button
-              onClick={handleLogout}
-              className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Log out
-            </button>
           </div>
         </div>
       </header>

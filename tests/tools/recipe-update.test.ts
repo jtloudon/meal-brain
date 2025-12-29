@@ -156,4 +156,92 @@ describe('Tool: recipeTools.update', () => {
 
     expect(recipe?.title).toBe('Recipe A');
   });
+
+  it('Test Case 4: Update recipe meal_type', async () => {
+    // Given: Create a recipe with dinner meal_type
+    const createResult = await recipeTools.create.execute(
+      {
+        title: 'Veggie Stir Fry',
+        ingredients: [{ name: 'vegetables', quantity: 2, unit: 'cup' }],
+        meal_type: 'dinner',
+      },
+      {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      }
+    );
+
+    expect(createResult.success).toBe(true);
+    if (!createResult.success) throw new Error('Setup failed');
+
+    const recipeId = createResult.data.recipe_id;
+
+    // When: Update meal_type to lunch
+    const updateResult = await recipeTools.update.execute(
+      {
+        recipe_id: recipeId,
+        meal_type: 'lunch',
+      },
+      {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      }
+    );
+
+    // Then: Update should succeed
+    expect(updateResult.success).toBe(true);
+
+    // Verify meal_type changed
+    const { data: updatedRecipe } = await supabase
+      .from('recipes')
+      .select('meal_type')
+      .eq('id', recipeId)
+      .single();
+
+    expect(updatedRecipe?.meal_type).toBe('lunch');
+  });
+
+  it('Test Case 5: Clear meal_type by setting to null', async () => {
+    // Given: Create a recipe with breakfast meal_type
+    const createResult = await recipeTools.create.execute(
+      {
+        title: 'Morning Oats',
+        ingredients: [{ name: 'oats', quantity: 1, unit: 'cup' }],
+        meal_type: 'breakfast',
+      },
+      {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      }
+    );
+
+    expect(createResult.success).toBe(true);
+    if (!createResult.success) throw new Error('Setup failed');
+
+    const recipeId = createResult.data.recipe_id;
+
+    // When: Update meal_type to null
+    const updateResult = await recipeTools.update.execute(
+      {
+        recipe_id: recipeId,
+        meal_type: null,
+      },
+      {
+        userId: TEST_USER_ID,
+        householdId: TEST_HOUSEHOLD_ID,
+      }
+    );
+
+    // Then: Update should succeed
+    expect(updateResult.success).toBe(true);
+
+    // Verify meal_type is now null
+    const { data: updatedRecipe } = await supabase
+      .from('recipes')
+      .select('meal_type')
+      .eq('id', recipeId)
+      .single();
+
+    expect(updatedRecipe?.meal_type).toBeNull();
+  });
 });
