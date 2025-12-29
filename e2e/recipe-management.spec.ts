@@ -293,8 +293,8 @@ test.describe('Recipe Management', () => {
     await expect(modal).toBeVisible();
 
     // Confirm deletion - click the red "Delete" button in the modal (not Cancel)
-    // Find the modal's Delete button specifically (the red one, not the gray Cancel)
-    await page.locator('button').filter({ hasText: /^Delete$/ }).nth(1).click();
+    // The modal has two buttons: Cancel and Delete. Click Delete.
+    await page.getByRole('button', { name: 'Delete', exact: true }).last().click();
 
     // Wait for delete API call
     await page.waitForTimeout(1000);
@@ -309,17 +309,19 @@ test.describe('Recipe Management', () => {
     // The test recipe should no longer exist in the recipe list
     const recipeCards = page.locator('div.cursor-pointer h3');
     const recipeCount = await recipeCards.count();
-    console.log(`[DELETE TEST] Found ${recipeCount} recipe cards`);
+    console.log(`[DELETE TEST] Found ${recipeCount} recipe cards after deletion`);
 
-    let foundDeletedRecipe = false;
+    const recipeNames: string[] = [];
     for (let i = 0; i < recipeCount; i++) {
       const text = await recipeCards.nth(i).textContent();
-      console.log(`[DELETE TEST] Recipe ${i}: ${text}`);
-      if (text === 'Delete Me Test Recipe') {
-        foundDeletedRecipe = true;
-        console.log(`[DELETE TEST] ERROR: Found deleted recipe still in list!`);
-      }
+      recipeNames.push(text || '');
     }
+    console.log(`[DELETE TEST] All recipes:`, recipeNames);
+    console.log(`[DELETE TEST] Looking for "Delete Me Test Recipe"...`);
+
+    const foundDeletedRecipe = recipeNames.includes('Delete Me Test Recipe');
+    console.log(`[DELETE TEST] Found deleted recipe: ${foundDeletedRecipe}`);
+
     expect(foundDeletedRecipe).toBe(false);
   });
 });
