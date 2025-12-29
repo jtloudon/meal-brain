@@ -256,7 +256,8 @@ test.describe('Recipe Management', () => {
 
   test('should delete a recipe', async ({ page }) => {
     // First, create a test recipe to delete (so we don't delete seed data)
-    await page.click('header button:has-text("Plus")');
+    // Click the first button in header (the + button, which may be icon-only)
+    await page.locator('header button').first().click();
     await page.waitForURL('**/recipes/new');
 
     // Create a recipe called "Delete Me Test Recipe"
