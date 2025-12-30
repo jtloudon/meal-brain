@@ -460,7 +460,7 @@ export default function RecipeDetailPage() {
         {/* Action Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginTop: '24px', marginBottom: '24px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
           <button
-            onClick={() => router.push(`/planner/add?recipeId=${recipe.id}`)}
+            onClick={() => router.push(`/planner?add=true&recipeId=${recipe.id}`)}
             style={{
               width: '100%',
               padding: '14px 16px',

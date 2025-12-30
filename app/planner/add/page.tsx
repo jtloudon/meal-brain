@@ -31,14 +31,22 @@ export default function AddMealPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [date, setDate] = useState(getTodayDate());
   const [mealType, setMealType] = useState<MealType>('dinner');
+  const [servingSize, setServingSize] = useState(4);
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     fetchRecipes();
   }, []);
 
-  // Check for recipeId in query params and auto-select
+  // Check for recipeId and date in query params and auto-select
   useEffect(() => {
     const recipeId = searchParams.get('recipeId');
+    const dateParam = searchParams.get('date');
+
+    if (dateParam) {
+      setDate(dateParam);
+    }
+
     if (recipeId && recipes.length > 0) {
       const recipe = recipes.find(r => r.id === recipeId);
       if (recipe) {
@@ -99,6 +107,8 @@ export default function AddMealPage() {
           recipe_id: selectedRecipe.id,
           date,
           meal_type: mealType,
+          serving_size: servingSize,
+          notes: notes.trim() ? notes : null,
         }),
       });
 
@@ -117,7 +127,18 @@ export default function AddMealPage() {
 
   return (
     <AuthenticatedLayout
-      title={step === 'select-recipe' ? 'Select Recipe' : 'Schedule Meal'}
+      title={
+        <span style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          color: '#f97316',
+          backgroundColor: '#fff7ed',
+          padding: '4px 12px',
+          borderRadius: '8px'
+        }}>
+          MealBrain
+        </span>
+      }
       action={
         <button
           onClick={() => {
@@ -127,9 +148,15 @@ export default function AddMealPage() {
               router.push('/planner');
             }
           }}
-          className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          style={{
+            padding: '8px',
+            color: '#f97316',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
+          }}
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={24} />
         </button>
       }
     >
@@ -230,7 +257,7 @@ export default function AddMealPage() {
             </div>
 
             {/* Meal Type Selector */}
-            <div className="mb-6">
+            <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Meal Type
               </label>
@@ -240,14 +267,19 @@ export default function AddMealPage() {
                     key={type}
                     type="button"
                     onClick={() => {
-                      console.log('Setting meal type to:', type);
                       setMealType(type);
                     }}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                      mealType === type
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    style={{
+                      padding: '12px',
+                      border: mealType === type ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      backgroundColor: mealType === type ? '#fff7ed' : 'white',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      color: '#111827',
+                      textTransform: 'capitalize'
+                    }}
                   >
                     {type}
                     {mealType === type && ' ✓'}
@@ -256,11 +288,61 @@ export default function AddMealPage() {
               </div>
             </div>
 
+            {/* Serving Size */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Serving Size
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setServingSize(Math.max(1, servingSize - 1))}
+                  className="w-10 h-10 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-orange-600 font-semibold text-lg flex items-center justify-center"
+                >
+                  −
+                </button>
+                <div className="flex-1 text-center text-2xl font-semibold text-gray-900">
+                  {servingSize}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setServingSize(servingSize + 1)}
+                  className="w-10 h-10 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-orange-600 font-semibold text-lg flex items-center justify-center"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Notes (Optional)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add any notes about this meal..."
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
               disabled={saving}
-              className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                backgroundColor: saving ? '#d1d5db' : '#f97316',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: saving ? 'not-allowed' : 'pointer'
+              }}
             >
               {saving ? 'Adding...' : 'Add to Planner'}
             </button>

@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PlannedMeal {
   id: string;
   recipe_id: string;
   date: string;
-  meal_type: string;
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  serving_size: number | null;
+  notes: string | null;
   recipe: {
     title: string;
     tags: string[];
@@ -19,29 +21,89 @@ interface PlannedMeal {
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
+const MEAL_COLORS: Record<MealType, string> = {
+  breakfast: '#22c55e', // green
+  lunch: '#3b82f6',     // blue
+  dinner: '#ef4444',    // red
+  snack: '#f59e0b',     // orange
+};
+
+const MEAL_LABELS: Record<MealType, string> = {
+  breakfast: 'Breakfast',
+  lunch: 'Lunch',
+  dinner: 'Dinner',
+  snack: 'Snack',
+};
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function PlannerPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [meals, setMeals] = useState<PlannedMeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [weekStart, setWeekStart] = useState<Date>(getMonday(new Date()));
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<PlannedMeal | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editMealType, setEditMealType] = useState<MealType>('dinner');
+  const [editRecipeId, setEditRecipeId] = useState('');
+  const [editServingSize, setEditServingSize] = useState(4);
+  const [editNotes, setEditNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Recipe search state
+  const [recipes, setRecipes] = useState<any[]>([]);
+  const [recipeSearch, setRecipeSearch] = useState('');
+  const [showRecipePicker, setShowRecipePicker] = useState(false);
 
   useEffect(() => {
     fetchMeals();
-  }, [weekStart]);
+  }, [currentMonth]);
+
+  useEffect(() => {
+    if (showEditModal && !editingMeal) {
+      fetchRecipes();
+    }
+  }, [showEditModal]);
+
+  // Check for add query params and open modal in create mode
+  useEffect(() => {
+    const add = searchParams.get('add');
+    const recipeId = searchParams.get('recipeId');
+    const date = searchParams.get('date');
+
+    if (add === 'true' && recipeId) {
+      fetchRecipes().then(() => {
+        setEditingMeal(null);
+        setEditRecipeId(recipeId);
+        setEditDate(date || formatDate(new Date()));
+        setEditMealType('dinner');
+        setEditServingSize(4);
+        setEditNotes('');
+        setShowEditModal(true);
+      });
+
+      // Clear query params
+      router.replace('/planner', { scroll: false });
+    }
+  }, [searchParams]);
 
   const fetchMeals = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const startDate = formatDate(weekStart);
-      const endDate = formatDate(addDays(weekStart, 6));
+      const startDate = getMonthStart(currentMonth);
+      const endDate = getMonthEnd(currentMonth);
 
       const response = await fetch(
-        `/api/planner?start_date=${startDate}&end_date=${endDate}`
+        `/api/planner?start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}`
       );
 
       if (!response.ok) {
@@ -57,257 +119,874 @@ export default function PlannerPage() {
     }
   };
 
-  const handleRemoveMeal = async (mealId: string) => {
+  const fetchRecipes = async () => {
     try {
-      const response = await fetch(`/api/planner/${mealId}`, {
+      const response = await fetch('/api/recipes');
+      if (response.ok) {
+        const data = await response.json();
+        setRecipes(data.recipes || []);
+      }
+    } catch (error) {
+      console.error('Error fetching recipes:', error);
+    }
+  };
+
+  const handleSaveMeal = async () => {
+    if (!editRecipeId) return;
+
+    try {
+      setSaving(true);
+
+      if (editingMeal) {
+        // Update existing meal
+        const response = await fetch(`/api/planner/${editingMeal.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: editDate,
+            meal_type: editMealType,
+            recipe_id: editRecipeId,
+            serving_size: editServingSize,
+            notes: editNotes.trim() ? editNotes : null,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update meal');
+        }
+      } else {
+        // Create new meal
+        const response = await fetch('/api/planner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipe_id: editRecipeId,
+            date: editDate,
+            meal_type: editMealType,
+            serving_size: editServingSize,
+            notes: editNotes.trim() ? editNotes : null,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to add meal');
+        }
+      }
+
+      // Refresh meals
+      await fetchMeals();
+      setShowEditModal(false);
+      resetEditForm();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save meal');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteMeal = async () => {
+    if (!editingMeal) return;
+
+    try {
+      setSaving(true);
+      const response = await fetch(`/api/planner/${editingMeal.id}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to remove meal');
+        throw new Error('Failed to delete meal');
       }
 
-      // Optimistically update UI
-      setMeals((prevMeals) => prevMeals.filter((m) => m.id !== mealId));
+      setMeals((prev) => prev.filter((m) => m.id !== editingMeal.id));
+      setShowEditModal(false);
+      setShowDeleteConfirm(false);
+      resetEditForm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to remove meal');
-      // Refetch to ensure UI is in sync
-      fetchMeals();
+      setError(err instanceof Error ? err.message : 'Failed to delete meal');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const getMealsForDay = (date: Date): Record<MealType, PlannedMeal[]> => {
+  const openEditModal = (meal: PlannedMeal) => {
+    setEditingMeal(meal);
+    setEditDate(meal.date);
+    setEditMealType(meal.meal_type);
+    setEditRecipeId(meal.recipe_id);
+    setEditServingSize(meal.serving_size || 4);
+    setEditNotes(meal.notes || '');
+    setShowEditModal(true);
+  };
+
+  const openAddModal = (date?: Date) => {
+    setEditingMeal(null);
+    setEditDate(formatDate(date || new Date()));
+    setEditMealType('dinner');
+    setEditRecipeId('');
+    setEditServingSize(4);
+    setEditNotes('');
+    setRecipeSearch('');
+    setShowRecipePicker(false);
+    fetchRecipes();
+    setShowEditModal(true);
+  };
+
+  const resetEditForm = () => {
+    setEditingMeal(null);
+    setEditDate('');
+    setEditMealType('dinner');
+    setEditRecipeId('');
+    setEditServingSize(4);
+    setEditNotes('');
+    setRecipeSearch('');
+    setShowRecipePicker(false);
+  };
+
+  const getMealsForDate = (date: Date): PlannedMeal[] => {
     const dateStr = formatDate(date);
-    const dayMeals = meals.filter((m) => m.date === dateStr);
-
-    return {
-      breakfast: dayMeals.filter((m) => m.meal_type === 'breakfast'),
-      lunch: dayMeals.filter((m) => m.meal_type === 'lunch'),
-      dinner: dayMeals.filter((m) => m.meal_type === 'dinner'),
-      snack: dayMeals.filter((m) => m.meal_type === 'snack'),
-    };
+    return meals.filter((m) => m.date === dateStr);
   };
 
-  const nextWeek = () => {
-    setWeekStart(addDays(weekStart, 7));
+  const goToToday = () => {
+    const today = new Date();
+    setCurrentMonth(today);
+    setSelectedDate(today);
   };
 
-  const prevWeek = () => {
-    setWeekStart(addDays(weekStart, -7));
+  const prevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
 
-  const thisWeek = () => {
-    setWeekStart(getMonday(new Date()));
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
+
+  // Calendar helper functions
+  const getMonthStart = (date: Date): Date => {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  };
+
+  const getMonthEnd = (date: Date): Date => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  };
+
+  const getCalendarDays = (): Date[] => {
+    const start = getMonthStart(currentMonth);
+    const end = getMonthEnd(currentMonth);
+
+    // Get first day of calendar (Sunday before or on month start)
+    const firstDay = new Date(start);
+    firstDay.setDate(firstDay.getDate() - firstDay.getDay());
+
+    // Get last day of calendar (Saturday after or on month end)
+    const lastDay = new Date(end);
+    lastDay.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
+
+    const days: Date[] = [];
+    const current = new Date(firstDay);
+
+    while (current <= lastDay) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+
+    return days;
+  };
+
+  const isToday = (date: Date): boolean => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isSelectedDate = (date: Date): boolean => {
+    return (
+      date.getDate() === selectedDate.getDate() &&
+      date.getMonth() === selectedDate.getMonth() &&
+      date.getFullYear() === selectedDate.getFullYear()
+    );
+  };
+
+  const isCurrentMonth = (date: Date): boolean => {
+    return (
+      date.getMonth() === currentMonth.getMonth() &&
+      date.getFullYear() === currentMonth.getFullYear()
+    );
+  };
+
+  const formatDate = (date: Date): string => {
+    return date.toISOString().split('T')[0];
+  };
+
+  const formatMonthYear = (): string => {
+    return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const formatDateLong = (date: Date): string => {
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  };
+
+  const filteredRecipes = recipes.filter(recipe => {
+    if (!recipeSearch) return true;
+    const search = recipeSearch.toLowerCase();
+    return (
+      recipe.title.toLowerCase().includes(search) ||
+      recipe.tags.some((tag: string) => tag.toLowerCase().includes(search))
+    );
+  });
+
+  const selectedRecipe = recipes.find(r => r.id === editRecipeId);
+  const calendarDays = getCalendarDays();
+  const selectedDayMeals = getMealsForDate(selectedDate);
 
   return (
     <AuthenticatedLayout
-      title="Meal Planner"
-      action={
-        <button
-          onClick={() => router.push('/planner/add')}
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-        >
-          <Plus size={20} />
-        </button>
+      title={
+        <span style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          color: '#f97316',
+          backgroundColor: '#fff7ed',
+          padding: '4px 12px',
+          borderRadius: '8px'
+        }}>
+          MealBrain
+        </span>
       }
+      action={null}
     >
-      <div className="px-4 py-4">
-        {/* Week Navigation */}
-        <div className="flex items-center justify-between mb-4">
+      <div style={{ padding: '16px 16px 80px 16px' }}>
+        {/* Month Navigation */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '16px'
+        }}>
           <button
-            onClick={prevWeek}
-            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+            onClick={prevMonth}
+            style={{
+              padding: '8px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              color: '#f97316'
+            }}
           >
-            ← Prev
+            <ChevronLeft size={24} />
           </button>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900">
-              {formatWeekRange(weekStart)}
-            </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>
+              {formatMonthYear()}
+            </h2>
             <button
-              onClick={thisWeek}
-              className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded"
+              onClick={goToToday}
+              style={{
+                padding: '4px 12px',
+                border: '1px solid #f97316',
+                borderRadius: '6px',
+                backgroundColor: 'white',
+                color: '#f97316',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
             >
               Today
             </button>
           </div>
+
           <button
-            onClick={nextWeek}
-            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+            onClick={nextMonth}
+            style={{
+              padding: '8px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              color: '#f97316'
+            }}
           >
-            Next →
+            <ChevronRight size={24} />
           </button>
         </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-600">{error}</p>
+        {/* Calendar Grid */}
+        <div style={{ marginBottom: '16px' }}>
+          {/* Day names header */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '4px',
+            marginBottom: '4px'
+          }}>
+            {DAY_NAMES.map(day => (
+              <div
+                key={day}
+                style={{
+                  textAlign: 'center',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#6b7280',
+                  padding: '8px 0'
+                }}
+              >
+                {day}
+              </div>
+            ))}
           </div>
-        )}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center py-12">
-            <div className="animate-pulse text-gray-600">Loading meals...</div>
-          </div>
-        )}
-
-        {/* Week View */}
-        {!loading && (
-          <div className="space-y-4">
-            {Array.from({ length: 7 }).map((_, dayIndex) => {
-              const date = addDays(weekStart, dayIndex);
-              const dayMeals = getMealsForDay(date);
-              const isToday = isSameDay(date, new Date());
+          {/* Calendar days */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '4px'
+          }}>
+            {calendarDays.map((date, idx) => {
+              const dayMeals = getMealsForDate(date);
+              const isTodayDate = isToday(date);
+              const isSelected = isSelectedDate(date);
+              const isInCurrentMonth = isCurrentMonth(date);
 
               return (
                 <div
-                  key={dayIndex}
-                  className={`border rounded-lg p-3 ${
-                    isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
-                  }`}
+                  key={idx}
+                  onClick={() => setSelectedDate(date)}
+                  style={{
+                    minHeight: '50px',
+                    padding: '6px 4px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    backgroundColor: isSelected ? '#fff7ed' : (isTodayDate ? '#fed7aa' : 'white'),
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                  }}
                 >
-                  {/* Day Header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <div className="text-sm font-semibold text-gray-900">
-                        {formatDayName(date)}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {formatDateShort(date)}
-                      </div>
-                    </div>
+                  {/* Date number */}
+                  <div style={{
+                    fontSize: '16px',
+                    fontWeight: isSelected ? '700' : '600',
+                    color: isInCurrentMonth ? '#111827' : '#9ca3af',
+                    marginBottom: '4px'
+                  }}>
+                    {date.getDate()}
                   </div>
 
-                  {/* Meals Grid */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {MEAL_TYPES.map((mealType) => (
-                      <div key={mealType} className="space-y-1">
-                        <div className="text-xs font-medium text-gray-500 capitalize">
-                          {mealType}
-                        </div>
-                        {dayMeals[mealType].length === 0 ? (
-                          <div className="text-xs text-gray-400 italic">No meal</div>
-                        ) : (
-                          dayMeals[mealType].map((meal) => (
-                            <div
-                              key={meal.id}
-                              className="bg-white border border-gray-200 rounded p-2 text-xs relative group"
-                            >
-                              {/* Remove button */}
-                              <button
-                                onClick={() => handleRemoveMeal(meal.id)}
-                                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-sm"
-                                aria-label="Remove meal"
-                              >
-                                ×
-                              </button>
-                              <div className="font-medium text-gray-900">
-                                {meal.recipe.title}
-                              </div>
-                              {meal.recipe.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {meal.recipe.tags.slice(0, 2).map((tag) => (
-                                    <span
-                                      key={tag}
-                                      className="text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded"
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
+                  {/* Meal dots */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '2px',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center'
+                  }}>
+                    {dayMeals.map(meal => (
+                      <div
+                        key={meal.id}
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: MEAL_COLORS[meal.meal_type]
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
               );
             })}
           </div>
-        )}
+        </div>
 
-        {/* Empty State */}
-        {!loading && meals.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="text-center max-w-sm">
-              <div className="mb-4 text-gray-400">
-                <svg
-                  className="w-16 h-16 mx-auto"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        {/* Selected Date Meals List */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '12px'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#6b7280' }}>
+              {formatDateLong(selectedDate)}
+            </h3>
+            <button
+              onClick={() => openAddModal(selectedDate)}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#f97316',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Add Meal
+            </button>
+          </div>
+
+          {selectedDayMeals.length === 0 ? (
+            <div style={{
+              padding: '32px 16px',
+              textAlign: 'center',
+              color: '#9ca3af',
+              fontSize: '14px',
+              backgroundColor: '#f9fafb',
+              borderRadius: '8px'
+            }}>
+              No meals planned for this day
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+              {selectedDayMeals.map(meal => (
+                <div
+                  key={meal.id}
+                  onClick={() => openEditModal(meal)}
+                  style={{
+                    padding: '10px 12px',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'center'
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  <div
+                    style={{
+                      width: '4px',
+                      height: '36px',
+                      borderRadius: '2px',
+                      backgroundColor: MEAL_COLORS[meal.meal_type],
+                      flexShrink: 0
+                    }}
                   />
-                </svg>
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                No meals planned yet
-              </h2>
-              <p className="text-sm text-gray-600 mb-6">
-                Start planning your week by adding meals to your calendar
-              </p>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
+                      {MEAL_LABELS[meal.meal_type]}: {meal.recipe.title}
+                    </div>
+                    {meal.serving_size && (
+                      <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                        Serves {meal.serving_size}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div style={{
+          padding: '16px',
+          backgroundColor: '#f9fafb',
+          borderRadius: '8px',
+          display: 'flex',
+          gap: '16px',
+          flexWrap: 'wrap',
+          justifyContent: 'center'
+        }}>
+          {Object.entries(MEAL_COLORS).map(([type, color]) => (
+            <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: color
+                }}
+              />
+              <span style={{ fontSize: '14px', color: '#111827' }}>
+                {MEAL_LABELS[type as MealType]}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Edit/Add Modal */}
+        {showEditModal && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'white', zIndex: 50 }}>
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '16px',
+              borderBottom: '1px solid #e5e7eb'
+            }}>
               <button
-                onClick={() => router.push('/planner/add')}
-                className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={() => {
+                  setShowEditModal(false);
+                  resetEditForm();
+                }}
+                disabled={saving}
+                style={{
+                  color: '#f97316',
+                  fontWeight: 500,
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '17px',
+                  cursor: 'pointer'
+                }}
               >
-                Plan Your First Meal
+                Cancel
+              </button>
+              <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827' }}>
+                {editingMeal ? 'Edit meal' : 'Add meal'}
+              </h3>
+              <button
+                onClick={handleSaveMeal}
+                disabled={saving || !editRecipeId}
+                style={{
+                  color: (saving || !editRecipeId) ? '#d1d5db' : '#f97316',
+                  fontWeight: 500,
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '17px',
+                  cursor: (saving || !editRecipeId) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {saving ? 'Saving...' : 'Save'}
               </button>
             </div>
+
+            {/* Content */}
+            <div style={{ padding: '16px', overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
+              {/* Date */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              {/* Meal Type */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                  Meal
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                  {Object.entries(MEAL_COLORS).map(([type, color]) => (
+                    <button
+                      key={type}
+                      onClick={() => setEditMealType(type as MealType)}
+                      style={{
+                        padding: '12px',
+                        border: editMealType === type ? `2px solid ${color}` : '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        backgroundColor: editMealType === type ? `${color}10` : 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '16px',
+                        color: '#111827'
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          backgroundColor: color
+                        }}
+                      />
+                      {MEAL_LABELS[type as MealType]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recipe */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                  Recipe
+                </label>
+                <div
+                  onClick={() => setShowRecipePicker(!showRecipePicker)}
+                  style={{
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    backgroundColor: 'white',
+                    fontSize: '16px',
+                    color: selectedRecipe ? '#111827' : '#9ca3af'
+                  }}
+                >
+                  {selectedRecipe ? selectedRecipe.title : 'Select a recipe'}
+                </div>
+              </div>
+
+              {/* Recipe Picker Dropdown */}
+              {showRecipePicker && (
+                <div style={{ marginBottom: '16px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div style={{ padding: '12px', borderBottom: '1px solid #e5e7eb' }}>
+                    <input
+                      type="text"
+                      value={recipeSearch}
+                      onChange={(e) => setRecipeSearch(e.target.value)}
+                      placeholder="Search recipes..."
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                    {filteredRecipes.map(recipe => (
+                      <div
+                        key={recipe.id}
+                        onClick={() => {
+                          setEditRecipeId(recipe.id);
+                          setShowRecipePicker(false);
+                          setRecipeSearch('');
+                        }}
+                        style={{
+                          padding: '12px',
+                          borderBottom: '1px solid #f3f4f6',
+                          cursor: 'pointer',
+                          backgroundColor: editRecipeId === recipe.id ? '#f0f9ff' : 'white'
+                        }}
+                      >
+                        <div style={{ fontSize: '16px', color: '#111827', marginBottom: '4px' }}>
+                          {recipe.title}
+                        </div>
+                        {recipe.tags.length > 0 && (
+                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                            {recipe.tags.slice(0, 2).join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Serving Size */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                  Serving size
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <button
+                    onClick={() => setEditServingSize(Math.max(1, editServingSize - 1))}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      backgroundColor: 'white',
+                      fontSize: '20px',
+                      color: '#f97316',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    −
+                  </button>
+                  <div style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    fontSize: '24px',
+                    fontWeight: '600',
+                    color: '#111827'
+                  }}>
+                    {editServingSize}
+                  </div>
+                  <button
+                    onClick={() => setEditServingSize(editServingSize + 1)}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      backgroundColor: 'white',
+                      fontSize: '20px',
+                      color: '#f97316',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                  Notes
+                </label>
+                <textarea
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="Add notes (optional)"
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {/* View Recipe Link */}
+              {selectedRecipe && (
+                <button
+                  onClick={() => router.push(`/recipes/${selectedRecipe.id}`)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginBottom: '16px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    backgroundColor: '#f0f9ff',
+                    color: '#3b82f6',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  View recipe
+                </button>
+              )}
+
+              {/* Delete Button - only show when editing */}
+              {editingMeal && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={saving}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    backgroundColor: '#fef2f2',
+                    color: '#ef4444',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    opacity: saving ? 0.5 : 1
+                  }}
+                >
+                  Delete meal
+                </button>
+              )}
+            </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 100,
+                padding: '0 16px'
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  maxWidth: '400px',
+                  width: '100%'
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#111827',
+                    marginBottom: '8px'
+                  }}>
+                    Delete Meal?
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    marginBottom: '24px'
+                  }}>
+                    Are you sure you want to delete this meal? This action cannot be undone.
+                  </p>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={saving}
+                      style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        backgroundColor: '#e5e7eb',
+                        color: '#374151',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        opacity: saving ? 0.5 : 1
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteMeal}
+                      disabled={saving}
+                      style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        backgroundColor: '#dc2626',
+                        color: 'white',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        opacity: saving ? 0.5 : 1
+                      }}
+                    >
+                      {saving ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
     </AuthenticatedLayout>
   );
-}
-
-// Helper functions
-function getMonday(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.setDate(diff));
-}
-
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}
-
-function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
-
-function formatDayName(date: Date): string {
-  return date.toLocaleDateString('en-US', { weekday: 'long' });
-}
-
-function formatDateShort(date: Date): string {
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function formatWeekRange(startDate: Date): string {
-  const endDate = addDays(startDate, 6);
-  return `${startDate.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })} - ${endDate.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })}`;
-}
-
-function isSameDay(date1: Date, date2: Date): boolean {
-  return formatDate(date1) === formatDate(date2);
 }

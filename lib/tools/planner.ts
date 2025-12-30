@@ -35,6 +35,8 @@ export const AddMealSchema = z.object({
     ),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format - must be YYYY-MM-DD'),
   meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']),
+  serving_size: z.number().int().positive().optional().nullable(),
+  notes: z.string().optional().nullable(),
 });
 
 export type AddMealInput = z.infer<typeof AddMealSchema>;
@@ -47,6 +49,26 @@ export const RemoveMealSchema = z.object({
 });
 
 export type RemoveMealInput = z.infer<typeof RemoveMealSchema>;
+
+/**
+ * Zod schema for updating a planner meal.
+ */
+export const UpdateMealSchema = z.object({
+  planner_meal_id: z.string().uuid('Invalid planner meal ID format'),
+  recipe_id: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      'Invalid recipe ID format'
+    )
+    .optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format - must be YYYY-MM-DD').optional(),
+  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).optional(),
+  serving_size: z.number().int().positive().nullable().optional(),
+  notes: z.string().nullable().optional(),
+});
+
+export type UpdateMealInput = z.infer<typeof UpdateMealSchema>;
 
 /**
  * Zod schema for listing meals in a date range.
@@ -100,6 +122,8 @@ export async function addMeal(
         recipe_id: validated.recipe_id,
         date: validated.date,
         meal_type: validated.meal_type,
+        serving_size: validated.serving_size ?? null,
+        notes: validated.notes ?? null,
       })
       .select('id')
       .single();
@@ -238,6 +262,125 @@ export async function removeMeal(
 }
 
 /**
+ * Updates a planned meal.
+ * Enforces household isolation - only meals from the user's household can be updated.
+ *
+ * @param input - Meal ID and fields to update
+ * @param context - User and household context for RLS
+ * @returns Tool result with success message
+ */
+export async function updateMeal(
+  input: UpdateMealInput,
+  context: ToolContext
+): Promise<ToolResult<{ message: string }>> {
+  try {
+    // Validate input
+    const validated = UpdateMealSchema.parse(input);
+
+    // Check if meal exists and belongs to household
+    const { data: existingMeal, error: fetchError } = await supabase
+      .from('planner_meals')
+      .select('id, household_id, recipe_id')
+      .eq('id', validated.planner_meal_id)
+      .single();
+
+    if (fetchError || !existingMeal) {
+      return {
+        success: false,
+        error: {
+          type: 'NOT_FOUND',
+          message: 'Meal not found',
+        },
+      };
+    }
+
+    // Check permission (household isolation)
+    if (existingMeal.household_id !== context.householdId) {
+      return {
+        success: false,
+        error: {
+          type: 'AUTHORIZATION_ERROR',
+          message: 'You do not have permission to update this meal',
+        },
+      };
+    }
+
+    // If recipe_id is being changed, verify new recipe belongs to household
+    if (validated.recipe_id && validated.recipe_id !== existingMeal.recipe_id) {
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipes')
+        .select('id')
+        .eq('id', validated.recipe_id)
+        .eq('household_id', context.householdId)
+        .single();
+
+      if (recipeError || !recipe) {
+        return {
+          success: false,
+          error: {
+            type: 'NOT_FOUND',
+            message: 'Recipe not found or does not belong to your household',
+          },
+        };
+      }
+    }
+
+    // Build update object (only include fields that were provided)
+    const updateData: any = {};
+    if (validated.recipe_id !== undefined) updateData.recipe_id = validated.recipe_id;
+    if (validated.date !== undefined) updateData.date = validated.date;
+    if (validated.meal_type !== undefined) updateData.meal_type = validated.meal_type;
+    if (validated.serving_size !== undefined) updateData.serving_size = validated.serving_size;
+    if (validated.notes !== undefined) updateData.notes = validated.notes;
+
+    // Update the meal
+    const { error: updateError } = await supabase
+      .from('planner_meals')
+      .update(updateData)
+      .eq('id', validated.planner_meal_id);
+
+    if (updateError) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: updateError.message,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        message: 'Meal updated successfully',
+      },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      return {
+        success: false,
+        error: {
+          type: 'VALIDATION_ERROR',
+          field: firstError.path.join('.'),
+          message: firstError.message,
+        },
+      };
+    }
+
+    console.error('Tool error:', error);
+
+    return {
+      success: false,
+      error: {
+        type: 'DATABASE_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
  * Lists planned meals for a given date range.
  * Enforces household isolation - only meals from the user's household are returned.
  *
@@ -255,6 +398,8 @@ export async function listMeals(
       recipe_id: string;
       date: string;
       meal_type: string;
+      serving_size: number | null;
+      notes: string | null;
       recipe: {
         title: string;
         tags: string[];
@@ -277,6 +422,8 @@ export async function listMeals(
         recipe_id,
         date,
         meal_type,
+        serving_size,
+        notes,
         recipes (
           title,
           tags,
@@ -306,6 +453,8 @@ export async function listMeals(
       recipe_id: meal.recipe_id,
       date: meal.date,
       meal_type: meal.meal_type,
+      serving_size: meal.serving_size ?? null,
+      notes: meal.notes ?? null,
       recipe: {
         title: meal.recipes?.title ?? 'Unknown Recipe',
         tags: meal.recipes?.tags ?? [],
@@ -356,6 +505,10 @@ export const planner = {
   remove_meal: {
     execute: removeMeal,
     schema: RemoveMealSchema,
+  },
+  update_meal: {
+    execute: updateMeal,
+    schema: UpdateMealSchema,
   },
   list_meals: {
     execute: listMeals,

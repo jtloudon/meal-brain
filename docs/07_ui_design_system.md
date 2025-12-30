@@ -179,10 +179,16 @@ All screens follow this consistent structure:
 │                                    │
 │                                    │
 ├────────────────────────────────────┤
-│ 🗓   🍽   🛒   ⚙️                    │
-│Planner Recipes Grocery Settings    │
+│ 🍽   🛒   🗓   ⚙️                    │
+│Recipes Groceries Planner Settings  │
 ──────────────────────────────────────
 ```
+
+**Navigation Order** (Updated 2025-12-29):
+1. Recipes
+2. Groceries (Shopping)
+3. Planner (Meal Planning)
+4. Settings
 
 **Frame Specs**:
 - **Bottom nav height**: 56px
@@ -362,7 +368,123 @@ All screens follow this consistent structure:
 
 ---
 
-## 5️⃣ AI Chat Panel (Slide-Up / Persistent)
+## 5️⃣ Meal Planner – Apple Calendar Style
+
+```
+──────────────────────────────────────
+│ MealBrain              Dec 2025  [Today] │
+├────────────────────────────────────┤
+│ Sun Mon Tue Wed Thu Fri Sat        │
+│  1   2   3   4   5   6   7         │
+│ ●●  ●●● ●   ●●  ●●● ●●  ●          │
+│  8   9  10  11  12  13  14         │
+│ ●●  ●   ●●● ●●  ●   ●●  ●●●        │
+│ ...                                │
+├────────────────────────────────────┤
+│ Monday, December 30, 2025 [Add Meal]│
+├────────────────────────────────────┤
+│ | Breakfast: Beef Tacos            │
+│ | Serves 4                         │
+│ | Dinner: Chicken Curry            │
+│ | Lunch: Chicken Curry             │
+│ | Serves 4                         │
+├────────────────────────────────────┤
+│ ● Breakfast ● Lunch ● Dinner ● Snack│
+──────────────────────────────────────
+```
+
+**Frame Specs**:
+- **Header**:
+  - MealBrain branding (orange badge #f97316 on #fff7ed)
+  - No + button (redundant with "Add Meal")
+- **Month Navigation**:
+  - < December 2025 > with "Today" button
+  - Orange controls (#f97316)
+- **Calendar Grid**:
+  - 7×6 cells, 50px min-height
+  - **Just colored dots** (6px) - no text in cells
+  - Selected date: Orange background (#fff7ed)
+  - Today: Light orange background (#fed7aa)
+  - Click date → Select it, show meals below
+- **Selected Date Meals List**:
+  - Shows date in long format
+  - "Add Meal" button (orange)
+  - Meals: 4px colored bar + title + serving size
+  - 0px gaps between items (compact)
+  - Click meal → Opens edit modal
+- **Legend**:
+  - Centered colored dots (no header text)
+  - Breakfast: Green, Lunch: Blue, Dinner: Red, Snack: Orange
+
+**Behavior**:
+- Click calendar date → Selects it, updates meal list below
+- Click meal in list → Opens edit modal
+- Click "Add Meal" → Opens add modal with selected date
+- Recipe "Add to Planner" → Navigates to /planner?add=true&recipeId=X
+- All interactions stay on one page (no navigation)
+
+**Component**: `/app/planner/page.tsx` (Redesigned 2025-12-30)
+
+---
+
+## 6️⃣ Settings – Meal Planner Configuration
+
+```
+──────────────────────────────────────
+│ Settings > Meal planner            │
+├────────────────────────────────────┤
+│ Start week on                      │
+│ Sunday                       [>]   │
+├────────────────────────────────────┤
+│ Meals                              │
+│ Add new                       [+]  │
+├────────────────────────────────────┤
+│ ● 08:00 Breakfast            [×]  │
+│ ● 12:00 Lunch                [×]  │
+│ ● 18:00 Dinner               [×]  │
+│ ● 20:00 Snack                [×]  │
+──────────────────────────────────────
+```
+
+**Frame Specs**:
+- **Header**:
+  - Back button: "Settings" (orange, 17px)
+  - Page title: "Meal planner" (17px, semibold)
+  - Border bottom: 1px solid #e5e7eb
+- **Start week on**:
+  - Section title: 17px semibold
+  - Selected day: 17px, with chevron indicator
+  - Currently hardcoded to "Sunday" (future enhancement: day selector)
+- **Meals section**:
+  - Section title: 17px semibold
+  - "Add new" button: Light gray background (#f9fafb), with plus icon
+  - Each meal shows:
+    - Colored dot (12px diameter) - indicates meal type
+    - Time (17px, tabular-nums for alignment)
+    - Meal name (17px)
+    - Delete button (28px circle, gray background)
+- **Default meals**:
+  - Breakfast: Green (#22c55e), 08:00
+  - Lunch: Blue (#3b82f6), 12:00
+  - Dinner: Red (#ef4444), 18:00
+  - Snack: Yellow/Orange (#f59e0b), 20:00
+
+**Behavior**:
+- Click "Add new" to show meal creation form
+- Meal creation form includes:
+  - Meal name input
+  - Time picker
+  - Color picker
+  - Cancel/Add buttons
+- Delete button removes meal from list
+- These settings will be referenced by the Meal Planning page (future implementation)
+- Week start day setting is currently display-only (Sunday hardcoded)
+
+**Component**: `/app/settings/meal-planner/page.tsx` (Added 2025-12-29)
+
+---
+
+## 7️⃣ AI Chat Panel (Slide-Up / Persistent)
 
 ```
 ──────────────────────────────────────
@@ -402,7 +524,7 @@ All screens follow this consistent structure:
 
 ---
 
-## 6️⃣ Ingredient Push Flow Modal
+## 8️⃣ Ingredient Push Flow Modal
 
 ```
 ──────────────────────────────────────
@@ -524,4 +646,6 @@ All screens follow this consistent structure:
 ---
 
 ## Version History
+- **v1.2** (2025-12-30): Added Apple Calendar-style Meal Planner wireframe, updated planner to single-page app with selected date meal list
+- **v1.1** (2025-12-29): Updated navigation order (Recipes → Groceries → Planner → Settings), added Settings > Meal Planner page wireframe
 - **v1.0** (2025-12-22): Consolidated from `07_ui_spec.md`, `07_ui_wireframes.md`, `07_ui_figma_lite.md`

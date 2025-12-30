@@ -6,8 +6,8 @@ import { Calendar, CookingPot, ShoppingCart, Settings } from 'lucide-react';
 
 const tabs = [
   { name: 'Recipes', href: '/recipes', icon: CookingPot },
-  { name: 'Planner', href: '/planner', icon: Calendar },
   { name: 'Groceries', href: '/groceries', icon: ShoppingCart },
+  { name: 'Planner', href: '/planner', icon: Calendar },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

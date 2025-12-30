@@ -55,6 +55,7 @@ export default function GroceriesPage() {
   const [editUnit, setEditUnit] = useState('whole');
   const [editListId, setEditListId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showClearCheckedConfirm, setShowClearCheckedConfirm] = useState(false);
 
   // Fetch all lists on mount
   useEffect(() => {
@@ -211,6 +212,32 @@ export default function GroceriesPage() {
     }
   };
 
+  const handleClearCheckedItems = async () => {
+    const checkedItems = items.filter(item => item.checked);
+    if (checkedItems.length === 0) return;
+
+    try {
+      setSaving(true);
+
+      // Delete all checked items
+      await Promise.all(
+        checkedItems.map(item =>
+          fetch(`/api/grocery/items/${item.id}`, {
+            method: 'DELETE',
+          })
+        )
+      );
+
+      // Update local state to remove checked items
+      setItems((prev) => prev.filter((item) => !item.checked));
+      setShowClearCheckedConfirm(false);
+    } catch (error) {
+      console.error('Error clearing checked items:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
 
@@ -350,6 +377,21 @@ export default function GroceriesPage() {
       }
       action={
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          {items.some(item => item.checked) && (
+            <button
+              onClick={() => setShowClearCheckedConfirm(true)}
+              style={{
+                color: '#f97316',
+                fontWeight: 500,
+                background: 'none',
+                border: 'none',
+                fontSize: '16px',
+                cursor: 'pointer'
+              }}
+            >
+              Clear Checked
+            </button>
+          )}
           <button
             onClick={() => setShowInlineAddForm(!showInlineAddForm)}
             style={{
@@ -1092,6 +1134,86 @@ export default function GroceriesPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Clear Checked Confirmation Modal */}
+        {showClearCheckedConfirm && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '0 16px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '100%'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: '8px'
+              }}>
+                Clear Checked Items?
+              </h3>
+              <p style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                marginBottom: '24px'
+              }}>
+                This will permanently delete all checked items ({items.filter(item => item.checked).length} item{items.filter(item => item.checked).length !== 1 ? 's' : ''}).
+                Uncheck any items you want to keep first.
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => setShowClearCheckedConfirm(false)}
+                  disabled={saving}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    backgroundColor: '#e5e7eb',
+                    color: '#374151',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    opacity: saving ? 0.5 : 1
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClearCheckedItems}
+                  disabled={saving}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    opacity: saving ? 0.5 : 1
+                  }}
+                >
+                  {saving ? 'Clearing...' : 'Clear Checked'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
