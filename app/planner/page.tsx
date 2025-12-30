@@ -99,8 +99,18 @@ export default function PlannerPage() {
       setLoading(true);
       setError(null);
 
-      const startDate = getMonthStart(currentMonth);
-      const endDate = getMonthEnd(currentMonth);
+      // Fetch meals for ALL visible calendar dates (including adjacent month dates)
+      // This ensures cross-month weeks display properly
+      const monthStart = getMonthStart(currentMonth);
+      const monthEnd = getMonthEnd(currentMonth);
+
+      // Get first visible day (Sunday before or on month start)
+      const startDate = new Date(monthStart);
+      startDate.setDate(startDate.getDate() - startDate.getDay());
+
+      // Get last visible day (Saturday after or on month end)
+      const endDate = new Date(monthEnd);
+      endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
 
       const response = await fetch(
         `/api/planner?start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}`
