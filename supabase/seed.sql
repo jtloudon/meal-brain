@@ -33,24 +33,24 @@ INSERT INTO households (id, name, created_at) VALUES
 INSERT INTO households (id, name, created_at) VALUES
   ('00000000-0000-4000-8000-000000000002', 'Test Household', NOW());
 
--- Demo Ingredients (canonical list)
-INSERT INTO ingredients (id, canonical_name) VALUES
-  ('a0000000-0000-4000-8000-000000000001', 'chicken breast'),
-  ('a0000000-0000-4000-8000-000000000002', 'rice'),
-  ('a0000000-0000-4000-8000-000000000003', 'coconut milk'),
-  ('a0000000-0000-4000-8000-000000000004', 'curry powder'),
-  ('a0000000-0000-4000-8000-000000000005', 'onion'),
-  ('a0000000-0000-4000-8000-000000000006', 'garlic'),
-  ('a0000000-0000-4000-8000-000000000007', 'ground beef'),
-  ('a0000000-0000-4000-8000-000000000008', 'taco shells'),
-  ('a0000000-0000-4000-8000-000000000009', 'lettuce'),
-  ('a0000000-0000-4000-8000-00000000000a', 'tomato'),
-  ('a0000000-0000-4000-8000-00000000000b', 'cheddar cheese'),
-  ('a0000000-0000-4000-8000-00000000000c', 'black beans'),
-  ('a0000000-0000-4000-8000-00000000000d', 'bell pepper'),
-  ('a0000000-0000-4000-8000-00000000000e', 'olive oil'),
-  ('a0000000-0000-4000-8000-00000000000f', 'salt'),
-  ('a0000000-0000-0000-0000-000000000010', 'black pepper');
+-- Demo Ingredients (canonical list with categories)
+INSERT INTO ingredients (id, canonical_name, category) VALUES
+  ('a0000000-0000-4000-8000-000000000001', 'chicken breast', 'Meat & Seafood'),
+  ('a0000000-0000-4000-8000-000000000002', 'rice', 'Pantry'),
+  ('a0000000-0000-4000-8000-000000000003', 'coconut milk', 'Canned Goods'),
+  ('a0000000-0000-4000-8000-000000000004', 'curry powder', 'Pantry'),
+  ('a0000000-0000-4000-8000-000000000005', 'onion', 'Produce'),
+  ('a0000000-0000-4000-8000-000000000006', 'garlic', 'Produce'),
+  ('a0000000-0000-4000-8000-000000000007', 'ground beef', 'Meat & Seafood'),
+  ('a0000000-0000-4000-8000-000000000008', 'taco shells', 'Bakery'),
+  ('a0000000-0000-4000-8000-000000000009', 'lettuce', 'Produce'),
+  ('a0000000-0000-4000-8000-00000000000a', 'tomato', 'Produce'),
+  ('a0000000-0000-4000-8000-00000000000b', 'cheddar cheese', 'Dairy & Eggs'),
+  ('a0000000-0000-4000-8000-00000000000c', 'black beans', 'Canned Goods'),
+  ('a0000000-0000-4000-8000-00000000000d', 'bell pepper', 'Produce'),
+  ('a0000000-0000-4000-8000-00000000000e', 'olive oil', 'Condiments & Sauces'),
+  ('a0000000-0000-4000-8000-00000000000f', 'salt', 'Pantry'),
+  ('a0000000-0000-0000-0000-000000000010', 'black pepper', 'Pantry');
 
 -- Demo Recipes
 INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions, image_url, source, serving_size, prep_time, cook_time, meal_type, created_at) VALUES

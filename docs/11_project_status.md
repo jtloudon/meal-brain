@@ -371,13 +371,45 @@ Specs are strong but not yet exercised in code.
   - ✅ Push ingredients error fixed (prep_state null handling)
   - ✅ Proper spacing with recipe source links
 
-**Next Steps (Phase 3 - Settings & Polish)**:
-1. **Settings Page (Full Implementation)**
-   - User preferences (household context, dietary constraints, AI style, planning preferences, AI learning)
-   - Shopping list category management
-   - Meal planner settings (week start day)
-   - About/Help section
-2. **Remaining UI/UX Polish**
+**Completed (Phase 3 - Settings System ✅ 2025-12-29)**:
+- ✅ Settings main page
+  - ✅ Grouped sections (Preferences, App Settings, Data, About)
+  - ✅ Navigation to all sub-pages
+  - ✅ MealBrain branding throughout
+- ✅ AI Preferences (full implementation)
+  - ✅ Household context (just-me, couple, family)
+  - ✅ Dietary constraints (multi-select with custom additions)
+  - ✅ AI collaboration style (coach vs collaborator)
+  - ✅ Planning preferences (multi-select)
+  - ✅ AI learning toggle
+  - ✅ API endpoint: GET/PUT /api/user/preferences
+  - ✅ Full CRUD with database persistence
+- ✅ Shopping List category management
+  - ✅ Simplified (removed unnecessary toggles)
+  - ✅ Add/delete custom categories
+  - ✅ 12 default categories (Produce, Meat & Seafood, Dairy & Eggs, etc.)
+  - ✅ API endpoint: GET/PUT /api/settings/shopping-categories
+  - ✅ Categories stored in user_preferences.shopping_categories
+- ✅ Auto-categorization system
+  - ✅ Utility with 200+ keywords across 11 categories
+  - ✅ Automatic ingredient categorization by name matching
+  - ✅ Fuzzy/partial matching algorithm
+  - ✅ Integrated with ingredient creation
+  - ✅ Grocery items inherit category from linked ingredient
+  - ✅ No more "Other" for common ingredients
+- ✅ Database updates
+  - ✅ Migration: shopping_categories JSONB column
+  - ✅ Seed data includes categories for all ingredients
+  - ✅ Single source of truth for category definitions
+- ✅ Placeholder pages (About, Help, Meal Planner, Import/Export)
+
+**Next Steps (Phase 3 - Polish & Features)**:
+1. **Remaining Settings Pages**
+   - Meal planner settings (week start day, default meal times)
+   - About page (version, credits, links)
+   - Help page (user guide, FAQ)
+   - Import/Export functionality
+2. **UI/UX Polish**
    - Mobile responsiveness testing
    - Loading states
    - Error handling improvements

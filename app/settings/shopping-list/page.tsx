@@ -1,0 +1,209 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { X, Plus } from 'lucide-react';
+
+export default function ShoppingListSettingsPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [newCategory, setNewCategory] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/settings/shopping-categories');
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data.categories || []);
+      } else {
+        // If no saved categories yet, initialize with defaults
+        const defaultCategories = [
+          'Produce',
+          'Meat & Seafood',
+          'Dairy & Eggs',
+          'Bakery',
+          'Frozen',
+          'Canned Goods',
+          'Condiments & Sauces',
+          'Beverages',
+          'Snacks & Treats',
+          'Pantry',
+          'Household',
+          'Other',
+        ];
+        setCategories(defaultCategories);
+        // Save defaults to database for first-time users
+        await saveCategories(defaultCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategory.trim() || categories.includes(newCategory.trim())) {
+      return;
+    }
+
+    const updatedCategories = [...categories, newCategory.trim()];
+    setCategories(updatedCategories);
+    setNewCategory('');
+    await saveCategories(updatedCategories);
+  };
+
+  const handleDeleteCategory = async (categoryToDelete: string) => {
+    if (categoryToDelete === 'Other') {
+      alert('Cannot delete the "Other" category');
+      return;
+    }
+
+    const updatedCategories = categories.filter(c => c !== categoryToDelete);
+    setCategories(updatedCategories);
+    await saveCategories(updatedCategories);
+  };
+
+  const saveCategories = async (updatedCategories: string[]) => {
+    try {
+      setSaving(true);
+      await fetch('/api/settings/shopping-categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: updatedCategories }),
+      });
+    } catch (error) {
+      console.error('Error saving categories:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '16px',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
+        <button
+          onClick={() => router.push('/settings')}
+          style={{
+            color: '#f97316',
+            fontWeight: 500,
+            background: 'none',
+            border: 'none',
+            fontSize: '16px',
+            cursor: 'pointer',
+            marginRight: '16px'
+          }}
+        >
+          ← Settings
+        </button>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
+          Shopping list
+        </h3>
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: '16px' }}>
+        {loading ? (
+          <p style={{ color: '#6b7280', textAlign: 'center' }}>Loading...</p>
+        ) : (
+          <div>
+          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+            Edit/reorder shopping list categories
+          </h4>
+
+          {/* Add new category */}
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            marginBottom: '16px',
+            backgroundColor: '#f9fafb',
+            padding: '8px',
+            borderRadius: '8px'
+          }}>
+            <input
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="Add new"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                border: 'none',
+                backgroundColor: 'transparent',
+                fontSize: '16px',
+                color: '#9ca3af',
+                outline: 'none'
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') handleAddCategory();
+              }}
+            />
+            <button
+              onClick={handleAddCategory}
+              style={{
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#6b7280'
+              }}
+            >
+              <Plus size={24} />
+            </button>
+          </div>
+
+          {/* Category list */}
+          <div>
+            {categories.map((category, index) => (
+              <div
+                key={category}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px 0',
+                  borderBottom: index < categories.length - 1 ? '1px solid #f3f4f6' : 'none'
+                }}
+              >
+                <span style={{ fontSize: '16px', color: '#111827', flex: 1 }}>
+                  {category}
+                </span>
+                <button
+                  onClick={() => handleDeleteCategory(category)}
+                  disabled={saving || category === 'Other'}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: category === 'Other' || saving ? 'not-allowed' : 'pointer',
+                    color: category === 'Other' ? '#d1d5db' : '#ef4444',
+                    padding: '4px',
+                    opacity: saving ? 0.5 : 1
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+        )}
+      </div>
+    </div>
+  );
+}
