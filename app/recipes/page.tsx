@@ -29,10 +29,156 @@ export default function RecipesPage() {
   const [showSearch, setShowSearch] = useState(false);
   const [householdName, setHouseholdName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importUrl, setImportUrl] = useState('');
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     fetchRecipes();
   }, [search, minRating, selectedCategory]);
+
+  const handleImportFromUrl = async () => {
+    if (!importUrl.trim()) return;
+
+    try {
+      setImporting(true);
+      setError(null);
+
+      // Call import API
+      const response = await fetch('/api/recipes/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: importUrl }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to import recipe');
+      }
+
+      const { recipe: importedRecipe } = await response.json();
+
+      // Parse ISO 8601 duration format (PT20M -> "20 min")
+      const parseDuration = (duration: string | null): string | null => {
+        if (!duration) return null;
+        const match = duration.match(/PT(\d+)M/);
+        if (match) return `${match[1]} min`;
+        const hourMatch = duration.match(/PT(\d+)H(\d+)?M?/);
+        if (hourMatch) {
+          const hours = hourMatch[1];
+          const mins = hourMatch[2];
+          return mins ? `${hours} hr ${mins} min` : `${hours} hr`;
+        }
+        return duration; // Return as-is if can't parse
+      };
+
+      // Format instructions with numbering
+      const formatInstructions = (instructions: string): string => {
+        if (!instructions) return '';
+        const lines = instructions.split('\n').filter(line => line.trim());
+        return lines.map((line, i) => `${i + 1}. ${line.replace(/^\d+\.\s*/, '')}`).join('\n');
+      };
+
+      // Parse ingredients using flexible parser with fallback
+      const { parseIngredientLine } = await import('@/lib/utils/parse-ingredients');
+      const ingredients: any[] = [];
+
+      console.log('[Import] Raw ingredients from backend:', importedRecipe.ingredients);
+
+      for (const ing of importedRecipe.ingredients) {
+        let parsed = parseIngredientLine(ing);
+        console.log('[Import] Parsing:', ing, '→', parsed);
+
+        if (parsed) {
+          ingredients.push({
+            name: parsed.name,
+            quantity: parsed.quantity,
+            unit: parsed.unit,
+            prep_state: parsed.prep_state,
+          });
+        } else {
+          // Fallback: Try to extract basic info with looser parsing
+          console.warn('[Import] Standard parsing failed, using fallback for:', ing);
+
+          // Try to extract quantity and unit more flexibly
+          const flexMatch = ing.match(/^([\d\s.\/½¼¾⅓⅔⅛⅜⅝⅞]+)?\s*(cup|tbsp|tsp|lb|oz|g|kg|ml|l|whole|clove|can|package|slice|pound|ounce|tablespoon|teaspoon|gram|kilogram)s?\s+(.+)$/i);
+
+          if (flexMatch) {
+            const [, qty, unit, name] = flexMatch;
+            let quantity = 1;
+
+            if (qty) {
+              // Parse quantity (handle fractions and mixed numbers)
+              const qtyTrimmed = qty.trim().replace(/\s+/g, ' ');
+              if (qtyTrimmed.includes('½')) quantity = parseFloat(qtyTrimmed.replace('½', '.5'));
+              else if (qtyTrimmed.includes('¼')) quantity = parseFloat(qtyTrimmed.replace('¼', '.25'));
+              else if (qtyTrimmed.includes('¾')) quantity = parseFloat(qtyTrimmed.replace('¾', '.75'));
+              else if (qtyTrimmed.includes('⅓')) quantity = parseFloat(qtyTrimmed.replace('⅓', '.333'));
+              else if (qtyTrimmed.includes('⅔')) quantity = parseFloat(qtyTrimmed.replace('⅔', '.667'));
+              else quantity = parseFloat(qtyTrimmed.split(' ')[0]) + (qtyTrimmed.split(' ')[1] ? parseFloat(qtyTrimmed.split(' ')[1]) : 0);
+            }
+
+            // Normalize unit
+            let normalizedUnit = unit.toLowerCase();
+            if (normalizedUnit === 'tablespoons' || normalizedUnit === 'tablespoon') normalizedUnit = 'tbsp';
+            else if (normalizedUnit === 'teaspoons' || normalizedUnit === 'teaspoon') normalizedUnit = 'tsp';
+            else if (normalizedUnit === 'pounds' || normalizedUnit === 'pound') normalizedUnit = 'lb';
+            else if (normalizedUnit === 'ounces' || normalizedUnit === 'ounce') normalizedUnit = 'oz';
+            else if (normalizedUnit === 'grams' || normalizedUnit === 'gram') normalizedUnit = 'g';
+            else if (normalizedUnit === 'kilograms' || normalizedUnit === 'kilogram') normalizedUnit = 'kg';
+            else if (normalizedUnit.endsWith('s')) normalizedUnit = normalizedUnit.slice(0, -1);
+
+            ingredients.push({
+              name: name.trim(),
+              quantity: isNaN(quantity) ? 1 : quantity,
+              unit: normalizedUnit,
+            });
+          } else {
+            // Last resort: treat whole thing as ingredient with default values
+            ingredients.push({
+              name: ing.trim(),
+              quantity: 1,
+              unit: 'whole',
+            });
+          }
+        }
+      }
+
+      console.log('[Import] Final parsed ingredients:', ingredients);
+
+      // Create the recipe
+      const createResponse = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: importedRecipe.title,
+          ingredients,
+          instructions: formatInstructions(importedRecipe.instructions),
+          notes: importedRecipe.notes,
+          rating: null,
+          tags: [],
+          prep_time: parseDuration(importedRecipe.prep_time),
+          cook_time: parseDuration(importedRecipe.cook_time),
+          serving_size: importedRecipe.serving_size,
+          image_url: importedRecipe.image_url,
+          source: importedRecipe.source,
+        }),
+      });
+
+      if (!createResponse.ok) {
+        throw new Error('Failed to create recipe');
+      }
+
+      // Success! Refresh recipes and close modal
+      await fetchRecipes();
+      setShowImportModal(false);
+      setImportUrl('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import recipe');
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const fetchRecipes = async () => {
     try {
@@ -123,18 +269,6 @@ export default function RecipesPage() {
 
   return (
     <AuthenticatedLayout
-      title={
-        <span style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#f97316',
-          backgroundColor: '#fff7ed',
-          padding: '4px 12px',
-          borderRadius: '8px'
-        }}>
-          MealBrain
-        </span>
-      }
       action={
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button
@@ -151,6 +285,21 @@ export default function RecipesPage() {
             }}
           >
             <Search size={22} style={{ color: '#f97316' }} />
+          </button>
+          <button
+            onClick={() => setShowImportModal(true)}
+            style={{
+              padding: '8px 12px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              fontSize: '15px',
+              color: '#f97316',
+              fontWeight: '500'
+            }}
+          >
+            Import
           </button>
           <button
             onClick={() => router.push('/recipes/new')}
@@ -210,7 +359,7 @@ export default function RecipesPage() {
         <div style={{
           display: 'flex',
           gap: '6px',
-          marginBottom: '16px',
+          marginBottom: '12px',
           justifyContent: 'space-between'
         }}>
           {categories.map((category) => (
@@ -231,6 +380,42 @@ export default function RecipesPage() {
               }}
             >
               {category}
+            </button>
+          ))}
+        </div>
+
+        {/* Rating Filter Pills */}
+        <div style={{
+          display: 'flex',
+          gap: '6px',
+          marginBottom: '16px'
+        }}>
+          {[null, 3, 4, 5].map((rating) => (
+            <button
+              key={rating ?? 'all'}
+              onClick={() => setMinRating(rating)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '16px',
+                border: 'none',
+                backgroundColor: minRating === rating ? '#f97316' : '#f3f4f6',
+                color: minRating === rating ? 'white' : '#6b7280',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              {rating ? (
+                <>
+                  <Star size={14} fill={minRating === rating ? 'white' : '#f97316'} stroke={minRating === rating ? 'white' : '#f97316'} strokeWidth={2} />
+                  <span>{rating}+</span>
+                </>
+              ) : (
+                'All Ratings'
+              )}
             </button>
           ))}
         </div>
@@ -354,12 +539,14 @@ export default function RecipesPage() {
                   }}>
                     {recipe.title}
                   </h3>
+                  {/* Star Rating */}
+                  {renderStars(recipe.rating)}
                   {recipe.tags.length > 0 && (
                     <div style={{
                       display: 'flex',
                       flexWrap: 'wrap',
                       gap: '6px',
-                      marginTop: '4px'
+                      marginTop: '6px'
                     }}>
                       {recipe.tags.map((tag) => (
                         <span
@@ -383,6 +570,102 @@ export default function RecipesPage() {
           </div>
         )}
       </div>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          padding: '0 16px'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '100%'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#111827',
+              marginBottom: '16px'
+            }}>
+              Import Recipe from URL
+            </h3>
+            <input
+              type="url"
+              value={importUrl}
+              onChange={(e) => setImportUrl(e.target.value)}
+              placeholder="https://example.com/recipe"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                marginBottom: '16px',
+                outline: 'none'
+              }}
+              onKeyPress={(e) => e.key === 'Enter' && handleImportFromUrl()}
+            />
+            {error && (
+              <p style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>
+                {error}
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportUrl('');
+                  setError(null);
+                }}
+                disabled={importing}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  backgroundColor: '#e5e7eb',
+                  color: '#374151',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  opacity: importing ? 0.5 : 1
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleImportFromUrl}
+                disabled={importing || !importUrl.trim()}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  backgroundColor: (importing || !importUrl.trim()) ? '#e5e7eb' : '#f97316',
+                  color: (importing || !importUrl.trim()) ? '#9ca3af' : 'white',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: (importing || !importUrl.trim()) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {importing ? 'Importing...' : 'Import'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthenticatedLayout>
   );
 }

@@ -46,6 +46,9 @@ export default function RecipeDetailPage() {
   const [pushing, setPushing] = useState(false);
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
   const [pushSuccess, setPushSuccess] = useState(false);
+  const [showServingSizeModal, setShowServingSizeModal] = useState(false);
+  const [adjustedServings, setAdjustedServings] = useState<number | null>(null);
+  const [baseServings, setBaseServings] = useState<number>(1);
 
   useEffect(() => {
     if (params.id) {
@@ -66,6 +69,14 @@ export default function RecipeDetailPage() {
 
       const data = await response.json();
       setRecipe(data);
+
+      // Parse base servings from serving_size string
+      if (data.serving_size) {
+        const match = data.serving_size.match(/\d+/);
+        if (match) {
+          setBaseServings(parseInt(match[0]));
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load recipe');
     } finally {
@@ -139,17 +150,35 @@ export default function RecipeDetailPage() {
       setPushing(true);
       setError(null);
 
-      // Only push selected ingredients
+      // Calculate effective servings for scaling
+      const effectiveServings = getEffectiveServings();
+
+      // Only push selected ingredients with scaled quantities
       const ingredients = recipe.recipe_ingredients
         .filter(ing => selectedIngredients.has(ing.id))
-        .map((ing) => ({
-          ingredient_id: ing.ingredient_id || null,
-          display_name: ing.display_name,
-          quantity: ing.quantity,
-          unit: ing.unit,
-          ...(ing.prep_state && { prep_state: ing.prep_state }),
-          source_recipe_id: recipe.id,
-        }));
+        .map((ing) => {
+          // Use scaled quantity if servings have been adjusted
+          const scaledQuantity = adjustedServings !== null
+            ? parseFloat(scaleQuantity(ing.quantity, baseServings, effectiveServings))
+            : ing.quantity;
+
+          console.log(`[Push Ingredients] ${ing.display_name}:`, {
+            original: ing.quantity,
+            baseServings,
+            effectiveServings,
+            adjustedServings,
+            scaledQuantity,
+          });
+
+          return {
+            ingredient_id: ing.ingredient_id || null,
+            display_name: ing.display_name,
+            quantity: scaledQuantity,
+            unit: ing.unit,
+            ...(ing.prep_state && { prep_state: ing.prep_state }),
+            source_recipe_id: recipe.id,
+          };
+        });
 
       const response = await fetch('/api/grocery/push-ingredients', {
         method: 'POST',
@@ -196,6 +225,96 @@ export default function RecipeDetailPage() {
     );
   };
 
+  const scaleQuantity = (originalQuantity: number, baseServings: number, targetServings: number): string => {
+    const scaled = (originalQuantity * targetServings) / baseServings;
+
+    // Format to reasonable precision
+    if (scaled % 1 === 0) {
+      return scaled.toString();
+    } else if (scaled < 1) {
+      // For fractions, try to display as common fractions
+      const fraction = scaled;
+      if (Math.abs(fraction - 0.25) < 0.01) return '1/4';
+      if (Math.abs(fraction - 0.33) < 0.01) return '1/3';
+      if (Math.abs(fraction - 0.5) < 0.01) return '1/2';
+      if (Math.abs(fraction - 0.67) < 0.01) return '2/3';
+      if (Math.abs(fraction - 0.75) < 0.01) return '3/4';
+      return scaled.toFixed(2);
+    } else {
+      // For numbers > 1, show up to 2 decimal places
+      return scaled.toFixed(2).replace(/\.?0+$/, '');
+    }
+  };
+
+  const getEffectiveServings = () => {
+    return adjustedServings !== null ? adjustedServings : baseServings;
+  };
+
+  const groupIngredientsBySection = () => {
+    if (!recipe) return [];
+
+    // Return all ingredients in a single group with no section header
+    // (Section parsing removed to preserve hyphens in ingredient names like "low-sodium")
+    return [{
+      section: null,
+      ingredients: recipe.recipe_ingredients
+    }];
+  };
+
+  const handleOpenServingSizeModal = () => {
+    setShowServingSizeModal(true);
+  };
+
+  const handleAdjustServings = (delta: number) => {
+    const current = adjustedServings !== null ? adjustedServings : baseServings;
+    const newValue = Math.max(1, current + delta);
+    setAdjustedServings(newValue);
+  };
+
+  const handleCancelServings = () => {
+    // Revert changes and close modal
+    setAdjustedServings(null);
+    setShowServingSizeModal(false);
+  };
+
+  const handleSaveServings = async () => {
+    if (!recipe || adjustedServings === null) return;
+
+    try {
+      // Calculate scaling ratio
+      const scalingRatio = adjustedServings / baseServings;
+
+      // Scale all ingredient quantities
+      const scaledIngredients = recipe.recipe_ingredients.map((ing) => ({
+        name: ing.display_name,
+        quantity: ing.quantity * scalingRatio,
+        unit: ing.unit,
+        prep_state: ing.prep_state || undefined,
+      }));
+
+      // Update recipe with new serving size and scaled ingredients
+      const response = await fetch(`/api/recipes/${recipe.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serving_size: adjustedServings.toString(),
+          ingredients: scaledIngredients,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update serving size');
+      }
+
+      // Reload the page to get fresh data with updated quantities
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update serving size');
+      console.error('Set permanently error:', err);
+    }
+  };
+
   if (loading) {
     return (
       <AuthenticatedLayout title="Recipe">
@@ -225,9 +344,10 @@ export default function RecipeDetailPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'white', paddingBottom: '80px' }}>
-      {/* Hero Image with Overlay */}
-      <div style={{ position: 'relative', height: '320px', width: '100%', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
+    <AuthenticatedLayout title="">
+      <div style={{ backgroundColor: 'white', paddingBottom: '80px' }}>
+        {/* Hero Image with Overlay */}
+        <div style={{ position: 'relative', height: '320px', width: '100%', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
         {recipe.image_url ? (
           <img
             src={recipe.image_url}
@@ -389,18 +509,30 @@ export default function RecipeDetailPage() {
       {/* Content */}
       <div style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '80px' }}>
         {/* Metadata Section */}
-        {(recipe.source || recipe.serving_size || recipe.prep_time || recipe.cook_time) && (
+        {(recipe.serving_size || recipe.prep_time || recipe.cook_time) && (
           <div style={{ paddingTop: '16px', paddingBottom: '16px', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 12px', fontSize: '16px' }}>
-            {recipe.source && (
-              <>
-                <span style={{ color: '#9ca3af', textAlign: 'right' }}>Source</span>
-                <span style={{ color: '#111827' }}>{recipe.source}</span>
-              </>
-            )}
             {recipe.serving_size && (
               <>
                 <span style={{ color: '#9ca3af', textAlign: 'right' }}>Serving size</span>
-                <span style={{ color: '#111827' }}>{recipe.serving_size}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#111827' }}>
+                    {adjustedServings !== null ? adjustedServings : recipe.serving_size}
+                  </span>
+                  <button
+                    onClick={handleOpenServingSizeModal}
+                    style={{
+                      color: '#3b82f6',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      padding: 0,
+                      fontWeight: '400'
+                    }}
+                  >
+                    Adjust +/-
+                  </button>
+                </div>
               </>
             )}
             {recipe.prep_time && (
@@ -420,21 +552,75 @@ export default function RecipeDetailPage() {
 
         {/* Ingredients Section */}
         <div className="py-6">
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', marginBottom: '16px' }}>Ingredients</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {recipe.recipe_ingredients.map((ingredient) => (
-              <p key={ingredient.id} style={{ color: '#111827', lineHeight: '1.5', fontSize: '16px', margin: 0 }}>
-                <strong style={{ fontWeight: '600' }}>
-                  {ingredient.quantity} {ingredient.unit}
-                </strong>{' '}
-                {ingredient.display_name}
-                {ingredient.prep_state && `, ${ingredient.prep_state}`}
-                {ingredient.optional && (
-                  <span style={{ color: '#6b7280', marginLeft: '4px' }}>(optional)</span>
-                )}
-              </p>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', margin: 0 }}>Ingredients</h2>
+            {recipe.source && (
+              <a
+                href={recipe.source}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: '#f97316',
+                  color: 'white',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                View Original
+              </a>
+            )}
           </div>
+          {recipe.source && (
+            <p style={{
+              fontSize: '13px',
+              color: '#6b7280',
+              marginTop: 0,
+              marginBottom: '16px',
+              fontStyle: 'italic'
+            }}>
+              Tip: View original recipe for ingredient groupings and detailed instructions
+            </p>
+          )}
+          {groupIngredientsBySection().map((group, groupIndex) => (
+            <div key={groupIndex} style={{ marginBottom: group.section ? '24px' : '0' }}>
+              {group.section && (
+                <h3 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '12px',
+                  marginTop: groupIndex > 0 ? '8px' : '0'
+                }}>
+                  {group.section}
+                </h3>
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {group.ingredients.map((ingredient) => {
+              const effectiveServings = getEffectiveServings();
+              const displayQuantity = adjustedServings !== null
+                ? scaleQuantity(ingredient.quantity, baseServings, effectiveServings)
+                : ingredient.quantity;
+
+              return (
+                <p key={ingredient.id} style={{ color: '#111827', lineHeight: '1.5', fontSize: '16px', margin: 0 }}>
+                  <strong style={{ fontWeight: '600' }}>
+                    {displayQuantity} {ingredient.unit}
+                  </strong>{' '}
+                  {ingredient.display_name}
+                  {ingredient.prep_state && `, ${ingredient.prep_state}`}
+                  {ingredient.optional && (
+                    <span style={{ color: '#6b7280', marginLeft: '4px' }}>(optional)</span>
+                  )}
+                </p>
+              );
+            })}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Directions Section */}
@@ -780,10 +966,152 @@ export default function RecipeDetailPage() {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
-    </div>
+        {/* Serving Size Adjustment Modal */}
+        {showServingSizeModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'center',
+              zIndex: 100,
+              padding: '80px 16px 16px',
+              overflowY: 'auto'
+            }}
+            onClick={handleCancelServings}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                padding: '24px',
+                maxWidth: '400px',
+                width: '100%',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: '20px',
+                textAlign: 'center'
+              }}>
+                Adjust Serving Size
+              </h3>
+
+              {/* Serving size input with +/- buttons */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '24px'
+              }}>
+                <input
+                  type="number"
+                  value={adjustedServings !== null ? adjustedServings : baseServings}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val) && val > 0) {
+                      setAdjustedServings(val);
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    outline: 'none',
+                    textAlign: 'center'
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => handleAdjustServings(-1)}
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      backgroundColor: '#f3f4f6',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '20px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    −
+                  </button>
+                  <button
+                    onClick={() => handleAdjustServings(1)}
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      backgroundColor: '#f3f4f6',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '20px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={handleCancelServings}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'transparent',
+                    color: '#6b7280',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveServings}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }
