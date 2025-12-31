@@ -320,6 +320,31 @@ Specs are strong but not yet exercised in code.
   - ✅ Data models updated with new grocery_items schema
   - ✅ Implementation plan updated with completion status
 
+**Completed (Phase 3 - Recipe Import Feature ✅ 2025-12-30)**:
+- ✅ Recipe import from URL
+  - ✅ Backend API route: POST /api/recipes/import
+  - ✅ JSON-LD schema.org Recipe parsing (most common format)
+  - ✅ Heuristic fallback parsing for non-standard sites
+  - ✅ Section header filtering ("Sauce", "Main", etc.)
+  - ✅ Serving size normalization ("4,4" → "4", mixed fractions)
+  - ✅ Flexible ingredient parsing with fallback
+  - ✅ Hyphen handling in ingredient names (e.g., "low-sodium", "1-inch")
+- ✅ Frontend integration
+  - ✅ Import modal on recipes page with URL input
+  - ✅ Flexible ingredient parser handles non-standard formats
+  - ✅ Console logging for debugging parse issues
+  - ✅ Error handling for failed imports
+- ✅ Display improvements
+  - ✅ Removed hyphen-based section parsing from recipe detail page
+  - ✅ All ingredients shown in single list (preserves hyphens)
+  - ✅ Added helpful tip: "View original for ingredient groupings"
+  - ✅ Tip only shows for imported recipes (those with source URL)
+- ✅ Bug fixes
+  - ✅ Fixed ingredient parsing to preserve "low-sodium", "1-inch", etc.
+  - ✅ Fixed serving size format issues (European decimals)
+  - ✅ Prevented section headers from being treated as ingredients
+  - ✅ Added fallback for ingredients that don't match standard format
+
 **Completed (Phase 3 - UI Polish 2025-12-29)**:
 - ✅ Bottom navigation refinement
   - ✅ All icons orange by default (#f97316)

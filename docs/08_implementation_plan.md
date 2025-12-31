@@ -591,6 +591,18 @@ The MVP is complete when:
   - [x] Meal type tracking with filters
   - [x] Second grocery list in seed data
   - [x] Test coverage for meal_type CRUD (5 new unit tests)
+- [x] **Recipe Import from URL** ✅ (Completed 2025-12-30)
+  - [x] Backend API route: POST /api/recipes/import
+  - [x] JSON-LD schema.org Recipe parsing (most recipe sites)
+  - [x] Heuristic fallback for non-standard sites
+  - [x] Section header filtering (removes "Sauce", "Main", etc. from ingredients)
+  - [x] Serving size normalization (handles European decimals, mixed fractions)
+  - [x] Flexible ingredient parsing with fallback (handles non-standard formats)
+  - [x] Hyphen preservation in ingredient names ("low-sodium", "1-inch")
+  - [x] Frontend import modal with URL input
+  - [x] Removed section parsing from display (preserves hyphens in UI)
+  - [x] Added user tip to view original for groupings
+  - [x] Import includes: title, ingredients, instructions, notes, times, serving size, image, source URL
 - [ ] **Future Polish Items**
   - [ ] Mobile responsiveness testing
   - [ ] Loading states

@@ -76,10 +76,21 @@ Optional later:
 - LLM reasoning layer (creative) - Claude 4.5 Sonnet
 - Tool execution layer (deterministic) - Agent SDK Skills
 
+**Recipe Import** (Phase 3 - Complete):
+- URL-based import from recipe websites
+  - POST /api/recipes/import endpoint
+  - JSON-LD schema.org Recipe parsing (industry standard)
+  - Heuristic fallback for non-standard sites
+  - Extracts: title, ingredients, instructions, notes, times, serving size, image URL, source
+  - Section header filtering (removes grouping headers from ingredients)
+  - Serving size normalization (handles international formats)
+  - Flexible ingredient parsing (handles non-standard formats with fallback)
+  - Preserves special characters in ingredient names (hyphens, fractions)
+
 **Media**:
 - Recipe images (Phase 3 - in progress):
   - User upload from device (JPEG, PNG, WebP, HEIC)
-  - External URL support (for future import feature)
+  - External URL support (imported recipes)
   - Stored in Supabase Storage bucket
 - Voice ingestion (Phase 5+):
   - Web Speech API for voice input
