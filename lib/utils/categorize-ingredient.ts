@@ -22,7 +22,7 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
   'Produce': [
     'onion', 'garlic', 'tomato', 'potato', 'carrot', 'celery', 'lettuce', 'spinach',
     'kale', 'cabbage', 'broccoli', 'cauliflower', 'pepper', 'bell pepper', 'jalapeño',
-    'cucumber', 'zucchini', 'squash', 'eggplant', 'mushroom', 'avocado',
+    'cucumber', 'zucchini', 'squash', 'eggplant', 'mushroom', 'avocado', 'pumpkin',
     'apple', 'banana', 'orange', 'lemon', 'lime', 'berry', 'strawberry', 'blueberry',
     'grape', 'melon', 'peach', 'pear', 'mango', 'pineapple', 'cilantro', 'parsley',
     'basil', 'thyme', 'rosemary', 'mint', 'dill', 'oregano', 'sage', 'arugula',

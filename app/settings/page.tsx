@@ -62,36 +62,14 @@ export default function SettingsPage() {
   ];
 
   return (
-    <AuthenticatedLayout
-      title={
-        <span style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#f97316',
-          backgroundColor: '#fff7ed',
-          padding: '4px 12px',
-          borderRadius: '8px'
-        }}>
-          MealBrain
-        </span>
-      }
-    >
+    <AuthenticatedLayout>
       <div style={{ padding: '8px 16px 80px 16px' }}>
-        <h1 style={{
-          fontSize: '28px',
-          fontWeight: '700',
-          color: '#111827',
-          marginBottom: '24px'
-        }}>
-          Settings
-        </h1>
-
         {settingsSections.map((section, idx) => (
           <div key={section.title} style={{ marginBottom: idx < settingsSections.length - 1 ? '32px' : '0' }}>
             <h2 style={{
               fontSize: '14px',
               fontWeight: '600',
-              color: '#6b7280',
+              color: '#f97316',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               marginBottom: '12px'

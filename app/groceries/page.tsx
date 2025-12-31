@@ -15,12 +15,10 @@ interface GroceryItem {
   ingredient_id: string | null;
   source_recipe_id: string | null;
   prep_state: string | null;
+  category: string;
   recipes?: {
     id: string;
     title: string;
-  } | null;
-  ingredients?: {
-    category: string;
   } | null;
 }
 
@@ -56,6 +54,38 @@ export default function GroceriesPage() {
   const [editListId, setEditListId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showClearCheckedConfirm, setShowClearCheckedConfirm] = useState(false);
+  const [shoppingCategories, setShoppingCategories] = useState<string[]>([]);
+
+  // Fetch shopping categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/settings/shopping-categories');
+        if (response.ok) {
+          const data = await response.json();
+          setShoppingCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch shopping categories:', error);
+        // Use defaults if fetch fails
+        setShoppingCategories([
+          'Produce',
+          'Meat & Seafood',
+          'Dairy & Eggs',
+          'Bakery',
+          'Frozen',
+          'Canned Goods',
+          'Condiments & Sauces',
+          'Beverages',
+          'Snacks & Treats',
+          'Pantry',
+          'Household',
+          'Other',
+        ]);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Fetch all lists on mount
   useEffect(() => {
@@ -153,6 +183,7 @@ export default function GroceriesPage() {
         display_name: editName,
         quantity: parseFloat(editQuantity),
         unit: editUnit,
+        category: editCategory,
       };
 
       // If list changed, add grocery_list_id to update
@@ -175,7 +206,13 @@ export default function GroceriesPage() {
           setItems((prev) =>
             prev.map((item) =>
               item.id === editingItem.id
-                ? { ...item, display_name: editName, quantity: parseFloat(editQuantity), unit: editUnit }
+                ? {
+                    ...item,
+                    display_name: editName,
+                    quantity: parseFloat(editQuantity),
+                    unit: editUnit,
+                    category: editCategory
+                  }
                 : item
             )
           );
@@ -296,20 +333,7 @@ export default function GroceriesPage() {
 
   if (loading) {
     return (
-      <AuthenticatedLayout
-        title={
-          <span style={{
-            fontSize: '24px',
-            fontWeight: '700',
-            color: '#f97316',
-            backgroundColor: '#fff7ed',
-            padding: '4px 12px',
-            borderRadius: '8px'
-          }}>
-            MealBrain
-          </span>
-        }
-      >
+      <AuthenticatedLayout>
         <div className="p-4">
           <p className="text-gray-500">Loading grocery lists...</p>
         </div>
@@ -319,43 +343,41 @@ export default function GroceriesPage() {
 
   if (lists.length === 0) {
     return (
-      <AuthenticatedLayout
-        title={
-          <span style={{
-            fontSize: '24px',
-            fontWeight: '700',
-            color: '#f97316',
-            backgroundColor: '#fff7ed',
-            padding: '4px 12px',
-            borderRadius: '8px'
+      <AuthenticatedLayout>
+        <div style={{ padding: '0 16px' }}>
+          {/* Pill-shaped action button */}
+          <div style={{
+            display: 'flex',
+            gap: '6px',
+            padding: '16px 0',
+            justifyContent: 'center'
           }}>
-            MealBrain
-          </span>
-        }
-        action={
-          <button
-            onClick={() => router.push('/groceries/new')}
-            style={{
-              color: '#f97316',
-              fontWeight: 500,
-              background: 'none',
-              border: 'none',
-              fontSize: '16px',
-              cursor: 'pointer'
-            }}
-          >
-            New List
-          </button>
-        }
-      >
-        <div className="p-4">
-          <p className="text-gray-500">No grocery lists yet.</p>
-          <button
-            onClick={() => setShowNewListModal(true)}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
-          >
-            Create List
-          </button>
+            <button
+              onClick={() => router.push('/groceries/new')}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '16px',
+                border: 'none',
+                backgroundColor: '#f3f4f6',
+                color: '#6b7280',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              New List
+            </button>
+          </div>
+
+          <div className="py-8">
+            <p className="text-gray-500">No grocery lists yet.</p>
+            <button
+              onClick={() => setShowNewListModal(true)}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+            >
+              Create List
+            </button>
+          </div>
         </div>
       </AuthenticatedLayout>
     );
@@ -363,44 +385,47 @@ export default function GroceriesPage() {
 
   return (
     <AuthenticatedLayout
-      title={
-        <span style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#f97316',
-          backgroundColor: '#fff7ed',
-          padding: '4px 12px',
-          borderRadius: '8px'
+      title=""
+    >
+      <div style={{ padding: '0 16px 80px 16px' }}>
+        {/* Pill-shaped action buttons */}
+        <div style={{
+          display: 'flex',
+          gap: '6px',
+          padding: '16px 0',
+          justifyContent: 'space-between'
         }}>
-          MealBrain
-        </span>
-      }
-      action={
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          {items.some(item => item.checked) && (
-            <button
-              onClick={() => setShowClearCheckedConfirm(true)}
-              style={{
-                color: '#f97316',
-                fontWeight: 500,
-                background: 'none',
-                border: 'none',
-                fontSize: '16px',
-                cursor: 'pointer'
-              }}
-            >
-              Clear Checked
-            </button>
-          )}
+          <button
+            onClick={() => setShowClearCheckedConfirm(true)}
+            disabled={!items.some(item => item.checked)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '16px',
+              border: 'none',
+              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+              color: items.some(item => item.checked) ? 'white' : '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+              flex: 1,
+              minWidth: 0
+            }}
+          >
+            Clear Checked
+          </button>
           <button
             onClick={() => setShowInlineAddForm(!showInlineAddForm)}
             style={{
-              color: '#f97316',
-              fontWeight: 500,
-              background: 'none',
+              padding: '6px 10px',
+              borderRadius: '16px',
               border: 'none',
-              fontSize: '16px',
-              cursor: 'pointer'
+              backgroundColor: showInlineAddForm ? '#f97316' : '#f3f4f6',
+              color: showInlineAddForm ? 'white' : '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              flex: 1,
+              minWidth: 0
             }}
           >
             Add Item
@@ -408,20 +433,22 @@ export default function GroceriesPage() {
           <button
             onClick={() => router.push('/groceries/new')}
             style={{
-              color: '#f97316',
-              fontWeight: 500,
-              background: 'none',
+              padding: '6px 10px',
+              borderRadius: '16px',
               border: 'none',
-              fontSize: '16px',
-              cursor: 'pointer'
+              backgroundColor: '#f3f4f6',
+              color: '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              flex: 1,
+              minWidth: 0
             }}
           >
             New List
           </button>
         </div>
-      }
-    >
-      <div style={{ padding: '8px 16px 80px 16px' }}>
+
         {/* List Selector - Clickable name with arrow */}
         <button
           onClick={() => setShowListSelector(true)}
@@ -431,7 +458,7 @@ export default function GroceriesPage() {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 0',
-            marginBottom: '16px',
+            marginBottom: '24px',
             background: 'none',
             border: 'none',
             cursor: 'pointer'
@@ -572,7 +599,7 @@ export default function GroceriesPage() {
             (() => {
               // Group items by category
               const grouped = items.reduce((acc, item) => {
-                const category = item.ingredients?.category || 'Other';
+                const category = item.category || 'Other';
                 if (!acc[category]) acc[category] = [];
                 acc[category].push(item);
                 return acc;
@@ -582,7 +609,7 @@ export default function GroceriesPage() {
               return Object.entries(grouped).map(([category, categoryItems], index) => (
                 <div key={category} className={index > 0 ? 'mt-6' : ''}>
                   {/* Category Header */}
-                  <h3 style={{ fontSize: '17px', fontWeight: 'bold', color: '#f97316', marginBottom: '8px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#f97316', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {category}
                   </h3>
 
@@ -656,7 +683,7 @@ export default function GroceriesPage() {
                           onClick={() => {
                             setEditingItem(item);
                             setEditName(item.display_name);
-                            setEditCategory(item.ingredients?.category || 'Other');
+                            setEditCategory(item.category || 'Other');
                             setEditQuantity(item.quantity.toString());
                             setEditUnit(item.unit);
                             setEditListId(selectedListId);
@@ -1023,14 +1050,33 @@ export default function GroceriesPage() {
               </div>
 
               <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
                 padding: '12px 0',
                 borderBottom: '1px solid #e5e7eb',
                 marginTop: '16px'
               }}>
-                <span style={{ color: '#9ca3af', fontSize: '16px' }}>Category</span>
-                <span style={{ color: '#111827', fontSize: '16px' }}>{editCategory}</span>
+                <label htmlFor="edit-category" style={{ color: '#9ca3af', fontSize: '16px', display: 'block', marginBottom: '8px' }}>
+                  Category
+                </label>
+                <select
+                  id="edit-category"
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    backgroundColor: 'white',
+                    color: '#111827'
+                  }}
+                >
+                  {shoppingCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <button

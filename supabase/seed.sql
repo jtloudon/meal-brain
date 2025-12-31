@@ -134,17 +134,17 @@ INSERT INTO grocery_lists (id, household_id, name, created_at) VALUES
   ('c0000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'Pantry Staples', NOW());
 
 -- Demo Grocery Items for "This Week" list
-INSERT INTO grocery_items (grocery_list_id, ingredient_id, display_name, quantity, unit, checked) VALUES
-  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'chicken breast', 1.5, 'lb', false),
-  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002', 'rice', 2, 'cup', false),
-  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000003', 'coconut milk', 1, 'can', false),
-  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000007', 'ground beef', 1, 'lb', false),
-  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000008', 'taco shells', 16, 'whole', true),
-  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-00000000000c', 'black beans', 2, 'can', false),
-  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000005', 'onion', 2, 'whole', false);
+INSERT INTO grocery_items (grocery_list_id, ingredient_id, display_name, quantity, unit, checked, category) VALUES
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'chicken breast', 1.5, 'lb', false, 'Meat & Seafood'),
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002', 'rice', 2, 'cup', false, 'Pantry'),
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000003', 'coconut milk', 1, 'can', false, 'Canned Goods'),
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000007', 'ground beef', 1, 'lb', false, 'Meat & Seafood'),
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000008', 'taco shells', 16, 'whole', true, 'Bakery'),
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-00000000000c', 'black beans', 2, 'can', false, 'Canned Goods'),
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000005', 'onion', 2, 'whole', false, 'Produce');
 
 -- Demo Grocery Items for "Pantry Staples" list
-INSERT INTO grocery_items (grocery_list_id, ingredient_id, display_name, quantity, unit, checked) VALUES
-  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000e', 'olive oil', 1, 'bottle', false),
-  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000f', 'salt', 1, 'container', false),
-  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-0000-0000-000000000010', 'black pepper', 1, 'container', false);
+INSERT INTO grocery_items (grocery_list_id, ingredient_id, display_name, quantity, unit, checked, category) VALUES
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000e', 'olive oil', 1, 'bottle', false, 'Condiments & Sauces'),
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000f', 'salt', 1, 'container', false, 'Pantry'),
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-0000-0000-000000000010', 'black pepper', 1, 'container', false, 'Pantry');

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 export default function AboutPage() {
   const router = useRouter();
@@ -12,21 +13,22 @@ export default function AboutPage() {
         display: 'flex',
         alignItems: 'center',
         padding: '16px',
-        borderBottom: '1px solid #e5e7eb'
+        borderBottom: '1px solid #e5e7eb',
+        gap: '12px'
       }}>
         <button
           onClick={() => router.push('/settings')}
           style={{
-            color: '#f97316',
-            fontWeight: 500,
+            padding: '8px',
             background: 'none',
             border: 'none',
-            fontSize: '17px',
             cursor: 'pointer',
-            marginRight: '8px'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          Settings
+          <ArrowLeft size={22} style={{ color: '#f97316' }} />
         </button>
         <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827' }}>
           About

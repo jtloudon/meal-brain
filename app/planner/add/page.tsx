@@ -127,18 +127,6 @@ export default function AddMealPage() {
 
   return (
     <AuthenticatedLayout
-      title={
-        <span style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#f97316',
-          backgroundColor: '#fff7ed',
-          padding: '4px 12px',
-          borderRadius: '8px'
-        }}>
-          MealBrain
-        </span>
-      }
       action={
         <button
           onClick={() => {

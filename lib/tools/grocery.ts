@@ -178,16 +178,19 @@ export async function pushIngredients(
 
     // Process each incoming ingredient
     for (const ingredient of validated.ingredients) {
-      // Check if ingredient already exists in list (same ingredient_id and unit)
+      // Check if ingredient already exists in list from the SAME recipe
+      // We only merge if it's the exact same ingredient from the same recipe
+      // Different recipes get separate line items for traceability
       const existingItem = existingItems?.find(
         (item) =>
           item.ingredient_id === ingredient.ingredient_id &&
           item.unit === ingredient.unit &&
-          item.display_name === ingredient.display_name
+          item.display_name === ingredient.display_name &&
+          item.source_recipe_id === (ingredient.source_recipe_id || null)
       );
 
       if (existingItem) {
-        // Merge: update quantity
+        // Merge: update quantity (only if from same recipe)
         const newQuantity =
           parseFloat(existingItem.quantity) + ingredient.quantity;
 
@@ -208,7 +211,10 @@ export async function pushIngredients(
 
         itemsMerged++;
       } else {
-        // Add new item
+        // Add new item - auto-categorize based on ingredient
+        const { categorizeIngredient } = await import('@/lib/utils/categorize-ingredient');
+        const category = categorizeIngredient(ingredient.display_name);
+
         const { error: insertError } = await supabase
           .from('grocery_items')
           .insert({
@@ -218,6 +224,7 @@ export async function pushIngredients(
             quantity: ingredient.quantity,
             unit: ingredient.unit,
             checked: false,
+            category: category,
             source_recipe_id: ingredient.source_recipe_id || null,
             prep_state: ingredient.prep_state || null,
           });
@@ -398,6 +405,10 @@ export async function addItem(
       };
     }
 
+    // Auto-categorize the item
+    const { categorizeIngredient } = await import('@/lib/utils/categorize-ingredient');
+    const category = categorizeIngredient(validated.name);
+
     // Add the item
     const { data: item, error } = await supabase
       .from('grocery_items')
@@ -407,6 +418,7 @@ export async function addItem(
         display_name: validated.name,
         quantity: validated.quantity,
         unit: validated.unit,
+        category: category,
         checked: false,
       })
       .select('id')
@@ -632,7 +644,7 @@ export async function getList(
       source_recipe_id: string | null;
       prep_state: string | null;
       recipes: { id: string; title: string } | null;
-      ingredients: { category: string } | null;
+      category: string;
     }>;
   }>
 > {
@@ -658,10 +670,10 @@ export async function getList(
       };
     }
 
-    // Fetch all items in the list with recipe and ingredient category information
+    // Fetch all items in the list with recipe information
     const { data: items, error: itemsError } = await supabase
       .from('grocery_items')
-      .select('id, display_name, quantity, unit, checked, ingredient_id, source_recipe_id, prep_state, recipes:source_recipe_id(id, title), ingredients:ingredient_id(category)')
+      .select('id, display_name, quantity, unit, checked, ingredient_id, source_recipe_id, prep_state, category, recipes:source_recipe_id(id, title)')
       .eq('grocery_list_id', validated.grocery_list_id)
       .order('created_at', { ascending: true });
 

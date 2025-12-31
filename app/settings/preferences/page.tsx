@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 type HouseholdContext = 'just-me' | 'couple' | 'family' | null;
 type AIStyle = 'coach' | 'collaborator' | null;
@@ -117,15 +118,16 @@ export default function AIPreferencesPage() {
           onClick={() => router.push('/settings')}
           disabled={saving}
           style={{
-            color: '#f97316',
-            fontWeight: 500,
+            padding: '8px',
             background: 'none',
             border: 'none',
-            fontSize: '16px',
-            cursor: 'pointer'
+            cursor: saving ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          Cancel
+          <ArrowLeft size={22} style={{ color: '#f97316' }} />
         </button>
         <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
           AI Preferences

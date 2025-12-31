@@ -43,7 +43,7 @@ export const CreateRecipeSchema = z.object({
     .min(1, 'At least one ingredient is required'),
   instructions: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  rating: z.number().min(1).max(5).optional(),
+  rating: z.number().min(1).max(5).nullable().optional(),
   notes: z.string().optional(),
   image_url: z.string().url().optional().or(z.literal('')),
   source: z.string().optional(),
@@ -62,7 +62,7 @@ export const ListRecipesSchema = z.object({
   filters: z
     .object({
       tags: z.array(z.string()).optional(),
-      rating: z.number().min(1).max(5).optional(),
+      rating: z.number().min(1).max(5).nullable().optional(),
       search: z.string().optional(),
     })
     .optional(),
@@ -90,7 +90,7 @@ export const UpdateRecipeSchema = z.object({
     .optional(),
   instructions: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  rating: z.number().min(1).max(5).optional(),
+  rating: z.number().min(1).max(5).nullable().optional(),
   notes: z.string().optional(),
   image_url: z.string().url().optional().or(z.literal('')),
   source: z.string().optional(),

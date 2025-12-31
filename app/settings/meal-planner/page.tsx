@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, Plus, X } from 'lucide-react';
+import { ChevronRight, Plus, X, ArrowLeft } from 'lucide-react';
 
 interface MealCourse {
   id: string;
@@ -12,10 +12,10 @@ interface MealCourse {
 }
 
 const DEFAULT_MEALS: MealCourse[] = [
-  { id: '1', name: 'Breakfast', time: '08:00', color: '#22c55e' }, // green
-  { id: '2', name: 'Lunch', time: '12:00', color: '#3b82f6' },     // blue
-  { id: '3', name: 'Dinner', time: '18:00', color: '#ef4444' },    // red
-  { id: '4', name: 'Snack', time: '20:00', color: '#f59e0b' },     // yellow/orange
+  { id: 'breakfast', name: 'Breakfast', time: '08:00', color: '#22c55e' }, // green
+  { id: 'lunch', name: 'Lunch', time: '12:00', color: '#3b82f6' },     // blue
+  { id: 'dinner', name: 'Dinner', time: '18:00', color: '#ef4444' },    // red
+  { id: 'snack', name: 'Snack', time: '20:00', color: '#f59e0b' },     // yellow/orange
 ];
 
 export default function MealPlannerSettingsPage() {
@@ -25,18 +25,64 @@ export default function MealPlannerSettingsPage() {
   const [newMealName, setNewMealName] = useState('');
   const [newMealTime, setNewMealTime] = useState('12:00');
   const [newMealColor, setNewMealColor] = useState('#3b82f6');
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+
+  // Fetch meal courses on mount
+  useEffect(() => {
+    const fetchMealCourses = async () => {
+      try {
+        const response = await fetch('/api/settings/meal-courses');
+        if (response.ok) {
+          const data = await response.json();
+          setMeals(data.mealCourses || DEFAULT_MEALS);
+        }
+      } catch (error) {
+        console.error('Failed to fetch meal courses:', error);
+      }
+    };
+    fetchMealCourses();
+  }, []);
+
+  // Save meal courses to database
+  const saveMealCourses = async (updatedMeals: MealCourse[]) => {
+    setSaving(true);
+    setSaveMessage('');
+    try {
+      const response = await fetch('/api/settings/meal-courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mealCourses: updatedMeals }),
+      });
+
+      if (response.ok) {
+        setSaveMessage('Saved!');
+        setTimeout(() => setSaveMessage(''), 2000);
+      } else {
+        setSaveMessage('Failed to save');
+      }
+    } catch (error) {
+      console.error('Failed to save meal courses:', error);
+      setSaveMessage('Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleAddMeal = () => {
     if (!newMealName.trim()) return;
 
     const newMeal: MealCourse = {
-      id: Date.now().toString(),
+      id: newMealName.toLowerCase().replace(/\s+/g, '-'),
       name: newMealName,
       time: newMealTime,
       color: newMealColor,
     };
 
-    setMeals([...meals, newMeal]);
+    const updatedMeals = [...meals, newMeal];
+    setMeals(updatedMeals);
+    saveMealCourses(updatedMeals);
+
     setNewMealName('');
     setNewMealTime('12:00');
     setNewMealColor('#3b82f6');
@@ -44,7 +90,18 @@ export default function MealPlannerSettingsPage() {
   };
 
   const handleDeleteMeal = (id: string) => {
-    setMeals(meals.filter(meal => meal.id !== id));
+    const updatedMeals = meals.filter(meal => meal.id !== id);
+    setMeals(updatedMeals);
+    saveMealCourses(updatedMeals);
+  };
+
+  // Format time for display (24hr to 12hr)
+  const formatTime = (time24: string) => {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
   };
 
   return (
@@ -54,60 +111,35 @@ export default function MealPlannerSettingsPage() {
         display: 'flex',
         alignItems: 'center',
         padding: '16px',
-        borderBottom: '1px solid #e5e7eb'
+        borderBottom: '1px solid #e5e7eb',
+        gap: '12px'
       }}>
         <button
           onClick={() => router.push('/settings')}
           style={{
-            color: '#f97316',
-            fontWeight: 500,
+            padding: '8px',
             background: 'none',
             border: 'none',
-            fontSize: '17px',
             cursor: 'pointer',
-            marginRight: '8px'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          Settings
+          <ArrowLeft size={22} style={{ color: '#f97316' }} />
         </button>
-        <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827' }}>
+        <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827', flex: 1 }}>
           Meal planner
         </h3>
+        {saveMessage && (
+          <span style={{ color: saveMessage === 'Saved!' ? '#22c55e' : '#ef4444', fontSize: '14px' }}>
+            {saveMessage}
+          </span>
+        )}
       </div>
 
       {/* Content */}
       <div style={{ padding: '16px 16px 80px 16px' }}>
-        {/* Start week on */}
-        <div style={{
-          padding: '16px 0',
-          borderBottom: '1px solid #e5e7eb',
-          marginBottom: '24px'
-        }}>
-          <h4 style={{
-            fontSize: '17px',
-            fontWeight: 600,
-            color: '#111827',
-            marginBottom: '12px'
-          }}>
-            Start week on
-          </h4>
-          <button
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 0',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            <span style={{ fontSize: '17px', color: '#111827' }}>Sunday</span>
-            <ChevronRight size={20} style={{ color: '#9ca3af' }} />
-          </button>
-        </div>
-
         {/* Meals Section */}
         <div>
           <h4 style={{
@@ -276,9 +308,10 @@ export default function MealPlannerSettingsPage() {
                 <span style={{
                   fontSize: '17px',
                   color: '#111827',
-                  fontVariantNumeric: 'tabular-nums'
+                  fontVariantNumeric: 'tabular-nums',
+                  minWidth: '90px'
                 }}>
-                  {meal.time}
+                  {formatTime(meal.time)}
                 </span>
 
                 {/* Meal name */}

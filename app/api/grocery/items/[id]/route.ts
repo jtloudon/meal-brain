@@ -15,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { grocery_list_id, display_name, quantity, unit } = await request.json();
+    const { grocery_list_id, display_name, quantity, unit, category } = await request.json();
 
     // Build update object dynamically based on provided fields
     const updateData: Record<string, any> = {};
@@ -23,6 +23,7 @@ export async function PATCH(
     if (display_name !== undefined) updateData.display_name = display_name;
     if (quantity !== undefined) updateData.quantity = quantity;
     if (unit !== undefined) updateData.unit = unit;
+    if (category !== undefined) updateData.category = category;
 
     // Validate that at least one field is being updated
     if (Object.keys(updateData).length === 0) {

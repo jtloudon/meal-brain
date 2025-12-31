@@ -5,11 +5,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
+interface MealCourse {
+  id: string;
+  name: string;
+  time: string;
+  color: string;
+}
+
 interface PlannedMeal {
   id: string;
   recipe_id: string;
   date: string;
-  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  meal_type: string;
   serving_size: number | null;
   notes: string | null;
   recipe: {
@@ -19,21 +26,12 @@ interface PlannedMeal {
   };
 }
 
-type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
-
-const MEAL_COLORS: Record<MealType, string> = {
-  breakfast: '#22c55e', // green
-  lunch: '#3b82f6',     // blue
-  dinner: '#ef4444',    // red
-  snack: '#f59e0b',     // orange
-};
-
-const MEAL_LABELS: Record<MealType, string> = {
-  breakfast: 'Breakfast',
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-  snack: 'Snack',
-};
+const DEFAULT_MEAL_COURSES: MealCourse[] = [
+  { id: 'breakfast', name: 'Breakfast', time: '08:00', color: '#22c55e' },
+  { id: 'lunch', name: 'Lunch', time: '12:00', color: '#3b82f6' },
+  { id: 'dinner', name: 'Dinner', time: '18:00', color: '#ef4444' },
+  { id: 'snack', name: 'Snack', time: '20:00', color: '#f59e0b' },
+];
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -45,29 +43,58 @@ export default function PlannerPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [viewMode, setViewMode] = useState<'monthly' | 'weekly'>('monthly');
+  const [mealCourses, setMealCourses] = useState<MealCourse[]>(DEFAULT_MEAL_COURSES);
 
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingMeal, setEditingMeal] = useState<PlannedMeal | null>(null);
   const [editDate, setEditDate] = useState('');
-  const [editMealType, setEditMealType] = useState<MealType>('dinner');
+  const [editMealType, setEditMealType] = useState('dinner');
   const [editRecipeId, setEditRecipeId] = useState('');
   const [editServingSize, setEditServingSize] = useState(4);
   const [editNotes, setEditNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Helper functions to get meal course info
+  const getMealColor = (mealType: string) => {
+    const course = mealCourses.find(c => c.id === mealType);
+    return course?.color || '#9ca3af';
+  };
+
+  const getMealLabel = (mealType: string) => {
+    const course = mealCourses.find(c => c.id === mealType);
+    return course?.name || mealType;
+  };
+
   // Recipe search state
   const [recipes, setRecipes] = useState<any[]>([]);
   const [recipeSearch, setRecipeSearch] = useState('');
   const [showRecipePicker, setShowRecipePicker] = useState(false);
+
+  // Fetch meal courses on mount
+  useEffect(() => {
+    const fetchMealCourses = async () => {
+      try {
+        const response = await fetch('/api/settings/meal-courses');
+        if (response.ok) {
+          const data = await response.json();
+          setMealCourses(data.mealCourses || DEFAULT_MEAL_COURSES);
+        }
+      } catch (error) {
+        console.error('Failed to fetch meal courses:', error);
+      }
+    };
+    fetchMealCourses();
+  }, []);
 
   useEffect(() => {
     fetchMeals();
   }, [currentMonth]);
 
   useEffect(() => {
-    if (showEditModal && !editingMeal) {
+    if (showEditModal) {
       fetchRecipes();
     }
   }, [showEditModal]);
@@ -264,11 +291,25 @@ export default function PlannerPage() {
   };
 
   const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    if (viewMode === 'weekly') {
+      // Move back one week
+      const newDate = new Date(currentMonth);
+      newDate.setDate(newDate.getDate() - 7);
+      setCurrentMonth(newDate);
+    } else {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    }
   };
 
   const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    if (viewMode === 'weekly') {
+      // Move forward one week
+      const newDate = new Date(currentMonth);
+      newDate.setDate(newDate.getDate() + 7);
+      setCurrentMonth(newDate);
+    } else {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    }
   };
 
   // Calendar helper functions
@@ -328,10 +369,25 @@ export default function PlannerPage() {
   };
 
   const formatDate = (date: Date): string => {
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const formatMonthYear = (): string => {
+    if (viewMode === 'weekly') {
+      // Calculate week range
+      const weekStart = new Date(currentMonth);
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const startStr = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const endStr = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      return `${startStr} - ${endStr}`;
+    }
     return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
@@ -354,18 +410,6 @@ export default function PlannerPage() {
 
   return (
     <AuthenticatedLayout
-      title={
-        <span style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#f97316',
-          backgroundColor: '#fff7ed',
-          padding: '4px 12px',
-          borderRadius: '8px'
-        }}>
-          MealBrain
-        </span>
-      }
       action={null}
     >
       <div style={{ padding: '16px 16px 80px 16px' }}>
@@ -426,7 +470,53 @@ export default function PlannerPage() {
           </button>
         </div>
 
+        {/* View Toggle */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginBottom: '16px',
+          padding: '4px',
+          backgroundColor: '#f3f4f6',
+          borderRadius: '8px',
+          width: 'fit-content'
+        }}>
+          <button
+            onClick={() => setViewMode('monthly')}
+            style={{
+              padding: '6px 16px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: viewMode === 'monthly' ? '#f97316' : 'transparent',
+              color: viewMode === 'monthly' ? 'white' : '#6b7280',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setViewMode('weekly')}
+            style={{
+              padding: '6px 16px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: viewMode === 'weekly' ? '#f97316' : 'transparent',
+              color: viewMode === 'weekly' ? 'white' : '#6b7280',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Weekly
+          </button>
+        </div>
+
         {/* Calendar Grid */}
+        {viewMode === 'monthly' && (
+        <>
         <div style={{ marginBottom: '16px' }}>
           {/* Day names header */}
           <div style={{
@@ -503,7 +593,7 @@ export default function PlannerPage() {
                           width: '6px',
                           height: '6px',
                           borderRadius: '50%',
-                          backgroundColor: MEAL_COLORS[meal.meal_type]
+                          backgroundColor: getMealColor(meal.meal_type)
                         }}
                       />
                     ))}
@@ -514,7 +604,7 @@ export default function PlannerPage() {
           </div>
         </div>
 
-        {/* Selected Date Meals List */}
+        {/* Selected Date Meals List - Monthly View Only */}
         <div style={{ marginBottom: '16px' }}>
           <div style={{
             display: 'flex',
@@ -573,13 +663,13 @@ export default function PlannerPage() {
                       width: '4px',
                       height: '36px',
                       borderRadius: '2px',
-                      backgroundColor: MEAL_COLORS[meal.meal_type],
+                      backgroundColor: getMealColor(meal.meal_type),
                       flexShrink: 0
                     }}
                   />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                      {MEAL_LABELS[meal.meal_type]}: {meal.recipe.title}
+                      {getMealLabel(meal.meal_type)}: {meal.recipe.title}
                     </div>
                     {meal.serving_size && (
                       <div style={{ fontSize: '14px', color: '#6b7280' }}>
@@ -603,22 +693,180 @@ export default function PlannerPage() {
           flexWrap: 'wrap',
           justifyContent: 'center'
         }}>
-          {Object.entries(MEAL_COLORS).map(([type, color]) => (
-            <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {mealCourses.map((course) => (
+            <div key={course.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div
                 style={{
                   width: '12px',
                   height: '12px',
                   borderRadius: '50%',
-                  backgroundColor: color
+                  backgroundColor: course.color
                 }}
               />
               <span style={{ fontSize: '14px', color: '#111827' }}>
-                {MEAL_LABELS[type as MealType]}
+                {course.name}
               </span>
             </div>
           ))}
         </div>
+        </>
+        )}
+
+        {/* Weekly List View */}
+        {viewMode === 'weekly' && (
+          <div style={{ marginBottom: '16px' }}>
+            {(() => {
+              // Get the week containing the current date reference
+              const weekStart = new Date(currentMonth);
+              // Adjust to start of week (Sunday)
+              weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+
+              const weekDays: Date[] = [];
+              for (let i = 0; i < 7; i++) {
+                const day = new Date(weekStart);
+                day.setDate(day.getDate() + i);
+                weekDays.push(day);
+              }
+
+              return weekDays.map((date, idx) => {
+                const dayMeals = getMealsForDate(date);
+                const isTodayDate = isToday(date);
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      marginBottom: '20px',
+                      border: isTodayDate ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      borderRadius: '12px',
+                      backgroundColor: 'white',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Day Header */}
+                    <div style={{
+                      padding: '12px 16px',
+                      backgroundColor: isTodayDate ? '#fff7ed' : '#f9fafb',
+                      borderBottom: '1px solid #e5e7eb',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
+                          {date.toLocaleDateString('en-US', { weekday: 'long' })}
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                          {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => openAddModal(date)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#f97316',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        + Add
+                      </button>
+                    </div>
+
+                    {/* Meals for this day */}
+                    <div style={{ padding: '12px' }}>
+                      {dayMeals.length === 0 ? (
+                        <div style={{
+                          padding: '24px 16px',
+                          textAlign: 'center',
+                          color: '#9ca3af',
+                          fontSize: '14px'
+                        }}>
+                          No meals planned
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {dayMeals.map(meal => (
+                            <div
+                              key={meal.id}
+                              onClick={() => openEditModal(meal)}
+                              style={{
+                                padding: '12px',
+                                backgroundColor: '#f9fafb',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                gap: '12px',
+                                alignItems: 'center',
+                                border: '1px solid #e5e7eb'
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: '4px',
+                                  height: '40px',
+                                  borderRadius: '2px',
+                                  backgroundColor: getMealColor(meal.meal_type),
+                                  flexShrink: 0
+                                }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <div style={{
+                                  fontSize: '12px',
+                                  fontWeight: '600',
+                                  color: '#6b7280',
+                                  textTransform: 'uppercase',
+                                  marginBottom: '4px'
+                                }}>
+                                  {getMealLabel(meal.meal_type)}
+                                </div>
+                                <div style={{
+                                  fontSize: '16px',
+                                  fontWeight: '600',
+                                  color: '#111827',
+                                  marginBottom: '4px'
+                                }}>
+                                  {meal.recipe.title}
+                                </div>
+                                {meal.serving_size && (
+                                  <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                                    Serves {meal.serving_size}
+                                  </div>
+                                )}
+                                {meal.recipe.tags && meal.recipe.tags.length > 0 && (
+                                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px', flexWrap: 'wrap' }}>
+                                    {meal.recipe.tags.slice(0, 3).map(tag => (
+                                      <span
+                                        key={tag}
+                                        style={{
+                                          fontSize: '11px',
+                                          padding: '2px 8px',
+                                          backgroundColor: '#e5e7eb',
+                                          color: '#6b7280',
+                                          borderRadius: '4px'
+                                        }}
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        )}
 
         {/* Edit/Add Modal */}
         {showEditModal && (
@@ -695,15 +943,15 @@ export default function PlannerPage() {
                   Meal
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                  {Object.entries(MEAL_COLORS).map(([type, color]) => (
+                  {mealCourses.map((course) => (
                     <button
-                      key={type}
-                      onClick={() => setEditMealType(type as MealType)}
+                      key={course.id}
+                      onClick={() => setEditMealType(course.id)}
                       style={{
                         padding: '12px',
-                        border: editMealType === type ? `2px solid ${color}` : '1px solid #e5e7eb',
+                        border: editMealType === course.id ? `2px solid ${course.color}` : '1px solid #e5e7eb',
                         borderRadius: '8px',
-                        backgroundColor: editMealType === type ? `${color}10` : 'white',
+                        backgroundColor: editMealType === course.id ? `${course.color}10` : 'white',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -717,10 +965,10 @@ export default function PlannerPage() {
                           width: '12px',
                           height: '12px',
                           borderRadius: '50%',
-                          backgroundColor: color
+                          backgroundColor: course.color
                         }}
                       />
-                      {MEAL_LABELS[type as MealType]}
+                      {course.name}
                     </button>
                   ))}
                 </div>
