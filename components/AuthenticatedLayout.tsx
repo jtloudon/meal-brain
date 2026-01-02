@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/auth/supabase-client';
 import BottomNav from './BottomNav';
+import FloatingAIButton from './FloatingAIButton';
 
 interface AuthenticatedLayoutProps {
   children: React.ReactNode;
@@ -91,6 +92,9 @@ export default function AuthenticatedLayout({
       <main className="flex-1 pb-40">
         {children}
       </main>
+
+      {/* Floating AI Button */}
+      <FloatingAIButton />
 
       {/* Bottom Navigation */}
       <BottomNav />

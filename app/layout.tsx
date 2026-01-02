@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import SplashScreen from './components/SplashScreen';
 
 export const metadata: Metadata = {
   title: 'MealBrain',
@@ -18,7 +19,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <SplashScreen />
+        {children}
+      </body>
     </html>
   );
 }

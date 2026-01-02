@@ -7,10 +7,10 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 2 Complete - All Core Features Working ✅
-**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal)** + **Grocery List (Full CRUD + Clear Checked)** + **Settings (Meal Planner + About)** + **Action Buttons (All Working)**
-**Phase:** Phase 1 ✅ → Phase 2 ✅ → **Phase 3 ✅** (UX Polish ✅ → Navigation Redesign ✅ → Settings Pages ✅)
-**Last Updated:** 2025-12-30
+**Status:** Phase 3 Complete - Branded Experience + AI Foundation Ready ✅
+**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal)** + **Grocery List (Full CRUD + Clear Checked)** + **Settings (Meal Planner + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)**
+**Phase:** Phase 1 ✅ → Phase 2 ✅ → **Phase 3 ✅** (UX Polish ✅ → Navigation Redesign ✅ → Settings Pages ✅ → **Branding & Splash ✅**)
+**Last Updated:** 2026-01-02
 
 ---
 
@@ -38,15 +38,28 @@ Architecture is not fully locked but large shifts are not anticipated.
 ---
 
 ## UI / UX Definition
-**Level:** Wireframes and visual direction mostly defined
+**Level:** Brand identity established, high-fidelity implementation complete ✅
 
-Characteristics:
-- Mobile-first responsive design
-- Bottom navigation with iconography (calendar, recipes, groceries, chat)
-- Clean, modern, mostly white, flat aesthetic
-- Focus on simplicity over density
+**Brand Identity** (Implemented 2026-01-02):
+- **Primary Color**: Orange (#f97316) - "hero orange"
+- **Brand Icon**: Chef's hat (40px SVG) = AI sous chef
+- **Brand Name**: "MealBrain" (single word)
+- **Tagline**: "An AI sous chef you control - helpful, never bossy"
 
-High-fidelity designs do not yet exist.
+**Visual System**:
+- Mobile-first responsive design (375px-667px optimized)
+- Orange navigation bar (bottom) with white icons
+- Splash screen (2.5s) with chef's hat, subtle zoom animation
+- Branded login page with minimal design (transparent input, white underline)
+- Floating chef's hat AI button (bottom-right FAB, 60px)
+- Clean white content areas with orange accents
+- Icon continuity: splash → login → AI panel
+
+**Design Philosophy**:
+- Warmth and approachability (orange)
+- Minimal friction (clean, simple inputs)
+- Brand consistency (chef's hat throughout)
+- Mobile-optimized touch targets
 
 ---
 
@@ -540,10 +553,58 @@ The goal is to:
 
 This file should be reviewed before any major build step.
 
-## Current Blockers (Added 2025-12-27)
+---
+
+## Recent Completions (2026-01-02)
+
+### Branding & UX Overhaul ✅
+**What**: Established complete brand identity and visual continuity system
+
+**Completed**:
+1. **Splash Screen** (app/components/SplashScreen.tsx):
+   - 2.5-second branded loading screen
+   - Chef's hat icon (40px white SVG)
+   - "MealBrain" title with tagline
+   - Subtle zoom animation (scale 0.95 → 1.0, 1s ease-out)
+   - Orange background (#f97316)
+   - Auto-redirects to /login
+
+2. **Login Page Redesign** (app/login/page.tsx):
+   - Orange background matching splash
+   - Chef's hat and "MealBrain" positioned identically to splash (seamless transition)
+   - Minimal input design: transparent background with white underline only
+   - Placeholder text: subtle peachy white for legibility
+   - Pill-shaped button (rounded-full) with semi-transparent white background
+   - Success message replaces helper text in-place (no box)
+   - Autofill styling override (prevents white background)
+
+3. **Navigation Bar Redesign** (components/BottomNav.tsx):
+   - Orange background (#f97316) - matches splash/login
+   - White icons (Calendar, CookingPot, ShoppingCart, Settings)
+   - Active state: 15% white overlay for subtle highlight
+   - Maintains brand continuity throughout app
+
+4. **Floating AI Button** (components/FloatingAIButton.tsx):
+   - Chef's hat FAB (60px circle, bottom-right)
+   - Orange background with drop shadow
+   - Hover effect: scale 1.1x
+   - Positioned above nav bar (80px from bottom)
+   - Shows on all authenticated pages
+   - Placeholder for future AI chat panel
+
+**Brand Rationale**:
+- Chef's hat = AI sous chef (icon continuity)
+- Orange = warmth, food, energy
+- Minimal design = mobile-first, reduces friction
+- Visual continuity: splash → login → app (same colors/icons)
+
+**Next Phase**: AI chat panel integration (chef's hat triggers slide-up panel)
+
+---
+
+## Current Blockers
 
 ### Dev Login Auth Bypass
-- **Status**: BLOCKED - No working automated dev login
-- **Workaround**: Use production magic link (check Mailpit at http://127.0.0.1:54324)
-- **Details**: See `docs/17_dev_login_blocker.md`
-- **Next**: Decide on Option A (manual), B (custom bypass), or C (debug Supabase)
+- **Status**: RESOLVED ✅ (Updated 2025-12-27)
+- Using /dev-login with signInWithPassword() + setSession()
+- All 3 dev users work correctly (demo, spouse, test)

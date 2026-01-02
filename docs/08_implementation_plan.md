@@ -603,13 +603,46 @@ The MVP is complete when:
   - [x] Removed section parsing from display (preserves hyphens in UI)
   - [x] Added user tip to view original for groupings
   - [x] Import includes: title, ingredients, instructions, notes, times, serving size, image, source URL
+- [x] **Branding & Splash Screen** ✅ (Completed 2026-01-02)
+  - [x] Splash Screen Component (app/components/SplashScreen.tsx)
+    - [x] Orange background (#f97316) - hero brand color
+    - [x] Chef's hat icon (40px white SVG)
+    - [x] "MealBrain" title with tagline
+    - [x] Subtle zoom animation (scale 0.95 → 1.0, 1s ease-out)
+    - [x] 2.5-second display duration
+    - [x] Fade-out transition (500ms)
+    - [x] Auto-redirect to /login
+  - [x] Login Page Redesign (app/login/page.tsx)
+    - [x] Orange background matching splash
+    - [x] Chef's hat and title positioned identically to splash (seamless transition)
+    - [x] Minimal input design: transparent bg with white underline only
+    - [x] Placeholder text: subtle peachy white (rgba(255,255,255,0.65))
+    - [x] Pill-shaped button (rounded-full) with semi-transparent white bg
+    - [x] Success message replaces helper text in-place
+    - [x] Autofill styling override (prevents white background)
+  - [x] Navigation Bar Redesign (components/BottomNav.tsx)
+    - [x] Orange background (#f97316)
+    - [x] White icons (all navigation items)
+    - [x] Active state: 15% white overlay
+    - [x] Brand continuity throughout app
+  - [x] Floating AI Button (components/FloatingAIButton.tsx)
+    - [x] Chef's hat FAB (60px circle, bottom-right)
+    - [x] Orange background with drop shadow
+    - [x] Hover effect: scale 1.1x
+    - [x] Positioned above nav bar (80px from bottom)
+    - [x] Shows on all authenticated pages (AuthenticatedLayout)
+    - [x] Placeholder for AI chat panel integration
+  - [x] Brand Architecture Documentation
+    - [x] Updated docs/01_architecture.md with UI/UX branding section
+    - [x] Documented visual continuity pattern (splash → login → app)
+    - [x] Defined brand rationale and design philosophy
 - [ ] **Future Polish Items**
   - [ ] Mobile responsiveness testing
   - [ ] Loading states
   - [ ] Error handling improvements
   - [ ] Accessibility audit (ARIA labels, keyboard navigation)
 
-**Phase 2 Progress Stats (Updated 2025-12-28)**:
+**Phase 3 Progress Stats (Updated 2026-01-02)**:
 - **26/26 E2E tests passing (100%)** ✅
 - **All 12 backend Tools complete and validated** ✅ (34/34 tests, 100%)
 - **Recipe management: Full CRUD** ✅ (7/7 E2E tests, 100% coverage)
@@ -617,6 +650,9 @@ The MVP is complete when:
 - **Grocery list: Full CRUD + Move Items** ✅ (7/7 E2E tests, 100% coverage)
 - **TDD workflow established** ✅ (Test-first development for all new features)
 - **E2E testing infrastructure complete** ✅ (26/26 tests passing)
+- **Brand identity established** ✅ (Orange + chef's hat throughout)
+- **Splash screen + branded login** ✅ (Seamless visual transition)
+- **Floating AI button** ✅ (Chef's hat FAB, ready for AI panel)
 
 ---
 

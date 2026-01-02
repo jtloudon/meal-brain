@@ -21,8 +21,8 @@ export default function BottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#e8e6e1',
-        borderTop: '1px solid #d1d5db',
+        backgroundColor: '#f97316',
+        borderTop: '1px solid rgba(0, 0, 0, 0.1)',
         zIndex: 50,
       }}
     >
@@ -49,8 +49,8 @@ export default function BottomNav() {
                 justifyContent: 'center',
                 flex: 1,
                 height: '100%',
-                color: '#f97316',
-                backgroundColor: isActive ? 'rgba(249, 115, 22, 0.1)' : 'transparent',
+                color: 'white',
+                backgroundColor: isActive ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                 borderRadius: '8px',
                 transition: 'background-color 0.2s',
                 margin: '0 4px'

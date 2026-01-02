@@ -99,6 +99,43 @@ Optional later:
 
 ---
 
+## UI/UX & Branding Architecture
+
+**Brand Identity** (Implemented 2026-01-02):
+- **Primary Color**: Orange (#f97316) - "hero orange"
+- **Brand Icon**: Chef's hat (SVG, 40px)
+- **Brand Name**: "MealBrain" (single word, white text on orange)
+- **Tagline**: "An AI sous chef you control - helpful, never bossy"
+
+**Visual Continuity Pattern**:
+1. **Splash Screen** (2.5 seconds):
+   - Orange background, chef's hat icon, MealBrain title, tagline
+   - Subtle zoom animation (scale 0.95 → 1.0)
+   - Sets brand expectations before app loads
+2. **Login Page**:
+   - Same orange background, chef's hat, MealBrain title
+   - Minimal design: transparent input with white underline
+   - Pill-shaped button with subtle semi-transparent white background
+   - Icon and title positioned identically to splash (seamless transition)
+3. **Authenticated Pages**:
+   - Orange navigation bar (bottom) with white icons
+   - Floating chef's hat AI button (bottom-right, 60px FAB)
+   - Clean white content areas
+
+**Branding Rationale**:
+- Chef's hat = AI sous chef (brand + AI trigger)
+- Orange = warmth, food, energy (consistent throughout)
+- Minimal design = mobile-first, reduces friction
+- Icon continuity = splash → login → AI panel
+
+**AI Panel Design** (Future):
+- Trigger: Floating chef's hat button (all authenticated pages)
+- Interaction: Tap to expand chat panel from bottom
+- Visual: Same orange branding, slides over content
+- Purpose: AI assistant for meal planning, recipe suggestions, grocery help
+
+---
+
 ## AI Modes
 ### Creative Mode
 Used for:
