@@ -82,6 +82,6 @@ export async function createHousehold(householdName: string) {
 
   console.log('[SERVER ACTION] Success - household created:', household.id);
 
-  // Redirect to planner
-  redirect('/planner');
+  // Redirect to preferences onboarding
+  redirect('/onboarding/preferences');
 }

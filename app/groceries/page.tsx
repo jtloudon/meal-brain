@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus, Pencil, ChevronDown } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown, Trash2 } from 'lucide-react';
 
 interface GroceryItem {
   id: string;
@@ -55,6 +55,10 @@ export default function GroceriesPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showClearCheckedConfirm, setShowClearCheckedConfirm] = useState(false);
   const [shoppingCategories, setShoppingCategories] = useState<string[]>([]);
+  const [editingListName, setEditingListName] = useState(false);
+  const [editListName, setEditListName] = useState('');
+  const [showDeleteListConfirm, setShowDeleteListConfirm] = useState(false);
+  const [listToDelete, setListToDelete] = useState<string | null>(null);
 
   // Fetch shopping categories on mount
   useEffect(() => {
@@ -244,6 +248,65 @@ export default function GroceriesPage() {
       }
     } catch (error) {
       console.error('Error deleting item:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveListName = async () => {
+    if (!selectedListId || !editListName.trim()) return;
+
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/grocery/lists/${selectedListId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editListName.trim() }),
+      });
+
+      if (res.ok) {
+        const updatedList = await res.json();
+        setLists((prev) =>
+          prev.map((list) => (list.id === selectedListId ? updatedList : list))
+        );
+        setEditingListName(false);
+      }
+    } catch (error) {
+      console.error('Error updating list name:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteList = async () => {
+    if (!listToDelete) return;
+
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/grocery/lists/${listToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        // Remove from lists array
+        setLists((prev) => prev.filter((list) => list.id !== listToDelete));
+
+        // If deleting the currently selected list, switch to another list
+        if (selectedListId === listToDelete) {
+          const remainingLists = lists.filter((list) => list.id !== listToDelete);
+          if (remainingLists.length > 0) {
+            setSelectedListId(remainingLists[0].id);
+          } else {
+            setSelectedListId(null);
+            setItems([]);
+          }
+        }
+
+        setShowDeleteListConfirm(false);
+        setListToDelete(null);
+      }
+    } catch (error) {
+      console.error('Error deleting list:', error);
     } finally {
       setSaving(false);
     }
@@ -449,26 +512,114 @@ export default function GroceriesPage() {
           </button>
         </div>
 
-        {/* List Selector - Clickable name with arrow */}
-        <button
-          onClick={() => setShowListSelector(true)}
-          style={{
-            width: '100%',
+        {/* List Selector - Clickable name with arrow + Edit button */}
+        {editingListName ? (
+          <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '12px 0',
-            marginBottom: '24px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-        >
-          <span style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
-            {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
-          </span>
-          <ChevronDown size={24} style={{ color: '#9ca3af' }} />
-        </button>
+            gap: '8px',
+            marginBottom: '24px'
+          }}>
+            <input
+              type="text"
+              value={editListName}
+              onChange={(e) => setEditListName(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') handleSaveListName();
+                if (e.key === 'Escape') setEditingListName(false);
+              }}
+              autoFocus
+              style={{
+                flex: 1,
+                fontSize: '24px',
+                fontWeight: '600',
+                padding: '8px 12px',
+                border: '2px solid #f97316',
+                borderRadius: '8px',
+                outline: 'none'
+              }}
+            />
+            <button
+              onClick={handleSaveListName}
+              disabled={!editListName.trim() || saving}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#f97316',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                opacity: (!editListName.trim() || saving) ? 0.5 : 1
+              }}
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setEditingListName(false)}
+              disabled={saving}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'white',
+                color: '#6b7280',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '24px'
+          }}>
+            <button
+              onClick={() => setShowListSelector(true)}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 0',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <span style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
+                {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
+              </span>
+              <ChevronDown size={24} style={{ color: '#9ca3af' }} />
+            </button>
+            <button
+              onClick={() => {
+                const currentList = lists.find(l => l.id === selectedListId);
+                if (currentList) {
+                  setEditListName(currentList.name);
+                  setEditingListName(true);
+                }
+              }}
+              style={{
+                padding: '8px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+              title="Rename list"
+            >
+              <Pencil size={20} style={{ color: '#f97316' }} />
+            </button>
+          </div>
+        )}
 
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
@@ -747,28 +898,56 @@ export default function GroceriesPage() {
               </h3>
               <div style={{ marginBottom: '20px' }}>
                 {lists.map((list) => (
-                  <button
+                  <div
                     key={list.id}
-                    onClick={() => {
-                      setSelectedListId(list.id);
-                      setShowListSelector(false);
-                    }}
                     style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: list.id === selectedListId ? '#f0f9ff' : 'white',
-                      border: list.id === selectedListId ? '2px solid #4A90E2' : '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      color: '#111827',
-                      cursor: 'pointer',
-                      marginBottom: '8px',
-                      textAlign: 'left',
-                      fontWeight: list.id === selectedListId ? '600' : '400'
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '8px'
                     }}
                   >
-                    {list.name}
-                  </button>
+                    <button
+                      onClick={() => {
+                        setSelectedListId(list.id);
+                        setShowListSelector(false);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '12px 16px',
+                        backgroundColor: list.id === selectedListId ? '#f0f9ff' : 'white',
+                        border: list.id === selectedListId ? '2px solid #4A90E2' : '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        color: '#111827',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontWeight: list.id === selectedListId ? '600' : '400'
+                      }}
+                    >
+                      {list.name}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setListToDelete(list.id);
+                        setShowDeleteListConfirm(true);
+                      }}
+                      style={{
+                        padding: '12px',
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title="Delete list"
+                    >
+                      <Trash2 size={18} style={{ color: '#ef4444' }} />
+                    </button>
+                  </div>
                 ))}
               </div>
               <button
@@ -1257,6 +1436,88 @@ export default function GroceriesPage() {
                   }}
                 >
                   {saving ? 'Clearing...' : 'Clear Checked'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete List Confirmation Dialog */}
+        {showDeleteListConfirm && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 150,
+            padding: '0 16px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '100%'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: '8px'
+              }}>
+                Delete Grocery List?
+              </h3>
+              <p style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                marginBottom: '24px'
+              }}>
+                This will permanently delete "{lists.find(l => l.id === listToDelete)?.name}" and all its items. This action cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => {
+                    setShowDeleteListConfirm(false);
+                    setListToDelete(null);
+                  }}
+                  disabled={saving}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    backgroundColor: '#e5e7eb',
+                    color: '#374151',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    opacity: saving ? 0.5 : 1
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteList}
+                  disabled={saving}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    opacity: saving ? 0.5 : 1
+                  }}
+                >
+                  {saving ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             </div>

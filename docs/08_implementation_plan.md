@@ -636,6 +636,22 @@ The MVP is complete when:
     - [x] Updated docs/01_architecture.md with UI/UX branding section
     - [x] Documented visual continuity pattern (splash → login → app)
     - [x] Defined brand rationale and design philosophy
+- [x] **User Onboarding Flow** ✅ (Completed 2026-01-02)
+  - [x] Multi-step preferences collection (6 steps)
+  - [x] Household context, dietary constraints, AI style
+  - [x] Planning preferences, AI learning toggle
+  - [x] Summary screen with orange uppercase labels
+  - [x] Progress indicator and navigation
+  - [x] Skip option with safe defaults
+  - [x] Seed data: 3 example recipes with images
+  - [x] Default grocery list creation
+  - [x] Duplicate prevention for seed data
+  - [x] Integration: household → preferences → recipes
+- [x] **Grocery List Management** ✅ (Completed 2026-01-02)
+  - [x] Rename functionality (inline edit with pencil icon)
+  - [x] Delete functionality (trash icon with confirmation)
+  - [x] Edge case handling (auto-switch when deleting current list)
+  - [x] API endpoints: PATCH and DELETE for lists
 - [ ] **Future Polish Items**
   - [ ] Mobile responsiveness testing
   - [ ] Loading states
@@ -643,13 +659,18 @@ The MVP is complete when:
   - [ ] Accessibility audit (ARIA labels, keyboard navigation)
 
 **Phase 3 Progress Stats (Updated 2026-01-02)**:
-- **26/26 E2E tests passing (100%)** ✅
+- **31/31 E2E tests passing (100%)** ✅
+  - Recipe management: 7/7 tests ✅
+  - Meal planner: 5/5 tests ✅
+  - Grocery list: 7/7 tests ✅
+  - Authentication: 5/5 tests ✅
+  - Onboarding: 5/5 tests ✅
+  - Action buttons: 6/6 tests ✅
 - **All 12 backend Tools complete and validated** ✅ (34/34 tests, 100%)
-- **Recipe management: Full CRUD** ✅ (7/7 E2E tests, 100% coverage)
-- **Meal planner: Full CRUD** ✅ (5/5 E2E tests, 100% coverage)
-- **Grocery list: Full CRUD + Move Items** ✅ (7/7 E2E tests, 100% coverage)
+- **User onboarding complete** ✅ (6-step flow with seed data)
+- **Grocery list management complete** ✅ (Rename + Delete)
 - **TDD workflow established** ✅ (Test-first development for all new features)
-- **E2E testing infrastructure complete** ✅ (26/26 tests passing)
+- **E2E testing infrastructure complete** ✅
 - **Brand identity established** ✅ (Orange + chef's hat throughout)
 - **Splash screen + branded login** ✅ (Seamless visual transition)
 - **Floating AI button** ✅ (Chef's hat FAB, ready for AI panel)

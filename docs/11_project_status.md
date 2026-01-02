@@ -7,9 +7,9 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 3 Complete - Branded Experience + AI Foundation Ready ✅
-**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal)** + **Grocery List (Full CRUD + Clear Checked)** + **Settings (Meal Planner + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)**
-**Phase:** Phase 1 ✅ → Phase 2 ✅ → **Phase 3 ✅** (UX Polish ✅ → Navigation Redesign ✅ → Settings Pages ✅ → **Branding & Splash ✅**)
+**Status:** Phase 3 Complete + Onboarding & User Experience Enhancements ✅
+**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow)** + **Seed Data (Example recipes + Default list)**
+**Phase:** Phase 1 ✅ → Phase 2 ✅ → **Phase 3 ✅** → **Ready for Phase 4 (AI Integration)** ✅
 **Last Updated:** 2026-01-02
 
 ---
@@ -599,6 +599,70 @@ This file should be reviewed before any major build step.
 - Visual continuity: splash → login → app (same colors/icons)
 
 **Next Phase**: AI chat panel integration (chef's hat triggers slide-up panel)
+
+---
+
+## Recent Completions (2026-01-02 Continued)
+
+### User Onboarding Experience ✅
+**What**: Complete 6-step onboarding flow with preferences collection and data seeding
+
+**Completed**:
+1. **Multi-Step Onboarding Flow** (`/onboarding/preferences`):
+   - Step 1: Household Context (just-me, couple, family)
+   - Step 2: Dietary Constraints (multi-select + custom)
+   - Step 3: AI Collaboration Style (coach vs collaborator)
+   - Step 4: Planning Preferences (multi-select)
+   - Step 5: AI Learning toggle (enable/disable)
+   - Step 6: Summary & Confirmation
+   - Progress bar (Step X of 6)
+   - Next/Back navigation
+   - Skip option with safe defaults
+   - Mobile-first design with orange branding
+
+2. **Seed Data for New Users** (`app/onboarding/preferences/actions.ts`):
+   - 3 Example recipes created automatically:
+     - Example: Chicken Curry (with image)
+     - Example: Beef Tacos (with image)
+     - Example: Black Bean Tacos (with image)
+   - Default grocery list: "My First List"
+   - Duplicate prevention (checks for existing examples)
+   - Runs after preferences saved
+
+3. **Integration**:
+   - Household creation → Preferences onboarding → Recipes page
+   - User preferences saved to `user_preferences` table
+   - API endpoint: `/api/user/preferences` (GET/PUT)
+   - Seamless flow from signup to first app experience
+
+### Grocery List Management Enhancements ✅
+**What**: Complete CRUD operations for grocery lists including rename and delete
+
+**Completed**:
+1. **Rename Functionality**:
+   - API endpoint: `PATCH /api/grocery/lists/[id]`
+   - UI: Inline edit with pencil icon
+   - Save/Cancel buttons
+   - Enter to save, Escape to cancel
+   - Empty name validation
+
+2. **Delete Functionality**:
+   - API endpoint: `DELETE /api/grocery/lists/[id]`
+   - UI: Red trash icon in list selector modal
+   - Confirmation dialog with list name
+   - Edge case handling: auto-switch to another list if deleting current
+   - Cascades deletion to all items (database constraint)
+
+3. **Summary Screen Styling**:
+   - Orange uppercase field labels (matches Settings page)
+   - Consistent text sizing (14px for labels and values)
+   - Letter spacing for readability
+
+**User Impact**:
+- New users immediately see example data demonstrating app capabilities
+- Can delete examples when ready to add own recipes
+- Full control over grocery list management
+- Professional onboarding experience sets proper expectations for AI behavior
 
 ---
 
