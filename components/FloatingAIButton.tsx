@@ -1,13 +1,20 @@
 'use client';
 
+import { useState } from 'react';
+import AIChatPanel from '../app/components/AIChatPanel';
+
 export default function FloatingAIButton() {
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
   const handleClick = () => {
-    // TODO: Open AI chat panel
-    console.log('AI panel clicked - will implement chat panel later');
+    console.log('Chef hat clicked, opening panel...');
+    setIsPanelOpen(true);
+    console.log('isPanelOpen set to:', true);
   };
 
   return (
-    <button
+    <>
+      <button
       onClick={handleClick}
       aria-label="Open AI Assistant"
       style={{
@@ -24,15 +31,13 @@ export default function FloatingAIButton() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        transition: 'transform 0.2s, box-shadow 0.2s',
+        transition: 'box-shadow 0.2s',
         zIndex: 40,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'scale(1.1)';
         e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)';
         e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
       }}
     >
@@ -51,5 +56,8 @@ export default function FloatingAIButton() {
         <line x1="6" y1="17" x2="18" y2="17" />
       </svg>
     </button>
+
+      <AIChatPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />
+    </>
   );
 }

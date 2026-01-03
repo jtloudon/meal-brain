@@ -7,10 +7,10 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 3 Complete + Onboarding & User Experience Enhancements ✅
-**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow)** + **Seed Data (Example recipes + Default list)**
-**Phase:** Phase 1 ✅ → Phase 2 ✅ → **Phase 3 ✅** → **Ready for Phase 4 (AI Integration)** ✅
-**Last Updated:** 2026-01-02
+**Status:** Phase 4 AI Chat Panel (Read-Only) - FUNCTIONAL ✅ (UI Polish Needed)
+**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow)** + **Seed Data (Example recipes + Default list)** + **AI Chat Panel (Functional - Read-only tools working, minimal collapsed UI, recipe linkification)**
+**Phase:** Phase 1 ✅ → Phase 2 ✅ → Phase 3 ✅ → **Phase 4 (AI Integration) - MOSTLY COMPLETE** ✅
+**Last Updated:** 2026-01-02 (Night - AI Chat Panel functional with all read-only tools)
 
 ---
 
@@ -663,6 +663,88 @@ This file should be reviewed before any major build step.
 - Can delete examples when ready to add own recipes
 - Full control over grocery list management
 - Professional onboarding experience sets proper expectations for AI behavior
+
+---
+
+## Recent Completions (2026-01-02 Evening)
+
+### AI Chat Panel - Phase 4 FUNCTIONAL ✅
+**What**: Interactive AI chat interface with Claude 4.5 Sonnet integration (read-only tools)
+
+**Completed** (2026-01-02 Night Session):
+1. **Chat Panel UI** (app/components/AIChatPanel.tsx):
+   - **Minimal collapsed design** - Small compact card (320px) with greeting and input
+   - **Expands on first message** - Transitions to full 70vh chat panel
+   - **Smooth animations** - 0.3s transition between collapsed/expanded states
+   - Dark backdrop (rgba(0,0,0,0.5)) with click-to-close (expanded only)
+   - Chat message bubbles (user: orange right, AI: gray left)
+   - **Recipe title linkification** - Auto-detects recipe names in responses, makes them clickable
+   - **Click recipe → navigate to detail** - Closes panel and opens recipe card
+   - Text input with send button, auto-scroll, loading state
+   - **React Portal rendering** - Proper z-index layering (999999/1000000)
+   - **Inline styles** - Overcomes Tailwind JIT limitations in portals
+   - **White background fix** - Added explicit backgroundColor: 'white'
+
+2. **Backend API Integration** (app/api/chat/route.ts):
+   - Claude Sonnet 4.5 SDK integration (@anthropic-ai/sdk)
+   - **Infinite loop fix** - Tool function parameters corrected (was passing wrong args)
+   - **Max 10 tool iterations** - Prevents runaway loops
+   - **5 Read-only tools enabled:**
+     - `recipe_list` - List recipes with filters (metadata only)
+     - **`recipe_get`** - Get FULL recipe details (ingredients, instructions, notes)
+     - `planner_list_meals` - View planned meals for date range
+     - `grocery_list_lists` - List all grocery lists
+     - `grocery_get_list` - Get items from specific list
+   - System prompt defining AI sous chef personality
+   - **30-second client timeout** - Prevents hanging requests
+   - Conversation history maintained, error handling with friendly messages
+   - Authentication + household isolation (RLS)
+
+3. **Critical Bugs Fixed**:
+   - ✅ **Display issue**: Panel content showing through (missing white background)
+   - ✅ **Infinite loop**: Tool calling 90+ times (wrong function parameters)
+     - Root cause: `listRecipes(householdId, {...})` should be `listRecipes({ filters: {...} }, { householdId })`
+     - Fixed all 5 tool calls to use correct `(input, context)` signature
+   - ✅ **Recipe visibility**: Claude couldn't see ingredients/instructions (added recipe_get tool)
+   - ✅ **Linkification**: Recipe titles in markdown (`**Beef Tacos**`) now clickable
+
+4. **UX Improvements**:
+   - Collapsed greeting: "Hi I'm your Sous Chef. How can I help?"
+   - Chef's hat icon in both collapsed and expanded states
+   - Close button (X) always accessible
+   - Orange color scheme throughout (#f97316)
+   - Clickable recipe titles with underline, hover effect, auto-navigation
+
+**Technical Challenges Solved**:
+- **Stacking context bug**: `transform: scale(1.1)` on FloatingAIButton created CSS stacking context
+  - Solution: Removed transform, use box-shadow for hover effect only
+- **Background transparency**: Tailwind `bg-white` not applied in portal
+  - Solution: Add `backgroundColor: 'white'` to inline styles
+- **Tool parameter mismatch**: All tools receiving garbage input
+  - Solution: Corrected to `toolFunction(input, context)` pattern
+- **Recipe matching**: Titles with "Example: " prefix and markdown formatting
+  - Solution: Strip prefixes, match `**title**` patterns
+
+**Files Modified** (2026-01-02 Night):
+- `app/components/AIChatPanel.tsx` - Minimal collapsed UI, recipe linkification, navigation
+- `app/api/chat/route.ts` - Fixed tool params, added recipe_get, max iterations, system prompt in loops
+- `components/FloatingAIButton.tsx` - Removed transform hover effect
+
+**Status**:
+- ✅ UI renders correctly (white background, proper layering)
+- ✅ Minimal collapsed design working
+- ✅ Backend connected to Claude 4.5 Sonnet
+- ✅ All 5 read-only tools functional (including recipe_get for full details)
+- ✅ Recipe titles clickable and navigable
+- ✅ No infinite loops (max 10 iterations enforced)
+- ⏳ UI polish needed (next session focus)
+- ⏳ Write tools with approval flow (Phase 4+ future work)
+
+**Next Steps**:
+1. **UI Polish** - Improve chat panel visual design (in progress)
+2. Add tool confirmation UI (approval modals for write operations)
+3. Enable write tools: `recipe.create`, `planner.add_meal`, `grocery.push_ingredients`
+4. Test end-to-end AI workflows ("Plan this week for me")
 
 ---
 
