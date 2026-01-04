@@ -1,11 +1,79 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
 import RecipeFormWithTabs from '@/components/RecipeFormWithTabs';
 import { parseIngredientsText } from '@/lib/utils/parse-ingredients';
 
 export default function NewRecipePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Parse initial data from URL params (from import)
+  const initialData = useMemo(() => {
+    const title = searchParams.get('title') || '';
+    const ingredientsParam = searchParams.get('ingredients');
+    const instructions = searchParams.get('instructions') || '';
+    const notes = searchParams.get('notes') || '';
+    const tagsParam = searchParams.get('tags');
+    const prepTime = searchParams.get('prepTime') || '';
+    const cookTime = searchParams.get('cookTime') || '';
+    const servingSize = searchParams.get('servingSize') || '';
+    const imageUrl = searchParams.get('imageUrl') || '';
+    const source = searchParams.get('source') || '';
+
+    // Parse ingredients from JSON if present
+    let ingredientsText = '';
+    if (ingredientsParam) {
+      try {
+        const ingredients = JSON.parse(ingredientsParam);
+        // Convert parsed ingredients back to text format for the form
+        ingredientsText = ingredients
+          .map((ing: any) => {
+            // Handle quantity ranges (e.g., "1-2")
+            const qty = ing.quantity_max !== null && ing.quantity_max !== undefined
+              ? `${ing.quantity_min}-${ing.quantity_max}`
+              : ing.quantity_min;
+            const unit = ing.unit;
+            const name = ing.name;
+            const prep = ing.prep_state ? `, ${ing.prep_state}` : '';
+            return `${qty} ${unit} ${name}${prep}`;
+          })
+          .join('\n');
+      } catch (e) {
+        console.error('Failed to parse ingredients:', e);
+      }
+    }
+
+    // Parse tags from JSON if present
+    let tagsString = '';
+    if (tagsParam) {
+      try {
+        const tagsArray = JSON.parse(tagsParam);
+        tagsString = tagsArray.join(', '); // Convert array to comma-separated string
+      } catch (e) {
+        console.error('Failed to parse tags:', e);
+      }
+    }
+
+    // Only return initial data if we have at least a title
+    if (!title) return undefined;
+
+    return {
+      title,
+      ingredientsText,
+      instructions,
+      notes,
+      tags: tagsString,
+      prepTime,
+      cookTime,
+      servingSize,
+      imageUrl,
+      source,
+      rating: null,
+      mealType: null,
+    };
+  }, [searchParams]);
 
   const handleSubmit = async (data: {
     title: string;
@@ -36,7 +104,8 @@ export default function NewRecipePage() {
         title: data.title,
         ingredients: parsedIngredients.map((ing) => ({
           name: ing.name,
-          quantity: ing.quantity,
+          quantity_min: ing.quantity_min,
+          quantity_max: ing.quantity_max,
           unit: ing.unit,
           prep_state: ing.prep_state || undefined,
         })),
@@ -66,6 +135,7 @@ export default function NewRecipePage() {
     <RecipeFormWithTabs
       mode="create"
       onSubmit={handleSubmit}
+      initialData={initialData}
     />
   );
 }

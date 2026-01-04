@@ -71,9 +71,9 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 bg-white z-40">
+      <header className="sticky top-0 bg-white z-40 flex-shrink-0">
         <div className="flex justify-between items-center px-4 py-3">
           <div style={{ flex: 1 }}>
             {typeof title === 'string' ? (
@@ -89,7 +89,7 @@ export default function AuthenticatedLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 pb-40">
+      <main className="flex-1 overflow-y-auto pb-20">
         {children}
       </main>
 

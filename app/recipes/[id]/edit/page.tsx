@@ -123,13 +123,14 @@ export default function EditRecipePage() {
         title: data.title,
         ingredients: parsedIngredients.map((ing) => ({
           name: ing.name,
-          quantity: ing.quantity,
+          quantity_min: ing.quantity_min,
+          quantity_max: ing.quantity_max,
           unit: ing.unit,
           prep_state: ing.prep_state || undefined,
         })),
         instructions: data.instructions || undefined,
         tags: data.tags.length > 0 ? data.tags : undefined,
-        rating: data.rating || undefined,
+        rating: data.rating !== null ? data.rating : null, // Allow explicit null to unset rating
         notes: data.notes || undefined,
         image_url: data.imageUrl || undefined,
         source: data.source || undefined,

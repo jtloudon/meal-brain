@@ -59,3 +59,22 @@ body {
 .animate-subtle-zoom {
   animation: subtle-zoom 1s ease-out forwards;
 }
+
+/* Hide Next.js dev indicator */
+#__next-build-watcher,
+#devtools-indicator,
+div[id*="devtools"],
+div[data-nextjs-toast],
+nextjs-portal,
+[data-nextjs-toast-wrapper],
+[class*="nextjs-toast"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Target by position - Next.js indicator is bottom-left */
+body > div[style*="position: fixed"][style*="bottom"][style*="left"]:not([class]):not([id]) {
+  display: none !important;
+}

@@ -40,6 +40,10 @@ const VALID_UNITS = [
   'can', 'cans',
   'package', 'packages',
   'slice', 'slices',
+  'fillet', 'fillets',
+  'piece', 'pieces',
+  'breast', 'breasts',
+  'thigh', 'thighs',
 ];
 
 // Normalize plural units to singular
@@ -67,11 +71,16 @@ const UNIT_NORMALIZATION: Record<string, string> = {
   'cans': 'can',
   'packages': 'package',
   'slices': 'slice',
+  'fillets': 'fillet',
+  'pieces': 'piece',
+  'breasts': 'breast',
+  'thighs': 'thigh',
 };
 
 export interface ParsedIngredient {
   name: string;
-  quantity: number;
+  quantity_min: number;
+  quantity_max: number | null;
   unit: string;
   prep_state?: string;
 }
@@ -86,44 +95,69 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
   // "2 tbsp vanilla extract"
   // "1 whole onion, diced"
 
-  let quantity = 0;
+  let quantity_min = 0;
+  let quantity_max: number | null = null;
   let remaining = trimmed;
 
-  // 1. Extract quantity (number or fraction at start)
-  const quantityMatch = remaining.match(/^([\d.]+\s*[\d/]*|[⅛¼⅓½⅔¾⅞])\s*/);
+  // 1. Extract quantity (number, fraction, or range at start)
+  const quantityMatch = remaining.match(/^([\d.]+(?:-[\d.]+)?(?:\s*[\d/]*)?|[⅛¼⅓½⅔¾⅞])\s*/);
   if (quantityMatch) {
     const quantityStr = quantityMatch[1].trim();
 
+    // Check if it's a range (e.g., "1-2" or "½-1")
+    if (quantityStr.includes('-') && !quantityStr.includes('/')) {
+      const [minStr, maxStr] = quantityStr.split('-').map(s => s.trim());
+
+      // Parse min value (could be fraction or number)
+      if (FRACTION_MAP[minStr]) {
+        quantity_min = FRACTION_MAP[minStr];
+      } else {
+        quantity_min = parseFloat(minStr);
+      }
+
+      // Parse max value (could be fraction or number)
+      if (FRACTION_MAP[maxStr]) {
+        quantity_max = FRACTION_MAP[maxStr];
+      } else {
+        quantity_max = parseFloat(maxStr);
+      }
+    }
     // Check if it's a fraction symbol
-    if (FRACTION_MAP[quantityStr]) {
-      quantity = FRACTION_MAP[quantityStr];
+    else if (FRACTION_MAP[quantityStr]) {
+      quantity_min = FRACTION_MAP[quantityStr];
     }
     // Check if it's a mixed number (e.g., "1 1/2")
     else if (quantityStr.includes(' ')) {
       const parts = quantityStr.split(' ');
       const whole = parseFloat(parts[0]);
       const fraction = FRACTION_MAP[parts[1]] || 0;
-      quantity = whole + fraction;
+      quantity_min = whole + fraction;
     }
     // Check if it's a fraction string (e.g., "1/2")
     else if (quantityStr.includes('/')) {
-      quantity = FRACTION_MAP[quantityStr] || 0;
+      quantity_min = FRACTION_MAP[quantityStr] || 0;
     }
     // Otherwise it's a decimal number
     else {
-      quantity = parseFloat(quantityStr);
+      quantity_min = parseFloat(quantityStr);
     }
 
     remaining = remaining.substring(quantityMatch[0].length).trim();
   }
 
-  if (quantity === 0 || isNaN(quantity)) {
+  if (quantity_min === 0 || isNaN(quantity_min)) {
     // No valid quantity found
     return null;
   }
 
-  // 2. Extract unit (must match valid units)
-  let unit = '';
+  // Validate max if it exists
+  if (quantity_max !== null && (quantity_max === 0 || isNaN(quantity_max))) {
+    // Invalid max value, treat as non-range
+    quantity_max = null;
+  }
+
+  // 2. Extract unit (optional - defaults to "whole" if not found)
+  let unit = 'whole';
   const unitPattern = new RegExp(`^(${VALID_UNITS.join('|')})\\s+`, 'i');
   const unitMatch = remaining.match(unitPattern);
 
@@ -132,10 +166,8 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
     // Normalize to singular form
     unit = UNIT_NORMALIZATION[unit] || unit;
     remaining = remaining.substring(unitMatch[0].length).trim();
-  } else {
-    // No valid unit found
-    return null;
   }
+  // If no unit found, remaining is just the ingredient name (use "whole" as default)
 
   // 3. Split name and prep_state by comma
   let name = remaining;
@@ -154,7 +186,8 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
 
   return {
     name,
-    quantity,
+    quantity_min,
+    quantity_max,
     unit,
     prep_state,
   };
@@ -182,7 +215,8 @@ export function parseIngredientsText(text: string): ParsedIngredient[] {
  */
 export function ingredientsToText(ingredients: Array<{
   display_name: string;
-  quantity: number;
+  quantity_min: number;
+  quantity_max: number | null;
   unit: string;
   prep_state?: string | null;
 }>): string {
@@ -190,16 +224,26 @@ export function ingredientsToText(ingredients: Array<{
     .map((ing) => {
       let line = '';
 
-      // Format quantity with fractions
-      const qty = ing.quantity;
-      if (qty === 0.125) line += '⅛';
-      else if (qty === 0.25) line += '¼';
-      else if (qty === 0.333) line += '⅓';
-      else if (qty === 0.5) line += '½';
-      else if (qty === 0.667) line += '⅔';
-      else if (qty === 0.75) line += '¾';
-      else if (qty === 0.875) line += '⅞';
-      else line += qty.toString();
+      // Helper function to format a single quantity value
+      const formatQuantity = (qty: number): string => {
+        if (qty === 0.125) return '⅛';
+        else if (qty === 0.25) return '¼';
+        else if (qty === 0.333) return '⅓';
+        else if (qty === 0.5) return '½';
+        else if (qty === 0.667) return '⅔';
+        else if (qty === 0.75) return '¾';
+        else if (qty === 0.875) return '⅞';
+        else return qty.toString();
+      };
+
+      // Format quantity (single or range)
+      if (ing.quantity_max !== null && ing.quantity_max !== undefined) {
+        // Range: "1-2" or "½-1"
+        line += `${formatQuantity(ing.quantity_min)}-${formatQuantity(ing.quantity_max)}`;
+      } else {
+        // Single quantity
+        line += formatQuantity(ing.quantity_min);
+      }
 
       line += ` ${ing.unit} ${ing.display_name}`;
 

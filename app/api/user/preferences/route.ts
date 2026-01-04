@@ -51,15 +51,20 @@ export async function GET(request: NextRequest) {
     // If no preferences exist yet, return defaults
     if (!preferences) {
       return NextResponse.json({
+        user_id: user.id,
         household_context: null,
         dietary_constraints: [],
         ai_style: null,
         planning_preferences: [],
         ai_learning_enabled: true,
+        default_grocery_list_id: null,
       });
     }
 
-    return NextResponse.json(preferences);
+    return NextResponse.json({
+      ...preferences,
+      user_id: user.id,
+    });
   } catch (error) {
     console.error('[API GET /user/preferences] Error:', error);
     return NextResponse.json(
@@ -114,6 +119,7 @@ export async function PUT(request: NextRequest) {
           ai_style: body.ai_style,
           planning_preferences: body.planning_preferences,
           ai_learning_enabled: body.ai_learning_enabled,
+          default_grocery_list_id: body.default_grocery_list_id,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }

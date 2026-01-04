@@ -109,6 +109,27 @@ export default function RecipeFormWithTabs({
         throw new Error('At least one ingredient is required');
       }
 
+      // Check for ingredients that won't parse
+      const lines = ingredientsText.split('\n').filter(line => line.trim());
+      const failedIngredients: string[] = [];
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+
+        // Check if line starts with a number or fraction (has quantity)
+        // Allow digits (0-9) or fraction symbols (⅛¼⅓½⅔¾⅞)
+        if (!/^[\d⅛¼⅓½⅔¾⅞]/.test(trimmed)) {
+          failedIngredients.push(trimmed);
+        }
+      }
+
+      if (failedIngredients.length > 0) {
+        throw new Error(
+          `Some ingredients are missing quantities. Please add a number before:\n${failedIngredients.map(ing => `• ${ing}`).join('\n')}\n\nExamples: "1 salmon", "2 cups flour", "½ tsp salt"`
+        );
+      }
+
       const tagArray = tags
         .split(',')
         .map((t) => t.trim())
@@ -229,16 +250,64 @@ export default function RecipeFormWithTabs({
         </button>
       </div>
 
-      {/* Error Message */}
+      {/* Error Modal */}
       {error && (
         <div style={{
-          margin: '12px 16px 0',
-          backgroundColor: '#fef2f2',
-          border: '1px solid #fecaca',
-          borderRadius: '8px',
-          padding: '12px'
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
         }}>
-          <p style={{ fontSize: '14px', color: '#dc2626', margin: 0 }}>{error}</p>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '100%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#111827',
+              marginBottom: '12px',
+              marginTop: 0
+            }}>
+              Ingredient Issue
+            </h3>
+            <p style={{
+              fontSize: '15px',
+              color: '#6b7280',
+              lineHeight: '1.5',
+              margin: '0 0 20px 0',
+              whiteSpace: 'pre-line'
+            }}>
+              {error}
+            </p>
+            <button
+              onClick={() => setError(null)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                backgroundColor: '#f97316',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '500',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              Got it
+            </button>
+          </div>
         </div>
       )}
 

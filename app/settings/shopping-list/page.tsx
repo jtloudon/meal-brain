@@ -4,15 +4,23 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Plus, ArrowLeft } from 'lucide-react';
 
+interface GroceryList {
+  id: string;
+  name: string;
+}
+
 export default function ShoppingListSettingsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newCategory, setNewCategory] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
+  const [groceryLists, setGroceryLists] = useState<GroceryList[]>([]);
+  const [defaultListId, setDefaultListId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
+    fetchGroceryLists();
   }, []);
 
   const fetchCategories = async () => {
@@ -85,6 +93,45 @@ export default function ShoppingListSettingsPage() {
     }
   };
 
+  const fetchGroceryLists = async () => {
+    try {
+      // Fetch all grocery lists
+      const listsRes = await fetch('/api/grocery/lists');
+      if (listsRes.ok) {
+        const listsData = await listsRes.json();
+        setGroceryLists(listsData.lists || []);
+      }
+
+      // Fetch current default list from preferences
+      const prefsRes = await fetch('/api/user/preferences');
+      if (prefsRes.ok) {
+        const prefsData = await prefsRes.json();
+        setDefaultListId(prefsData.default_grocery_list_id);
+      }
+    } catch (error) {
+      console.error('Error fetching grocery lists:', error);
+    }
+  };
+
+  const handleSetDefaultList = async (listId: string) => {
+    try {
+      setSaving(true);
+      const res = await fetch('/api/user/preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ default_grocery_list_id: listId }),
+      });
+
+      if (res.ok) {
+        setDefaultListId(listId);
+      }
+    } catch (error) {
+      console.error('Error setting default list:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
       {/* Header */}
@@ -120,7 +167,41 @@ export default function ShoppingListSettingsPage() {
           <p style={{ color: '#6b7280', textAlign: 'center' }}>Loading...</p>
         ) : (
           <div>
-          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+          {/* Default Grocery List Section */}
+          <div style={{ marginBottom: '32px' }}>
+            <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#f97316', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Default Grocery List
+            </h4>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>
+              Pre-selected when adding ingredients from recipes
+            </p>
+            <select
+              value={defaultListId || ''}
+              onChange={(e) => handleSetDefaultList(e.target.value)}
+              disabled={saving || groceryLists.length === 0}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '16px',
+                backgroundColor: 'white',
+                color: '#111827',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving ? 0.5 : 1
+              }}
+            >
+              <option value="">None (always ask)</option>
+              {groceryLists.map((list) => (
+                <option key={list.id} value={list.id}>
+                  {list.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Categories Section */}
+          <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#f97316', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Edit/reorder shopping list categories
           </h4>
 

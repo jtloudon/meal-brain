@@ -5,12 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import BottomNav from '@/components/BottomNav';
 import { ArrowLeft, Calendar, ShoppingCart, Star, Share2, Edit, Trash2 } from 'lucide-react';
+import { decodeHTML } from '@/lib/utils/decode-html';
 
 interface RecipeIngredient {
   id: string;
   ingredient_id: string | null;
   display_name: string;
-  quantity: number;
+  quantity_min: number;
+  quantity_max: number | null;
   unit: string;
   prep_state: string | null;
   optional: boolean;
@@ -43,12 +45,24 @@ export default function RecipeDetailPage() {
   const [showPushModal, setShowPushModal] = useState(false);
   const [groceryLists, setGroceryLists] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedGroceryList, setSelectedGroceryList] = useState<string | null>(null);
+  const [secondGroceryList, setSecondGroceryList] = useState<string | null>(null);
+  const [defaultGroceryListId, setDefaultGroceryListId] = useState<string | null>(null);
   const [pushing, setPushing] = useState(false);
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
+  const [ingredientsListA, setIngredientsListA] = useState<Set<string>>(new Set());
+  const [ingredientsListB, setIngredientsListB] = useState<Set<string>>(new Set());
   const [pushSuccess, setPushSuccess] = useState(false);
   const [showServingSizeModal, setShowServingSizeModal] = useState(false);
   const [adjustedServings, setAdjustedServings] = useState<number | null>(null);
   const [baseServings, setBaseServings] = useState<number>(1);
+
+  // Helper to format quantity (handles ranges like "1-2")
+  const formatQuantity = (min: number, max: number | null): string => {
+    if (max !== null && max !== min) {
+      return `${min}-${max}`;
+    }
+    return min.toString();
+  };
 
   useEffect(() => {
     if (params.id) {
@@ -108,12 +122,30 @@ export default function RecipeDetailPage() {
 
   const fetchGroceryLists = async () => {
     try {
+      // Fetch grocery lists
       const response = await fetch('/api/grocery/lists');
       if (!response.ok) throw new Error('Failed to fetch grocery lists');
       const data = await response.json();
       setGroceryLists(data.lists || []);
-      if (data.lists && data.lists.length > 0) {
-        setSelectedGroceryList(data.lists[0].id);
+
+      // Fetch user preferences to get default list
+      const prefsResponse = await fetch('/api/user/preferences');
+      if (prefsResponse.ok) {
+        const prefs = await prefsResponse.json();
+        const defaultId = prefs.default_grocery_list_id;
+        setDefaultGroceryListId(defaultId);
+
+        // Set selected list to default if it exists, otherwise first list
+        if (defaultId && data.lists?.some((list: any) => list.id === defaultId)) {
+          setSelectedGroceryList(defaultId);
+        } else if (data.lists && data.lists.length > 0) {
+          setSelectedGroceryList(data.lists[0].id);
+        }
+      } else {
+        // If preferences fetch fails, just use first list
+        if (data.lists && data.lists.length > 0) {
+          setSelectedGroceryList(data.lists[0].id);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load grocery lists');
@@ -125,9 +157,13 @@ export default function RecipeDetailPage() {
     if (recipe) {
       const allIngredientIds = new Set(recipe.recipe_ingredients.map(ing => ing.id));
       setSelectedIngredients(allIngredientIds);
+      // For 2-list mode: all ingredients start in List A (default list)
+      setIngredientsListA(allIngredientIds);
+      setIngredientsListB(new Set());
     }
     setShowPushModal(true);
     setPushSuccess(false);
+    setSecondGroceryList(null);  // Reset second list
     fetchGroceryLists();
   };
 
@@ -143,6 +179,44 @@ export default function RecipeDetailPage() {
     });
   };
 
+  // For 2-list mode: toggle ingredient in List A (exclusive with List B)
+  const toggleIngredientListA = (ingredientId: string) => {
+    setIngredientsListA(prev => {
+      const next = new Set(prev);
+      if (next.has(ingredientId)) {
+        next.delete(ingredientId);
+      } else {
+        next.add(ingredientId);
+        // Remove from List B (exclusive)
+        setIngredientsListB(prevB => {
+          const nextB = new Set(prevB);
+          nextB.delete(ingredientId);
+          return nextB;
+        });
+      }
+      return next;
+    });
+  };
+
+  // For 2-list mode: toggle ingredient in List B (exclusive with List A)
+  const toggleIngredientListB = (ingredientId: string) => {
+    setIngredientsListB(prev => {
+      const next = new Set(prev);
+      if (next.has(ingredientId)) {
+        next.delete(ingredientId);
+      } else {
+        next.add(ingredientId);
+        // Remove from List A (exclusive)
+        setIngredientsListA(prevA => {
+          const nextA = new Set(prevA);
+          nextA.delete(ingredientId);
+          return nextA;
+        });
+      }
+      return next;
+    });
+  };
+
   const handlePushIngredients = async () => {
     if (!recipe || !selectedGroceryList) return;
 
@@ -153,45 +227,93 @@ export default function RecipeDetailPage() {
       // Calculate effective servings for scaling
       const effectiveServings = getEffectiveServings();
 
-      // Only push selected ingredients with scaled quantities
-      const ingredients = recipe.recipe_ingredients
-        .filter(ing => selectedIngredients.has(ing.id))
-        .map((ing) => {
-          // Use scaled quantity if servings have been adjusted
-          const scaledQuantity = adjustedServings !== null
-            ? parseFloat(scaleQuantity(ing.quantity, baseServings, effectiveServings))
-            : ing.quantity;
+      // Helper to create ingredient payload with scaling
+      const createIngredientPayload = (ing: any) => {
+        // Use quantity_max if available (for ranges), otherwise use quantity_min
+        const baseQty = ing.quantity_max ?? ing.quantity_min;
+        const scaledMin = adjustedServings !== null
+          ? parseFloat(scaleQuantity(ing.quantity_min, baseServings, effectiveServings))
+          : ing.quantity_min;
+        const scaledMax = ing.quantity_max && adjustedServings !== null
+          ? parseFloat(scaleQuantity(ing.quantity_max, baseServings, effectiveServings))
+          : ing.quantity_max;
 
-          console.log(`[Push Ingredients] ${ing.display_name}:`, {
-            original: ing.quantity,
-            baseServings,
-            effectiveServings,
-            adjustedServings,
-            scaledQuantity,
+        // For grocery list, use the max value (or min if no max)
+        const finalQty = scaledMax ?? scaledMin;
+
+        return {
+          ingredient_id: ing.ingredient_id || null,
+          display_name: ing.display_name,
+          quantity_min: finalQty,
+          quantity_max: null, // Grocery items don't use ranges
+          unit: ing.unit,
+          ...(ing.prep_state && { prep_state: ing.prep_state }),
+          source_recipe_id: recipe.id,
+        };
+      };
+
+      // 2-List Mode: Push to both lists
+      if (secondGroceryList) {
+        // Push ingredients for List A
+        if (ingredientsListA.size > 0) {
+          const ingredientsA = recipe.recipe_ingredients
+            .filter(ing => ingredientsListA.has(ing.id))
+            .map(createIngredientPayload);
+
+          const responseA = await fetch('/api/grocery/push-ingredients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              grocery_list_id: selectedGroceryList,
+              ingredients: ingredientsA,
+            }),
           });
 
-          return {
-            ingredient_id: ing.ingredient_id || null,
-            display_name: ing.display_name,
-            quantity: scaledQuantity,
-            unit: ing.unit,
-            ...(ing.prep_state && { prep_state: ing.prep_state }),
-            source_recipe_id: recipe.id,
-          };
+          if (!responseA.ok) {
+            const data = await responseA.json();
+            throw new Error(data.error || 'Failed to push to first list');
+          }
+        }
+
+        // Push ingredients for List B
+        if (ingredientsListB.size > 0) {
+          const ingredientsB = recipe.recipe_ingredients
+            .filter(ing => ingredientsListB.has(ing.id))
+            .map(createIngredientPayload);
+
+          const responseB = await fetch('/api/grocery/push-ingredients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              grocery_list_id: secondGroceryList,
+              ingredients: ingredientsB,
+            }),
+          });
+
+          if (!responseB.ok) {
+            const data = await responseB.json();
+            throw new Error(data.error || 'Failed to push to second list');
+          }
+        }
+      } else {
+        // Single-List Mode: Push to one list (current behavior)
+        const ingredients = recipe.recipe_ingredients
+          .filter(ing => selectedIngredients.has(ing.id))
+          .map(createIngredientPayload);
+
+        const response = await fetch('/api/grocery/push-ingredients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grocery_list_id: selectedGroceryList,
+            ingredients,
+          }),
         });
 
-      const response = await fetch('/api/grocery/push-ingredients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          grocery_list_id: selectedGroceryList,
-          ingredients,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to push ingredients');
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to push ingredients');
+        }
       }
 
       // Success! Show success message
@@ -199,7 +321,7 @@ export default function RecipeDetailPage() {
       setTimeout(() => {
         setShowPushModal(false);
         setPushSuccess(false);
-      }, 1500);
+      }, 3000); // 3 seconds
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to push ingredients');
     } finally {
@@ -208,7 +330,7 @@ export default function RecipeDetailPage() {
   };
 
   const renderStars = (rating: number | null) => {
-    if (!rating) return null;
+    const displayRating = rating || 0; // Show empty stars if no rating
 
     return (
       <div className="flex gap-0.5">
@@ -216,8 +338,8 @@ export default function RecipeDetailPage() {
           <Star
             key={star}
             size={16}
-            fill={star <= rating ? '#f97316' : 'none'}
-            stroke={star <= rating ? '#f97316' : '#d1d5db'}
+            fill={star <= displayRating ? '#f97316' : 'none'}
+            stroke={star <= displayRating ? '#f97316' : '#d1d5db'}
             strokeWidth={2}
           />
         ))}
@@ -284,10 +406,11 @@ export default function RecipeDetailPage() {
       // Calculate scaling ratio
       const scalingRatio = adjustedServings / baseServings;
 
-      // Scale all ingredient quantities
+      // Scale all ingredient quantities (both min and max for ranges)
       const scaledIngredients = recipe.recipe_ingredients.map((ing) => ({
         name: ing.display_name,
-        quantity: ing.quantity * scalingRatio,
+        quantity_min: ing.quantity_min * scalingRatio,
+        quantity_max: ing.quantity_max ? ing.quantity_max * scalingRatio : null,
         unit: ing.unit,
         prep_state: ing.prep_state || undefined,
       }));
@@ -509,8 +632,14 @@ export default function RecipeDetailPage() {
       {/* Content */}
       <div style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '80px' }}>
         {/* Metadata Section */}
-        {(recipe.serving_size || recipe.prep_time || recipe.cook_time) && (
-          <div style={{ paddingTop: '16px', paddingBottom: '16px', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 12px', fontSize: '16px' }}>
+        {(recipe.rating !== undefined || recipe.serving_size || recipe.prep_time || recipe.cook_time) && (
+          <div style={{ paddingTop: '16px', paddingBottom: '16px', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 12px', fontSize: '16px', alignItems: 'center' }}>
+            {recipe.rating !== undefined && (
+              <>
+                <span style={{ color: '#9ca3af', textAlign: 'right' }}>Rating</span>
+                {renderStars(recipe.rating)}
+              </>
+            )}
             {recipe.serving_size && (
               <>
                 <span style={{ color: '#9ca3af', textAlign: 'right' }}>Serving size</span>
@@ -554,7 +683,7 @@ export default function RecipeDetailPage() {
         <div className="py-6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', margin: 0 }}>Ingredients</h2>
-            {recipe.source && (
+            {recipe.source && (recipe.source.startsWith('http://') || recipe.source.startsWith('https://')) && (
               <a
                 href={recipe.source}
                 target="_blank"
@@ -574,7 +703,7 @@ export default function RecipeDetailPage() {
               </a>
             )}
           </div>
-          {recipe.source && (
+          {recipe.source && (recipe.source.startsWith('http://') || recipe.source.startsWith('https://')) && (
             <p style={{
               fontSize: '13px',
               color: '#6b7280',
@@ -601,17 +730,21 @@ export default function RecipeDetailPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {group.ingredients.map((ingredient) => {
               const effectiveServings = getEffectiveServings();
-              const displayQuantity = adjustedServings !== null
-                ? scaleQuantity(ingredient.quantity, baseServings, effectiveServings)
-                : ingredient.quantity;
+              const displayMin = adjustedServings !== null
+                ? scaleQuantity(ingredient.quantity_min, baseServings, effectiveServings)
+                : ingredient.quantity_min;
+              const displayMax = ingredient.quantity_max && adjustedServings !== null
+                ? scaleQuantity(ingredient.quantity_max, baseServings, effectiveServings)
+                : ingredient.quantity_max;
+              const displayQuantity = formatQuantity(parseFloat(displayMin), displayMax ? parseFloat(displayMax) : null);
 
               return (
                 <p key={ingredient.id} style={{ color: '#111827', lineHeight: '1.5', fontSize: '16px', margin: 0 }}>
                   <strong style={{ fontWeight: '600' }}>
                     {displayQuantity} {ingredient.unit}
                   </strong>{' '}
-                  {ingredient.display_name}
-                  {ingredient.prep_state && `, ${ingredient.prep_state}`}
+                  {decodeHTML(ingredient.display_name)}
+                  {ingredient.prep_state && `, ${decodeHTML(ingredient.prep_state)}`}
                   {ingredient.optional && (
                     <span style={{ color: '#6b7280', marginLeft: '4px' }}>(optional)</span>
                   )}
@@ -628,7 +761,7 @@ export default function RecipeDetailPage() {
           <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', marginBottom: '16px' }}>Directions</h2>
             <div style={{ color: '#111827', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-              {recipe.instructions}
+              {decodeHTML(recipe.instructions)}
             </div>
           </div>
         )}
@@ -638,7 +771,7 @@ export default function RecipeDetailPage() {
           <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', marginBottom: '16px' }}>Notes</h2>
             <div style={{ color: '#6b7280', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontStyle: 'italic' }}>
-              {recipe.notes}
+              {decodeHTML(recipe.notes)}
             </div>
           </div>
         )}
@@ -818,10 +951,30 @@ export default function RecipeDetailPage() {
                   <p style={{
                     fontSize: '16px',
                     fontWeight: '600',
-                    color: '#059669'
+                    color: '#059669',
+                    marginBottom: '12px'
                   }}>
                     Ingredients added to grocery list!
                   </p>
+                  <button
+                    onClick={() => {
+                      router.push(`/groceries?list=${selectedGroceryList}`);
+                      setShowPushModal(false);
+                      setPushSuccess(false);
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#f97316',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    View List
+                  </button>
                 </div>
               ) : (
                 <>
@@ -844,36 +997,153 @@ export default function RecipeDetailPage() {
                     </p>
                   ) : (
                     <>
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          color: '#374151',
-                          marginBottom: '8px'
-                        }}>
-                          Grocery List
-                        </label>
-                        <select
-                          value={selectedGroceryList || ''}
-                          onChange={(e) => setSelectedGroceryList(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '8px',
+                      {/* List selector(s) */}
+                      {!secondGroceryList ? (
+                        // Single-list mode
+                        <div style={{ marginBottom: '16px' }}>
+                          <label style={{
+                            display: 'block',
                             fontSize: '14px',
-                            outline: 'none'
-                          }}
-                        >
-                          {groceryLists.map((list) => (
-                            <option key={list.id} value={list.id}>
-                              {list.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                            fontWeight: '500',
+                            color: '#374151',
+                            marginBottom: '8px'
+                          }}>
+                            Grocery List
+                          </label>
+                          <select
+                            value={selectedGroceryList || ''}
+                            onChange={(e) => setSelectedGroceryList(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '8px',
+                              fontSize: '14px',
+                              outline: 'none',
+                              marginBottom: '8px'
+                            }}
+                          >
+                            {groceryLists.map((list) => (
+                              <option key={list.id} value={list.id}>
+                                {list.name}
+                              </option>
+                            ))}
+                          </select>
+                          {groceryLists.length > 1 && (
+                            <button
+                              onClick={() => {
+                                // Set second list to first available list that's not the primary
+                                const secondList = groceryLists.find(l => l.id !== selectedGroceryList);
+                                if (secondList) setSecondGroceryList(secondList.id);
+                              }}
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: '13px',
+                                color: '#f97316',
+                                backgroundColor: 'transparent',
+                                border: '1px solid #f97316',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              + Add second list
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        // Two-list mode
+                        <div style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div>
+                              <label style={{
+                                display: 'block',
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                color: '#374151',
+                                marginBottom: '6px'
+                              }}>
+                                List A
+                              </label>
+                              <select
+                                value={selectedGroceryList || ''}
+                                onChange={(e) => {
+                                  setSelectedGroceryList(e.target.value);
+                                  // If List B is same as new List A, swap them
+                                  if (e.target.value === secondGroceryList) {
+                                    setSecondGroceryList(selectedGroceryList);
+                                  }
+                                }}
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 10px',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '6px',
+                                  fontSize: '13px',
+                                  outline: 'none'
+                                }}
+                              >
+                                {groceryLists.map((list) => (
+                                  <option key={list.id} value={list.id}>
+                                    {list.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label style={{
+                                display: 'block',
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                color: '#374151',
+                                marginBottom: '6px'
+                              }}>
+                                List B
+                              </label>
+                              <select
+                                value={secondGroceryList || ''}
+                                onChange={(e) => {
+                                  setSecondGroceryList(e.target.value);
+                                  // If List A is same as new List B, swap them
+                                  if (e.target.value === selectedGroceryList) {
+                                    setSelectedGroceryList(secondGroceryList);
+                                  }
+                                }}
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 10px',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '6px',
+                                  fontSize: '13px',
+                                  outline: 'none'
+                                }}
+                              >
+                                {groceryLists.map((list) => (
+                                  <option key={list.id} value={list.id}>
+                                    {list.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setSecondGroceryList(null)}
+                            style={{
+                              marginTop: '8px',
+                              padding: '4px 10px',
+                              fontSize: '12px',
+                              color: '#6b7280',
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              textDecoration: 'underline'
+                            }}
+                          >
+                            Use single list
+                          </button>
+                        </div>
+                      )}
 
+                      {/* Ingredients selection */}
                       <div style={{ marginBottom: '20px' }}>
                         <label style={{
                           display: 'block',
@@ -888,36 +1158,106 @@ export default function RecipeDetailPage() {
                           border: '1px solid #e5e7eb',
                           borderRadius: '8px',
                           padding: '12px',
-                          maxHeight: '200px',
+                          maxHeight: '250px',
                           overflow: 'auto'
                         }}>
-                          {recipe.recipe_ingredients.map((ingredient) => (
-                            <label
-                              key={ingredient.id}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                                padding: '8px 4px',
-                                cursor: 'pointer',
-                                fontSize: '14px'
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedIngredients.has(ingredient.id)}
-                                onChange={() => toggleIngredient(ingredient.id)}
-                                style={{
-                                  width: '18px',
-                                  height: '18px',
-                                  cursor: 'pointer'
-                                }}
-                              />
-                              <span style={{ color: '#111827' }}>
-                                <strong>{ingredient.quantity} {ingredient.unit}</strong> {ingredient.display_name}
-                              </span>
-                            </label>
-                          ))}
+                          {!secondGroceryList ? (
+                            // Single-list mode: one checkbox column
+                            <>
+                              {recipe.recipe_ingredients.map((ingredient) => (
+                                <label
+                                  key={ingredient.id}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    padding: '8px 4px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px'
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedIngredients.has(ingredient.id)}
+                                    onChange={() => toggleIngredient(ingredient.id)}
+                                    style={{
+                                      width: '20px',
+                                      height: '20px',
+                                      cursor: 'pointer',
+                                      flexShrink: 0,
+                                      accentColor: '#3b82f6'
+                                    }}
+                                  />
+                                  <span style={{ color: '#111827' }}>
+                                    <strong>{formatQuantity(ingredient.quantity_min, ingredient.quantity_max)} {ingredient.unit}</strong> {decodeHTML(ingredient.display_name)}
+                                  </span>
+                                </label>
+                              ))}
+                            </>
+                          ) : (
+                            // Two-list mode: two checkbox columns (exclusive)
+                            <>
+                              {/* Column headers */}
+                              <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: '40px 40px 1fr',
+                                gap: '8px',
+                                paddingBottom: '8px',
+                                marginBottom: '8px',
+                                borderBottom: '1px solid #e5e7eb'
+                              }}>
+                                <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textAlign: 'center' }}>A</div>
+                                <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textAlign: 'center' }}>B</div>
+                                <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>Ingredient</div>
+                              </div>
+                              {recipe.recipe_ingredients.map((ingredient) => (
+                                <div
+                                  key={ingredient.id}
+                                  style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '40px 40px 1fr',
+                                    gap: '8px',
+                                    alignItems: 'center',
+                                    padding: '6px 0',
+                                    fontSize: '14px'
+                                  }}
+                                >
+                                  {/* List A checkbox */}
+                                  <input
+                                    type="checkbox"
+                                    checked={ingredientsListA.has(ingredient.id)}
+                                    onChange={() => toggleIngredientListA(ingredient.id)}
+                                    style={{
+                                      width: '20px',
+                                      height: '20px',
+                                      cursor: 'pointer',
+                                      justifySelf: 'center',
+                                      flexShrink: 0,
+                                      accentColor: '#3b82f6'
+                                    }}
+                                  />
+                                  {/* List B checkbox */}
+                                  <input
+                                    type="checkbox"
+                                    checked={ingredientsListB.has(ingredient.id)}
+                                    onChange={() => toggleIngredientListB(ingredient.id)}
+                                    style={{
+                                      width: '20px',
+                                      height: '20px',
+                                      cursor: 'pointer',
+                                      justifySelf: 'center',
+                                      flexShrink: 0,
+                                      accentColor: '#3b82f6'
+                                    }}
+                                  />
+                                  {/* Ingredient name */}
+                                  <span style={{ color: '#111827' }}>
+                                    <strong>{formatQuantity(ingredient.quantity_min, ingredient.quantity_max)} {ingredient.unit}</strong> {decodeHTML(ingredient.display_name)}
+                                  </span>
+                                </div>
+                              ))}
+                            </>
+                          )}
                         </div>
                       </div>
                     </>
@@ -944,21 +1284,45 @@ export default function RecipeDetailPage() {
                     </button>
                     <button
                       onClick={handlePushIngredients}
-                      disabled={pushing || groceryLists.length === 0 || selectedIngredients.size === 0}
+                      disabled={pushing || groceryLists.length === 0 || (
+                        secondGroceryList
+                          ? (ingredientsListA.size === 0 && ingredientsListB.size === 0)
+                          : selectedIngredients.size === 0
+                      )}
                       style={{
                         flex: 1,
                         padding: '10px 16px',
-                        backgroundColor: (pushing || groceryLists.length === 0 || selectedIngredients.size === 0) ? '#e5e7eb' : '#f97316',
-                        color: (pushing || groceryLists.length === 0 || selectedIngredients.size === 0) ? '#9ca3af' : 'white',
+                        backgroundColor: (pushing || groceryLists.length === 0 || (
+                          secondGroceryList
+                            ? (ingredientsListA.size === 0 && ingredientsListB.size === 0)
+                            : selectedIngredients.size === 0
+                        )) ? '#e5e7eb' : '#f97316',
+                        color: (pushing || groceryLists.length === 0 || (
+                          secondGroceryList
+                            ? (ingredientsListA.size === 0 && ingredientsListB.size === 0)
+                            : selectedIngredients.size === 0
+                        )) ? '#9ca3af' : 'white',
                         fontSize: '14px',
                         fontWeight: '500',
                         border: 'none',
                         borderRadius: '8px',
-                        cursor: (pushing || groceryLists.length === 0 || selectedIngredients.size === 0) ? 'not-allowed' : 'pointer',
-                        opacity: (pushing || groceryLists.length === 0 || selectedIngredients.size === 0) ? 0.5 : 1
+                        cursor: (pushing || groceryLists.length === 0 || (
+                          secondGroceryList
+                            ? (ingredientsListA.size === 0 && ingredientsListB.size === 0)
+                            : selectedIngredients.size === 0
+                        )) ? 'not-allowed' : 'pointer',
+                        opacity: (pushing || groceryLists.length === 0 || (
+                          secondGroceryList
+                            ? (ingredientsListA.size === 0 && ingredientsListB.size === 0)
+                            : selectedIngredients.size === 0
+                        )) ? 0.5 : 1
                       }}
                     >
-                      {pushing ? 'Pushing...' : `Push ${selectedIngredients.size} ingredient${selectedIngredients.size !== 1 ? 's' : ''}`}
+                      {pushing ? 'Pushing...' : (
+                        secondGroceryList
+                          ? `Push (${ingredientsListA.size} + ${ingredientsListB.size})`
+                          : `Push ${selectedIngredients.size} ingredient${selectedIngredients.size !== 1 ? 's' : ''}`
+                      )}
                     </button>
                   </div>
                 </>

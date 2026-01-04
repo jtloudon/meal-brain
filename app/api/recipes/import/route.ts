@@ -121,6 +121,7 @@ function extractFromHeuristics($: cheerio.CheerioAPI, url: string) {
     cook_time: null,
     serving_size: null,
     image_url: null,
+    source: url,
   };
 }
 

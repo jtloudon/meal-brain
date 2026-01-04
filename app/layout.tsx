@@ -22,6 +22,27 @@ export default function RootLayout({
       <body className="antialiased">
         <SplashScreen />
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Remove Next.js dev indicator
+              if (typeof window !== 'undefined') {
+                const removeIndicator = () => {
+                  const selectors = [
+                    '#devtools-indicator',
+                    '[data-nextjs-toast]',
+                    'nextjs-portal'
+                  ];
+                  selectors.forEach(sel => {
+                    document.querySelectorAll(sel).forEach(el => el.remove());
+                  });
+                };
+                removeIndicator();
+                setInterval(removeIndicator, 1000);
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

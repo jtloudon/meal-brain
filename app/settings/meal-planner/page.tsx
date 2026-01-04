@@ -143,10 +143,12 @@ export default function MealPlannerSettingsPage() {
         {/* Meals Section */}
         <div>
           <h4 style={{
-            fontSize: '17px',
-            fontWeight: 600,
-            color: '#111827',
-            marginBottom: '16px'
+            fontSize: '12px',
+            fontWeight: '600',
+            color: '#f97316',
+            marginBottom: '8px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
           }}>
             Meals
           </h4>

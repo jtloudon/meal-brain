@@ -35,7 +35,8 @@ export const CreateRecipeSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1, 'Ingredient name is required'),
-        quantity: z.number().positive('Quantity must be positive'),
+        quantity_min: z.number().positive('Quantity must be positive'),
+        quantity_max: z.number().positive().nullable().optional(),
         unit: z.enum(VALID_UNITS),
         prep_state: z.string().optional(),
       })
@@ -64,6 +65,7 @@ export const ListRecipesSchema = z.object({
       tags: z.array(z.string()).optional(),
       rating: z.number().min(1).max(5).nullable().optional(),
       search: z.string().optional(),
+      meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).nullable().optional(),
     })
     .optional(),
   limit: z.number().positive().max(100).default(50),
@@ -82,7 +84,8 @@ export const UpdateRecipeSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1, 'Ingredient name is required'),
-        quantity: z.number().positive('Quantity must be positive'),
+        quantity_min: z.number().positive('Quantity must be positive'),
+        quantity_max: z.number().positive().nullable().optional(),
         unit: z.enum(VALID_UNITS),
         prep_state: z.string().optional(),
       })
@@ -207,7 +210,8 @@ export async function createRecipe(
           recipe_id: recipe.id,
           ingredient_id: canonicalIngredient?.id ?? null,
           display_name: ingredient.name,
-          quantity: ingredient.quantity,
+          quantity_min: ingredient.quantity_min,
+          quantity_max: ingredient.quantity_max ?? null,
           unit: ingredient.unit,
           prep_state: ingredient.prep_state ?? null,
           optional: false,
@@ -286,6 +290,8 @@ export async function listRecipes(
       created_at: string;
       image_url: string | null;
       meal_type: string | null;
+      prep_time: string | null;
+      cook_time: string | null;
     }>;
     total: number;
   }>
@@ -297,7 +303,7 @@ export async function listRecipes(
     // Build query - include ingredients, notes, and instructions for client-side search
     let query = supabase
       .from('recipes')
-      .select('id, title, tags, rating, created_at, image_url, notes, instructions, meal_type, recipe_ingredients(display_name)', { count: 'exact' })
+      .select('id, title, tags, rating, created_at, image_url, notes, instructions, meal_type, prep_time, cook_time, recipe_ingredients(display_name)', { count: 'exact' })
       .eq('household_id', context.householdId)
       .order('created_at', { ascending: false });
 
@@ -496,7 +502,8 @@ export async function updateRecipe(
             recipe_id: validated.recipe_id,
             ingredient_id: canonicalIngredient?.id ?? null,
             display_name: ingredient.name,
-            quantity: ingredient.quantity,
+            quantity_min: ingredient.quantity_min,
+            quantity_max: ingredient.quantity_max ?? null,
             unit: ingredient.unit,
             prep_state: ingredient.prep_state ?? null,
             optional: false,

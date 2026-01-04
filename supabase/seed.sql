@@ -98,29 +98,29 @@ INSERT INTO recipes (id, household_id, title, rating, tags, notes, instructions,
    NOW());
 
 -- Recipe Ingredients (Chicken Curry)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, display_name, quantity, unit, prep_state, optional) VALUES
-  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'chicken breast', 1.5, 'lb', 'diced', false),
-  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002', 'rice', 2, 'cup', 'uncooked', false),
-  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000003', 'coconut milk', 1, 'can', null, false),
-  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000004', 'curry powder', 2, 'tbsp', null, false),
-  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000005', 'onion', 1, 'whole', 'diced', false),
-  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000006', 'garlic', 3, 'clove', 'minced', false);
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, display_name, quantity_min, quantity_max, unit, prep_state, optional) VALUES
+  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'chicken breast', 1.5, null, 'lb', 'diced', false),
+  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002', 'rice', 2, null, 'cup', 'uncooked', false),
+  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000003', 'coconut milk', 1, null, 'can', null, false),
+  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000004', 'curry powder', 2, null, 'tbsp', null, false),
+  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000005', 'onion', 1, null, 'whole', 'diced', false),
+  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000006', 'garlic', 3, null, 'clove', 'minced', false);
 
 -- Recipe Ingredients (Beef Tacos)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, display_name, quantity, unit, prep_state, optional) VALUES
-  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000007', 'ground beef', 1, 'lb', null, false),
-  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000008', 'taco shells', 8, 'whole', null, false),
-  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000009', 'lettuce', 1, 'cup', 'shredded', false),
-  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000a', 'tomato', 2, 'whole', 'diced', false),
-  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000b', 'cheddar cheese', 1, 'cup', 'shredded', true);
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, display_name, quantity_min, quantity_max, unit, prep_state, optional) VALUES
+  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000007', 'ground beef', 1, null, 'lb', null, false),
+  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000008', 'taco shells', 8, null, 'whole', null, false),
+  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000009', 'lettuce', 1, null, 'cup', 'shredded', false),
+  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000a', 'tomato', 2, null, 'whole', 'diced', false),
+  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-00000000000b', 'cheddar cheese', 1, null, 'cup', 'shredded', true);
 
 -- Recipe Ingredients (Black Bean Tacos)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, display_name, quantity, unit, prep_state, optional) VALUES
-  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-00000000000c', 'black beans', 2, 'can', 'drained', false),
-  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000008', 'taco shells', 8, 'whole', null, false),
-  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-00000000000d', 'bell pepper', 1, 'whole', 'sliced', false),
-  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000005', 'onion', 1, 'whole', 'diced', false),
-  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000009', 'lettuce', 1, 'cup', 'shredded', false);
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, display_name, quantity_min, quantity_max, unit, prep_state, optional) VALUES
+  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-00000000000c', 'black beans', 2, null, 'can', 'drained', false),
+  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000008', 'taco shells', 8, null, 'whole', null, false),
+  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-00000000000d', 'bell pepper', 1, null, 'whole', 'sliced', false),
+  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000005', 'onion', 1, null, 'whole', 'diced', false),
+  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000009', 'lettuce', 1, null, 'cup', 'shredded', false);
 
 -- Demo Planner Meals (this week)
 INSERT INTO planner_meals (household_id, recipe_id, date, meal_type) VALUES

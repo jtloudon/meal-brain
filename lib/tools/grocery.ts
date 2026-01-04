@@ -63,7 +63,8 @@ export const PushIngredientsSchema = z.object({
       z.object({
         ingredient_id: z.string().nullable(),
         display_name: z.string().min(1, 'Display name is required'),
-        quantity: z.number().positive('Quantity must be positive'),
+        quantity_min: z.number().positive('Quantity must be positive'),
+        quantity_max: z.number().positive().nullable().optional(),
         unit: z.string().min(1, 'Unit is required'),
         prep_state: z.string().optional(),
         source_recipe_id: z.string().optional(),
@@ -191,8 +192,10 @@ export async function pushIngredients(
 
       if (existingItem) {
         // Merge: update quantity (only if from same recipe)
+        // Use quantity_max if available (for ranges like "1-2"), otherwise use quantity_min
+        const ingredientQty = ingredient.quantity_max ?? ingredient.quantity_min;
         const newQuantity =
-          parseFloat(existingItem.quantity) + ingredient.quantity;
+          parseFloat(existingItem.quantity) + ingredientQty;
 
         const { error: updateError } = await supabase
           .from('grocery_items')
@@ -215,13 +218,16 @@ export async function pushIngredients(
         const { categorizeIngredient } = await import('@/lib/utils/categorize-ingredient');
         const category = categorizeIngredient(ingredient.display_name);
 
+        // Use quantity_max if available (for ranges like "1-2"), otherwise use quantity_min
+        const ingredientQty = ingredient.quantity_max ?? ingredient.quantity_min;
+
         const { error: insertError } = await supabase
           .from('grocery_items')
           .insert({
             grocery_list_id: validated.grocery_list_id,
             ingredient_id: ingredient.ingredient_id,
             display_name: ingredient.display_name,
-            quantity: ingredient.quantity,
+            quantity: ingredientQty,
             unit: ingredient.unit,
             checked: false,
             category: category,

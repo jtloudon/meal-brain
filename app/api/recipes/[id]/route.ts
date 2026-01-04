@@ -78,7 +78,8 @@ export async function GET(
           id,
           ingredient_id,
           display_name,
-          quantity,
+          quantity_min,
+          quantity_max,
           unit,
           prep_state,
           optional

@@ -4,7 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus, Pencil, ChevronDown, Trash2 } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown, Trash2, Star } from 'lucide-react';
+import { decodeHTML } from '@/lib/utils/decode-html';
 
 interface GroceryItem {
   id: string;
@@ -32,6 +33,7 @@ export default function GroceriesPage() {
   const router = useRouter();
   const [lists, setLists] = useState<GroceryList[]>([]);
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [defaultListId, setDefaultListId] = useState<string | null>(null);
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewListModal, setShowNewListModal] = useState(false);
@@ -110,8 +112,23 @@ export default function GroceriesPage() {
         const data = await res.json();
         setLists(data.lists || []);
 
-        // Auto-select first list if available
-        if (data.lists && data.lists.length > 0) {
+        // Fetch user preferences to get default list
+        let fetchedDefaultListId = null;
+        try {
+          const prefsResponse = await fetch('/api/user/preferences');
+          if (prefsResponse.ok) {
+            const prefs = await prefsResponse.json();
+            fetchedDefaultListId = prefs.default_grocery_list_id;
+            setDefaultListId(fetchedDefaultListId);
+          }
+        } catch (prefsError) {
+          console.error('Error fetching preferences:', prefsError);
+        }
+
+        // Auto-select default list if set, otherwise first list
+        if (fetchedDefaultListId && data.lists?.some((list: GroceryList) => list.id === fetchedDefaultListId)) {
+          setSelectedListId(fetchedDefaultListId);
+        } else if (data.lists && data.lists.length > 0) {
           setSelectedListId(data.lists[0].id);
         }
       }
@@ -183,9 +200,19 @@ export default function GroceriesPage() {
 
     try {
       setSaving(true);
+
+      // Handle quantity ranges like "1-3" by using the maximum value
+      let quantity = parseFloat(editQuantity);
+      if (editQuantity.includes('-')) {
+        const parts = editQuantity.split('-').map(s => parseFloat(s.trim()));
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          quantity = Math.max(parts[0], parts[1]); // Use the max value for shopping
+        }
+      }
+
       const updateData: any = {
         display_name: editName,
-        quantity: parseFloat(editQuantity),
+        quantity: quantity,
         unit: editUnit,
         category: editCategory,
       };
@@ -213,7 +240,7 @@ export default function GroceriesPage() {
                 ? {
                     ...item,
                     display_name: editName,
-                    quantity: parseFloat(editQuantity),
+                    quantity: quantity,
                     unit: editUnit,
                     category: editCategory
                   }
@@ -368,13 +395,25 @@ export default function GroceriesPage() {
 
     try {
       setSaving(true);
+
+      // Handle quantity ranges like "1-3" by using the maximum value
+      let quantity = parseFloat(newItemQuantity);
+      if (newItemQuantity.includes('-')) {
+        const parts = newItemQuantity.split('-').map(s => parseFloat(s.trim()));
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          quantity = Math.max(parts[0], parts[1]); // Use the max value for shopping
+        }
+      }
+
+      console.log('[Add Item] Parsed quantity:', { original: newItemQuantity, parsed: quantity, isNaN: isNaN(quantity) });
+
       const res = await fetch('/api/grocery/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           grocery_list_id: selectedListId,
           display_name: newItemName,
-          quantity: parseFloat(newItemQuantity),
+          quantity: quantity,
           unit: newItemUnit,
         }),
       });
@@ -593,9 +632,14 @@ export default function GroceriesPage() {
                 cursor: 'pointer'
               }}
             >
-              <span style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
-                {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {selectedListId === defaultListId && (
+                  <Star size={20} style={{ color: '#f97316', fill: '#f97316' }} />
+                )}
+                <span style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
+                  {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
+                </span>
+              </div>
               <ChevronDown size={24} style={{ color: '#9ca3af' }} />
             </button>
             <button
@@ -632,11 +676,11 @@ export default function GroceriesPage() {
             {/* Quantity and Unit - Top Row */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
               <input
-                type="number"
+                type="text"
                 value={newItemQuantity}
                 onChange={(e) => setNewItemQuantity(e.target.value)}
-                placeholder="Qty"
-                min="0"
+                placeholder="Qty (e.g., 1-3)"
+                inputMode="decimal"
                 step="0.01"
                 style={{
                   width: '80px',
@@ -806,7 +850,7 @@ export default function GroceriesPage() {
                               margin: 0
                             }}
                           >
-                            {item.quantity} {item.unit} {item.display_name}
+                            {item.quantity} {item.unit} {decodeHTML(item.display_name)}
                           </p>
 
                           {/* Recipe source link */}
@@ -847,7 +891,7 @@ export default function GroceriesPage() {
                             border: 'none',
                             cursor: 'pointer',
                             padding: 0,
-                            paddingRight: '4px',
+                            paddingRight: '70px', // Extra padding to avoid Sous Chef button overlap
                             marginTop: '1px',
                             transition: 'color 0.2s'
                           }}
@@ -922,10 +966,57 @@ export default function GroceriesPage() {
                         color: '#111827',
                         cursor: 'pointer',
                         textAlign: 'left',
-                        fontWeight: list.id === selectedListId ? '600' : '400'
+                        fontWeight: list.id === selectedListId ? '600' : '400',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
                       }}
                     >
-                      {list.name}
+                      {list.id === defaultListId && (
+                        <Star size={16} style={{ color: '#f97316', fill: '#f97316', flexShrink: 0 }} />
+                      )}
+                      <span style={{ flex: 1 }}>{list.name}</span>
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          setSaving(true);
+                          const res = await fetch('/api/user/preferences', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              default_grocery_list_id: list.id === defaultListId ? null : list.id
+                            }),
+                          });
+                          if (res.ok) {
+                            setDefaultListId(list.id === defaultListId ? null : list.id);
+                          }
+                        } catch (error) {
+                          console.error('Error setting default list:', error);
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                      style={{
+                        padding: '12px',
+                        backgroundColor: list.id === defaultListId ? '#fff7ed' : 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title={list.id === defaultListId ? 'Remove as default' : 'Set as default'}
+                    >
+                      <Star
+                        size={18}
+                        style={{
+                          color: '#f97316',
+                          fill: list.id === defaultListId ? '#f97316' : 'transparent'
+                        }}
+                      />
                     </button>
                     <button
                       onClick={(e) => {

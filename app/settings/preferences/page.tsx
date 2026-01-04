@@ -19,6 +19,7 @@ export default function AIPreferencesPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
   const [preferences, setPreferences] = useState<UserPreferences>({
     household_context: null,
     dietary_constraints: [],
@@ -48,17 +49,19 @@ export default function AIPreferencesPage() {
     }
   };
 
-  const handleSave = async () => {
+  const savePreferences = async (updatedPreferences: UserPreferences) => {
     try {
       setSaving(true);
       const res = await fetch('/api/user/preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preferences),
+        body: JSON.stringify(updatedPreferences),
       });
 
       if (res.ok) {
-        router.push('/settings');
+        // Show "Saved" feedback
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1500);
       }
     } catch (error) {
       console.error('Error saving preferences:', error);
@@ -67,33 +70,39 @@ export default function AIPreferencesPage() {
     }
   };
 
-  const toggleDietaryConstraint = (constraint: string) => {
-    setPreferences((prev) => ({
-      ...prev,
-      dietary_constraints: prev.dietary_constraints.includes(constraint)
-        ? prev.dietary_constraints.filter((c) => c !== constraint)
-        : [...prev.dietary_constraints, constraint],
-    }));
+  const toggleDietaryConstraint = async (constraint: string) => {
+    const updated = {
+      ...preferences,
+      dietary_constraints: preferences.dietary_constraints.includes(constraint)
+        ? preferences.dietary_constraints.filter((c) => c !== constraint)
+        : [...preferences.dietary_constraints, constraint],
+    };
+    setPreferences(updated);
+    await savePreferences(updated);
   };
 
-  const addCustomConstraint = () => {
+  const addCustomConstraint = async () => {
     if (newConstraint.trim() && !preferences.dietary_constraints.includes(newConstraint.trim())) {
-      setPreferences((prev) => ({
-        ...prev,
-        dietary_constraints: [...prev.dietary_constraints, newConstraint.trim()],
-      }));
+      const updated = {
+        ...preferences,
+        dietary_constraints: [...preferences.dietary_constraints, newConstraint.trim()],
+      };
+      setPreferences(updated);
       setNewConstraint('');
       setShowAddConstraint(false);
+      await savePreferences(updated);
     }
   };
 
-  const togglePlanningPreference = (pref: string) => {
-    setPreferences((prev) => ({
-      ...prev,
-      planning_preferences: prev.planning_preferences.includes(pref)
-        ? prev.planning_preferences.filter((p) => p !== pref)
-        : [...prev.planning_preferences, pref],
-    }));
+  const togglePlanningPreference = async (pref: string) => {
+    const updated = {
+      ...preferences,
+      planning_preferences: preferences.planning_preferences.includes(pref)
+        ? preferences.planning_preferences.filter((p) => p !== pref)
+        : [...preferences.planning_preferences, pref],
+    };
+    setPreferences(updated);
+    await savePreferences(updated);
   };
 
   if (loading) {
@@ -116,12 +125,11 @@ export default function AIPreferencesPage() {
       }}>
         <button
           onClick={() => router.push('/settings')}
-          disabled={saving}
           style={{
             padding: '8px',
             background: 'none',
             border: 'none',
-            cursor: saving ? 'not-allowed' : 'pointer',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -132,20 +140,17 @@ export default function AIPreferencesPage() {
         <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
           AI Preferences
         </h3>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            color: saving ? '#d1d5db' : '#f97316',
-            fontWeight: 500,
-            background: 'none',
-            border: 'none',
-            fontSize: '16px',
-            cursor: saving ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {saving ? 'Saving...' : 'Save'}
-        </button>
+        <div style={{ width: '60px', textAlign: 'right' }}>
+          {showSaved && (
+            <span style={{
+              fontSize: '14px',
+              color: '#22c55e',
+              fontWeight: '500'
+            }}>
+              Saved ✓
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -162,7 +167,11 @@ export default function AIPreferencesPage() {
             {(['just-me', 'couple', 'family'] as const).map((context) => (
               <button
                 key={context}
-                onClick={() => setPreferences((prev) => ({ ...prev, household_context: context }))}
+                onClick={async () => {
+                  const updated = { ...preferences, household_context: context };
+                  setPreferences(updated);
+                  await savePreferences(updated);
+                }}
                 style={{
                   padding: '12px 16px',
                   backgroundColor: preferences.household_context === context ? '#fff7ed' : 'white',
@@ -298,7 +307,11 @@ export default function AIPreferencesPage() {
             ].map((style) => (
               <button
                 key={style.value}
-                onClick={() => setPreferences((prev) => ({ ...prev, ai_style: style.value }))}
+                onClick={async () => {
+                  const updated = { ...preferences, ai_style: style.value };
+                  setPreferences(updated);
+                  await savePreferences(updated);
+                }}
                 style={{
                   padding: '12px 16px',
                   backgroundColor: preferences.ai_style === style.value ? '#fff7ed' : 'white',
@@ -359,7 +372,11 @@ export default function AIPreferencesPage() {
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
-              onClick={() => setPreferences((prev) => ({ ...prev, ai_learning_enabled: true }))}
+              onClick={async () => {
+                const updated = { ...preferences, ai_learning_enabled: true };
+                setPreferences(updated);
+                await savePreferences(updated);
+              }}
               style={{
                 padding: '12px 16px',
                 backgroundColor: preferences.ai_learning_enabled ? '#fff7ed' : 'white',
@@ -377,7 +394,11 @@ export default function AIPreferencesPage() {
               </div>
             </button>
             <button
-              onClick={() => setPreferences((prev) => ({ ...prev, ai_learning_enabled: false }))}
+              onClick={async () => {
+                const updated = { ...preferences, ai_learning_enabled: false };
+                setPreferences(updated);
+                await savePreferences(updated);
+              }}
               style={{
                 padding: '12px 16px',
                 backgroundColor: !preferences.ai_learning_enabled ? '#fff7ed' : 'white',

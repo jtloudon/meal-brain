@@ -7,10 +7,10 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 4 AI Chat Panel (Read-Only) - FUNCTIONAL ✅ (UI Polish Needed)
-**Code exists:** Infrastructure + pure functions + database + **All 12 Tools** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow)** + **Seed Data (Example recipes + Default list)** + **AI Chat Panel (Functional - Read-only tools working, minimal collapsed UI, recipe linkification)**
-**Phase:** Phase 1 ✅ → Phase 2 ✅ → Phase 3 ✅ → **Phase 4 (AI Integration) - MOSTLY COMPLETE** ✅
-**Last Updated:** 2026-01-02 (Night - AI Chat Panel functional with all read-only tools)
+**Status:** Phase 4 AI Chat Panel (Write Operations) - FUNCTIONAL ✅ (Batch Approval Complete)
+**Code exists:** Infrastructure + pure functions + database + **All Tools (Read + Write)** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal + AI Integration)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow)** + **Seed Data (Example recipes + Default list)** + **AI Chat Panel (Full-Featured - Floating design, white AI bubbles, batch approval for write ops, real-time calendar refresh, date context awareness, HTML entity decoding, recipe linkification, New Chat button)**
+**Phase:** Phase 1 ✅ → Phase 2 ✅ → Phase 3 ✅ → **Phase 4 (AI Integration) - COMPLETE** ✅
+**Last Updated:** 2026-01-04 (Afternoon - Write operations + batch approval + polish)
 
 ---
 
@@ -730,6 +730,17 @@ This file should be reviewed before any major build step.
 - `app/api/chat/route.ts` - Fixed tool params, added recipe_get, max iterations, system prompt in loops
 - `components/FloatingAIButton.tsx` - Removed transform hover effect
 
+**UI Improvements** (2026-01-02 Late Night):
+- ✅ Close button: Small gray X on right, no background/border
+- ✅ Removed timestamps from all messages
+- ✅ Removed header title/subtitle in expanded view (cleaner)
+- ✅ Updated input field: Gray background (bg-gray-50), larger padding, rounded-2xl
+- ✅ Updated Send button: Full width, orange gradient, rounded-2xl
+- ✅ Removed airplane icon, text "Send" button instead
+- ✅ Updated placeholder: "Ask me anything about your meals..."
+- ✅ Removed bottom border from input section
+- ✅ Using original chef's hat icon (stroke-based SVG)
+
 **Status**:
 - ✅ UI renders correctly (white background, proper layering)
 - ✅ Minimal collapsed design working
@@ -737,14 +748,68 @@ This file should be reviewed before any major build step.
 - ✅ All 5 read-only tools functional (including recipe_get for full details)
 - ✅ Recipe titles clickable and navigable
 - ✅ No infinite loops (max 10 iterations enforced)
-- ⏳ UI polish needed (next session focus)
+- ✅ UI improved with cleaner design, better input styling
+- ⏳ Continued UI refinement (ongoing)
 - ⏳ Write tools with approval flow (Phase 4+ future work)
 
 **Next Steps**:
-1. **UI Polish** - Improve chat panel visual design (in progress)
-2. Add tool confirmation UI (approval modals for write operations)
-3. Enable write tools: `recipe.create`, `planner.add_meal`, `grocery.push_ingredients`
-4. Test end-to-end AI workflows ("Plan this week for me")
+1. Add tool confirmation UI (approval modals for write operations)
+2. Enable write tools: `recipe.create`, `planner.add_meal`, `grocery.push_ingredients`
+3. Test end-to-end AI workflows ("Plan this week for me")
+
+---
+
+## Recent Completions (2026-01-02 Late Night)
+
+### AI Chat Panel - Floating UI Redesign ✅
+**What**: Complete visual overhaul with modern floating design matching reference example
+
+**Completed**:
+1. **Floating Panel Layout** (app/components/AIChatPanel.tsx):
+   - **Single panel design** - Removed collapsed/expanded states
+   - **Centered with margins** - 16px on left/right to show app behind
+   - **Positioned above nav** - 110px from bottom (80px nav + 30px spacing)
+   - **Fixed dimensions** - calc(100% - 32px) wide, max 500px, 70vh tall
+   - **Rounded corners** - 24px border radius on all sides
+   - **Elevated shadow** - Subtle depth with modern shadow
+
+2. **Chat Bubble Improvements**:
+   - **AI bubbles**: White background with `shadow-md` (soft shadow)
+   - **User bubbles**: Orange (#f97316) background - kept existing
+   - Both use rounded-2xl (16px) corners
+   - Max 80% width for better readability
+
+3. **Input Field Redesign**:
+   - **Inline send icon** - Airplane/Send icon positioned inside input on right
+   - **Rounded pill design** - Full rounded (rounded-full) gray background
+   - **Icon interaction** - Gray default, orange hover, disabled gray
+   - Removed separate send button
+   - Cleaner, more modern appearance
+
+4. **Loading State**:
+   - White bubble with shadow-md (matches AI bubbles)
+   - Animated dots (3-dot bounce)
+
+5. **Empty State**:
+   - Chef's hat icon (matches brand)
+   - Greeting message
+
+**Visual Impact**:
+- App content visible on both sides (floating effect)
+- Bottom navigation always accessible
+- Modern chat interface matching design reference
+- Consistent with brand orange color throughout
+- Professional elevation and spacing
+
+**Files Modified**:
+- `app/components/AIChatPanel.tsx` - Complete layout redesign
+
+**Status**:
+- ✅ Floating panel layout complete
+- ✅ White AI bubbles with shadow
+- ✅ Inline send icon in input field
+- ✅ App visible on sides and bottom
+- ✅ Compiled successfully
 
 ---
 
@@ -754,3 +819,159 @@ This file should be reviewed before any major build step.
 - **Status**: RESOLVED ✅ (Updated 2025-12-27)
 - Using /dev-login with signInWithPassword() + setSession()
 - All 3 dev users work correctly (demo, spouse, test)
+
+---
+
+## Recent Updates (2026-01-04)
+
+### Phase 4 Completion: AI Write Operations + Polish
+
+**Major Features Completed:**
+
+1. **Authentication Fix** (lib/auth/supabase-server.ts)
+   - Fixed cookie `setAll` error in API routes
+   - Added try-catch for Server Component compatibility
+   - Resolved 401 Unauthorized errors in chat API
+
+2. **AI Date Context** (app/api/chat/route.ts:333-356)
+   - Dynamic date calculation (today, this week, next week, tomorrow)
+   - System prompt includes current date context
+   - AI correctly interprets "this week", "next week" requests
+
+3. **Batch Approval for Write Operations** (app/api/chat/route.ts:428-471)
+   - Handles multiple write tools in single request
+   - Shows all actions in approval UI list
+   - Executes all approved actions sequentially
+   - Success message shows count of completed actions
+
+4. **Write Tools Implemented:**
+   - `planner_add_meal` - Add meals to planner with approval
+   - `grocery_push_ingredients` - Push recipe ingredients to list
+   - `recipe_create` - Create new recipes (existing)
+
+5. **New Chat Button** (app/components/AIChatPanel.tsx:443-457)
+   - Clears conversation history
+   - Resets session state
+   - Orange-styled button in header
+
+6. **Recipe Rating Fixes:**
+   - Recipe detail page now shows stars (recipes/[id]/page.tsx:617-621)
+   - Fixed null rating display (shows 5 gray outlined stars)
+   - Edit mode allows unsetting ratings (recipes/[id]/edit/page.tsx:132)
+
+7. **HTML Entity Decoding** (lib/utils/decode-html.ts)
+   - Created universal decoder utility
+   - Handles &#8217; ('), &#215; (×), &amp; (&), etc.
+   - Applied to:
+     - Recipe detail page (ingredients, instructions, notes)
+     - Grocery list page (ingredient names)
+     - Push to grocery modal (both single & dual list modes)
+
+8. **Real-Time Updates:**
+   - Calendar dots appear immediately after AI adds meals
+   - Uses router.refresh() after batch approval (AIChatPanel.tsx:275)
+
+9. **UX Polish:**
+   - Success message duration: 1.5s → 3s
+   - Checkbox improvements: 18px → 20px, flexShrink: 0, accentColor
+   - Better scroll behavior when reopening chat panel
+
+**Technical Debt Addressed:**
+- Consistent HTML entity handling across all text displays
+- Proper null handling for optional recipe fields
+- Improved error logging in chat API
+- Fixed preferences tool query (single() → limit(1))
+
+**Files Modified:**
+- `lib/auth/supabase-server.ts` - Cookie handling fix
+- `lib/utils/decode-html.ts` - NEW: HTML entity decoder
+- `lib/tools/preferences.ts` - Query fix
+- `app/api/chat/route.ts` - Date context + batch approval + tools
+- `app/api/chat/approve/route.ts` - Write tool handlers
+- `app/components/AIChatPanel.tsx` - New Chat button + batch UI + refresh
+- `app/recipes/[id]/page.tsx` - Stars + decoding + checkbox styles
+- `app/recipes/[id]/edit/page.tsx` - Null rating fix
+- `app/recipes/page.tsx` - Star display fix
+- `app/groceries/page.tsx` - HTML decoding
+
+**Current State:**
+- ✅ AI can read all data (recipes, meals, grocery lists, preferences)
+- ✅ AI can write with approval (add meals, push ingredients, create recipes)
+- ✅ Batch operations work (plan full week in one approval)
+- ✅ Real-time UI updates after AI actions
+- ✅ Clean text display (no HTML entities)
+- ✅ Complete date awareness
+- ✅ Professional approval flow with clear previews
+
+**Next Potential Enhancements:**
+- Additional write tools (update recipe, remove meal, etc.)
+- Meal plan optimization suggestions
+- Grocery list smart grouping
+- Recipe recommendations based on history
+
+---
+
+## Latest Updates - 2026-01-04 (Evening)
+
+### Quantity Range Support - COMPLETE ✅
+
+**Major Feature Added:**
+Recipe ingredients now support quantity ranges (e.g., "1-2 salmon fillets")
+
+**Database Changes:**
+- Added `quantity_max` column to `recipe_ingredients`
+- Renamed `quantity` → `quantity_min` for clarity
+- Migration: `20260104184621_add_quantity_max_to_recipe_ingredients.sql`
+
+**Implementation:**
+- Parser handles ranges: "1-2", "½-1", etc.
+- Display shows ranges correctly throughout app
+- Serving size scaling handles both min and max
+- Grocery lists use max value when pushing (better to have extra)
+
+### UI Improvements - COMPLETE ✅
+
+**Search Redesign:**
+- Search icon in top-left of recipes page
+- Expands in-place (no layout shift)
+- Import and + buttons stay on right
+- Removed "Recipes" title text
+
+**Layout Fixes:**
+- Bottom nav truly fixed (no movement)
+- AuthenticatedLayout uses h-screen + overflow-hidden
+- Main content scrolls independently
+- Sous Chef button padding adjusted (no overlap with edit icons)
+
+### Bug Fixes - COMPLETE ✅
+
+**Grocery List Range Input:**
+- Changed from type="number" to type="text" with inputMode="decimal"
+- Accepts "1-3" and parses to max value (3)
+- Works for add and edit operations
+
+**Meal Planner Error Handling:**
+- Better error messages when recipe not found
+- Guides AI to call recipe_list first
+
+**Type Safety:**
+- Added meal_type to ListRecipesSchema filters
+- Fixed executeTool context (userId + householdId)
+- Fixed recipe import heuristics (missing source field)
+
+### Testing Requirements
+
+**Unit Tests Needed:**
+- parseIngredientLine with ranges
+- ingredientsToText with ranges
+- Grocery quantity parsing
+
+**E2E Tests Needed (Playwright):**
+- Create/edit recipes with ranges
+- Import recipes with ranges
+- Serving size scaling with ranges
+- Push to grocery with ranges
+- Add grocery items with ranges
+- Search UI behavior
+- Bottom nav fixed position
+

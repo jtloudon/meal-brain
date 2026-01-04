@@ -30,9 +30,18 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { grocery_list_id, display_name, quantity, unit } = body;
 
-  if (!grocery_list_id || !display_name || !quantity || !unit) {
+  if (!grocery_list_id || !display_name || !unit) {
     return NextResponse.json(
       { error: 'Missing required fields' },
+      { status: 400 }
+    );
+  }
+
+  // Validate quantity is a valid number
+  if (quantity === undefined || quantity === null || isNaN(quantity) || quantity <= 0) {
+    console.error('Invalid quantity received:', quantity, 'type:', typeof quantity);
+    return NextResponse.json(
+      { error: 'Quantity must be a positive number' },
       { status: 400 }
     );
   }

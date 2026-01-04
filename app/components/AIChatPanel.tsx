@@ -5,11 +5,19 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { X, Send } from 'lucide-react';
 
+interface ApprovalAction {
+  id: string;
+  toolName: string;
+  toolInput: any;
+  preview: string;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  approvalActions?: ApprovalAction[]; // Changed to array
 }
 
 interface AIChatPanelProps {
@@ -24,7 +32,6 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   const [mounted, setMounted] = useState(false);
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
   const [recipes, setRecipes] = useState<Array<{ id: string; title: string }>>([]);
-  const [isExpanded, setIsExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -33,12 +40,75 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   useEffect(() => {
     setMounted(true);
     setPortalRoot(document.body);
+
+    // Clear old localStorage data
+    localStorage.removeItem('ai-chat-history');
+
+    // Check if user has switched accounts - if so, clear chat history
+    const checkAndLoadHistory = async () => {
+      try {
+        // Get current user ID
+        const response = await fetch('/api/user/preferences');
+        if (response.ok) {
+          const prefs = await response.json();
+          const currentUserId = prefs.user_id;
+
+          // Get stored user ID from sessionStorage
+          const storedUserId = sessionStorage.getItem('ai-chat-user-id');
+
+          if (storedUserId && storedUserId !== currentUserId) {
+            // User switched accounts - clear chat history
+            console.log('[AI Chat] User switched accounts, clearing history');
+            sessionStorage.removeItem('ai-chat-history');
+            sessionStorage.setItem('ai-chat-user-id', currentUserId);
+            return;
+          }
+
+          // Store current user ID if not stored
+          if (!storedUserId) {
+            sessionStorage.setItem('ai-chat-user-id', currentUserId);
+          }
+
+          // Load chat history from sessionStorage (clears when tab closes)
+          const savedMessages = sessionStorage.getItem('ai-chat-history');
+          if (savedMessages) {
+            const parsed = JSON.parse(savedMessages);
+            // Convert timestamp strings back to Date objects
+            const messagesWithDates = parsed.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            }));
+            setMessages(messagesWithDates);
+            // Scroll to bottom after loading
+            setTimeout(() => {
+              messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+            }, 100);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load chat history:', error);
+      }
+    };
+
+    checkAndLoadHistory();
   }, []);
 
-  // Auto-scroll to bottom when messages change
+  // Save messages to sessionStorage whenever they change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (mounted && messages.length > 0) {
+      sessionStorage.setItem('ai-chat-history', JSON.stringify(messages));
+    }
+  }, [messages, mounted]);
+
+  // Auto-scroll to bottom when messages change or panel opens
+  useEffect(() => {
+    if (isOpen && messages.length > 0) {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [messages, isOpen]);
 
   // Focus input when panel opens and fetch recipes for linkification
   useEffect(() => {
@@ -86,9 +156,9 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           continue;
         }
 
-        // Match recipe title with optional markdown bold (**title**)
+        // Match recipe title with markdown bold (**title**), quotes ("title"), or plain text
         const escapedTitle = recipe.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`\\*\\*${escapedTitle}\\*\\*|\\b${escapedTitle}\\b`, 'gi');
+        const regex = new RegExp(`\\*\\*${escapedTitle}\\*\\*|"${escapedTitle}"|\\b${escapedTitle}\\b`, 'gi');
 
         const matches = [...part.text.matchAll(regex)];
         if (matches.length === 0) {
@@ -125,6 +195,98 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     onClose();
   };
 
+  const handleNewChat = () => {
+    // Clear chat history from sessionStorage
+    sessionStorage.removeItem('ai-chat-history');
+    // Clear messages state
+    setMessages([]);
+  };
+
+  const handleBatchApproval = async (messageId: string, approved: boolean) => {
+    // Find the message with approval actions
+    const message = messages.find(msg => msg.id === messageId);
+    if (!message || !message.approvalActions) return;
+
+    // Remove approval buttons immediately
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, approvalActions: undefined }
+          : msg
+      )
+    );
+
+    if (!approved) {
+      // User cancelled - just add a message
+      const cancelMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'Okay, I won\'t do that.',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, cancelMessage]);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Execute all approved actions
+      const results = [];
+      for (const action of message.approvalActions) {
+        const response = await fetch('/api/chat/approve', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            approval_id: action.id,
+            approved: true,
+            tool_name: action.toolName,
+            tool_input: action.toolInput,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to execute ${action.preview}`);
+        }
+
+        const data = await response.json();
+        results.push(data.message || 'Done!');
+
+        // If a recipe was created, add it to recipes state for linkification
+        if (action.toolName === 'recipe_create' && data.data?.recipe_id) {
+          setRecipes((prev) => [
+            ...prev,
+            { id: data.data.recipe_id, title: action.toolInput.title },
+          ]);
+        }
+      }
+
+      const resultMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: `Success! Completed ${results.length} action${results.length > 1 ? 's' : ''}:\n\n${results.map((r, i) => `${i + 1}. ${r}`).join('\n')}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, resultMessage]);
+
+      // Refresh the page data to update calendar dots and other UI
+      router.refresh();
+    } catch (error) {
+      console.error('Approval error:', error);
+      const errorMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'Sorry, something went wrong executing those actions.',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -138,11 +300,6 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-
-    // Expand panel after first message
-    if (!isExpanded) {
-      setIsExpanded(true);
-    }
 
     try {
       // Build conversation history for API
@@ -183,6 +340,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
         role: 'assistant',
         content: data.message,
         timestamp: new Date(),
+        approvalActions: data.approval_required ? data.approval_actions : undefined,
       };
       setMessages((prev) => [...prev, assistantMessage]);
       setIsLoading(false);
@@ -217,101 +375,136 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
 
   const portalContent = (
     <>
-      {/* Backdrop - only show when expanded */}
-      {isExpanded && (
-        <div
-          className="bg-black bg-opacity-50"
-          onClick={onClose}
-          style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 999999,
-          }}
-        />
-      )}
-
-      {/* Chat Panel */}
-      <div className="bg-white shadow-2xl flex flex-col"
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .ai-chat-messages::-webkit-scrollbar {
+            width: 10px;
+          }
+          .ai-chat-messages::-webkit-scrollbar-track {
+            background: #f9fafb;
+            border-radius: 10px;
+          }
+          .ai-chat-messages::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+          }
+          .ai-chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+          }
+        `
+      }} />
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
         style={{
           position: 'fixed',
-          left: isExpanded ? 0 : '50%',
-          right: isExpanded ? 0 : 'auto',
-          bottom: isExpanded ? 0 : '100px',
-          height: isExpanded ? '70vh' : 'auto',
-          maxHeight: isExpanded ? '600px' : 'none',
-          width: isExpanded ? 'auto' : '320px',
-          transform: isExpanded ? 'none' : 'translateX(-50%)',
-          borderRadius: isExpanded ? '24px 24px 0 0' : '16px',
-          zIndex: 1000000,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 999999,
+        }}
+      />
+
+      {/* Floating Chat Panel */}
+      <div
+        className="flex flex-col"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          bottom: '90px', // Closer to bottom nav
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 32px)', // 16px margins on each side
+          maxWidth: '500px',
+          height: '57.75vh', // Increased by 10% from 52.5vh
+          maxHeight: '495px', // Increased by 10% from 450px
+          borderRadius: '24px',
           backgroundColor: 'white',
-          transition: 'all 0.3s ease',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 15px rgba(0, 0, 0, 0.05)',
+          zIndex: 1000000,
+          overflow: 'hidden',
         }}
       >
-        {/* Header - only show when expanded */}
-        {isExpanded && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              {/* Chef's hat icon */}
-              <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 38h24v-8H8v8zm4-16c0-5.52 4.48-10 10-10s10 4.48 10 10v4H12v-4z" fill="#f97316"/>
-                <circle cx="12" cy="12" r="4" fill="#f97316"/>
-                <circle cx="28" cy="12" r="4" fill="#f97316"/>
-                <circle cx="20" cy="8" r="5" fill="#f97316"/>
-              </svg>
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">AI Sous Chef</h2>
-                <p className="text-xs text-gray-500">Here to help with meal planning</p>
-              </div>
-            </div>
+        {/* Header */}
+        <div className="relative flex-shrink-0" style={{ padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#f97316"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
+            <line x1="6" y1="17" x2="18" y2="17" />
+          </svg>
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>Sous Chef</span>
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            right: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}>
+            <button
+              onClick={handleNewChat}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                color: '#f97316',
+                fontSize: '13px',
+                fontWeight: '500',
+              }}
+              aria-label="New chat"
+            >
+              New Chat
+            </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              style={{
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                cursor: 'pointer',
+                color: '#9ca3af',
+              }}
               aria-label="Close chat"
             >
-              <X className="w-5 h-5 text-gray-600" />
+              <X style={{ width: '20px', height: '20px' }} />
             </button>
           </div>
-        )}
+        </div>
 
-        {/* Collapsed greeting - only show when NOT expanded */}
-        {!isExpanded && (
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                {/* Chef's hat icon - small */}
-                <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 38h24v-8H8v8zm4-16c0-5.52 4.48-10 10-10s10 4.48 10 10v4H12v-4z" fill="#f97316"/>
-                  <circle cx="12" cy="12" r="4" fill="#f97316"/>
-                  <circle cx="28" cy="12" r="4" fill="#f97316"/>
-                  <circle cx="20" cy="8" r="5" fill="#f97316"/>
-                </svg>
-                <p className="text-sm text-gray-700 font-medium">Hi I'm your Sous Chef. How can I help?</p>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Messages - only show when expanded */}
-        {isExpanded && (
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        {/* Messages */}
+        <div
+          className="flex-1 overflow-y-auto px-6 py-4 space-y-4 ai-chat-messages"
+          style={{
+            scrollbarWidth: 'auto',
+            scrollbarColor: '#d1d5db #f9fafb',
+          }}
+        >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-              <svg width="60" height="60" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-4 opacity-50">
-                <path d="M8 38h24v-8H8v8zm4-16c0-5.52 4.48-10 10-10s10 4.48 10 10v4H12v-4z" fill="#f97316"/>
-                <circle cx="12" cy="12" r="4" fill="#f97316"/>
-                <circle cx="28" cy="12" r="4" fill="#f97316"/>
-                <circle cx="20" cy="8" r="5" fill="#f97316"/>
+              <svg
+                width="60"
+                height="60"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#f97316"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mb-4 opacity-50"
+              >
+                <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
+                <line x1="6" y1="17" x2="18" y2="17" />
               </svg>
               <p className="text-sm">Hi! I'm your AI sous chef.</p>
               <p className="text-sm mt-2">Ask me anything about your meals,<br />recipes, or grocery lists.</p>
@@ -320,25 +513,35 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                style={{
+                  display: 'flex',
+                  justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
+                  marginBottom: '16px',
+                  paddingLeft: '16px',
+                  paddingRight: '16px',
+                }}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
+                  style={{
+                    maxWidth: '80%',
+                    borderRadius: '16px',
+                    padding: '12px 16px',
+                    backgroundColor: message.role === 'user' ? '#f97316' : '#ffffff',
+                    color: message.role === 'user' ? '#ffffff' : '#111827',
+                    boxShadow: message.role === 'user' ? 'none' : '0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+                  }}
                 >
-                  <p className="text-sm whitespace-pre-wrap">
+                  <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap', margin: 0 }}>
                     {message.role === 'assistant' && recipes.length > 0
                       ? linkifyRecipes(message.content).map((part, i) =>
                           part.recipeId ? (
                             <span
                               key={i}
                               onClick={() => handleRecipeClick(part.recipeId!)}
-                              className="font-semibold underline cursor-pointer hover:text-orange-600"
+                              className="font-bold underline cursor-pointer"
+                              style={{ color: '#f97316' }}
                             >
-                              {part.text}
+                              {part.text.replace(/^\*\*|\*\*$|^"|"$/g, '')}
                             </span>
                           ) : (
                             <span key={i}>{part.text}</span>
@@ -346,50 +549,140 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                         )
                       : message.content}
                   </p>
-                  <p className={`text-xs mt-1 ${
-                    message.role === 'user' ? 'text-orange-100' : 'text-gray-500'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+
+                  {/* Batch Approval UI */}
+                  {message.approvalActions && message.approvalActions.length > 0 && (
+                    <div style={{ marginTop: '12px' }}>
+                      {/* List of actions */}
+                      <div style={{
+                        backgroundColor: '#fef3c7',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        marginBottom: '8px',
+                        fontSize: '13px',
+                        lineHeight: '1.5'
+                      }}>
+                        <div style={{ fontWeight: '600', marginBottom: '6px', color: '#92400e' }}>
+                          {message.approvalActions.length} action{message.approvalActions.length > 1 ? 's' : ''} to approve:
+                        </div>
+                        {message.approvalActions.map((action, idx) => (
+                          <div key={action.id} style={{ color: '#78350f' }}>
+                            {idx + 1}. {action.preview}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Approval buttons */}
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleBatchApproval(message.id, true)}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            border: 'none',
+                            backgroundColor: '#f97316',
+                            color: 'white',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                          }}
+                        >
+                          Yes, add all ✓
+                        </button>
+                        <button
+                          onClick={() => handleBatchApproval(message.id, false)}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            border: '1px solid #d1d5db',
+                            backgroundColor: 'white',
+                            color: '#6b7280',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          No, thanks
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
           )}
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px', paddingLeft: '16px', paddingRight: '16px' }}>
+              <div style={{
+                backgroundColor: '#ffffff',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+                borderRadius: '16px',
+                padding: '12px 16px',
+              }}>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce 1s infinite', animationDelay: '0ms' }} />
+                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce 1s infinite', animationDelay: '150ms' }} />
+                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce 1s infinite', animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
-          </div>
-        )}
+        </div>
 
         {/* Input */}
-        <div className={`px-6 py-4 bg-white ${isExpanded ? 'border-t border-gray-200 rounded-b-3xl' : ''}`}>
-          <div className="flex items-end gap-3">
+        <div style={{ padding: '16px 24px', backgroundColor: 'white', flexShrink: 0, borderRadius: '0 0 24px 24px' }}>
+          <div style={{ position: 'relative' }}>
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about meals, recipes, or groceries..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+              placeholder="Enter message"
+              style={{
+                width: '100%',
+                padding: '12px 50px 12px 16px',
+                backgroundColor: '#f3f4f6',
+                border: 'none',
+                borderRadius: '50px',
+                outline: 'none',
+                fontSize: '16px',
+                boxSizing: 'border-box',
+              }}
               disabled={isLoading}
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="p-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+              style={{
+                position: 'absolute',
+                right: '14px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                padding: '4px',
+                border: 'none',
+                background: 'transparent',
+                cursor: !input.trim() || isLoading ? 'not-allowed' : 'pointer',
+                color: !input.trim() || isLoading ? '#d1d5db' : '#6b7280',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
               aria-label="Send message"
+              onMouseEnter={(e) => {
+                if (input.trim() && !isLoading) {
+                  e.currentTarget.style.color = '#f97316';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (input.trim() && !isLoading) {
+                  e.currentTarget.style.color = '#6b7280';
+                }
+              }}
             >
-              <Send className="w-5 h-5" />
+              <Send style={{ width: '20px', height: '20px' }} />
             </button>
           </div>
         </div>

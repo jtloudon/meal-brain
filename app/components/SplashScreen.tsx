@@ -4,9 +4,20 @@ import { useEffect, useState } from 'react';
 
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
+  const [hasShown, setHasShown] = useState(false);
 
   useEffect(() => {
-    // Hide splash screen after 2.5 seconds
+    // Check if already shown in this session
+    if (typeof window !== 'undefined') {
+      const alreadyShown = sessionStorage.getItem('splash-shown');
+      if (alreadyShown) {
+        setIsVisible(false);
+        return;
+      }
+    }
+
+    // Mark as shown and hide after delay
+    sessionStorage.setItem('splash-shown', 'true');
     const timer = setTimeout(() => {
       setIsVisible(false);
     }, 2500);
