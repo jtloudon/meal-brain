@@ -12,18 +12,38 @@ const VALID_UNITS = [
   'tsp',
   'ml',
   'l',
+  'gallon',
+  'quart',
+  'pint',
   'fl oz',
   // Weight
   'lb',
   'oz',
   'g',
   'kg',
-  // Count
+  // Count/Containers
   'whole',
   'clove',
   'can',
+  'jar',
+  'bottle',
   'package',
+  'bag',
+  'box',
   'slice',
+  'fillet',
+  'piece',
+  'breast',
+  'thigh',
+  'head',
+  'bunch',
+  'stalk',
+  'sprig',
+  'leaf',
+  // Seasoning
+  'pinch',
+  'dash',
+  'to taste',
 ] as const;
 
 /**
