@@ -1,11 +1,11 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, Suspense } from 'react';
+import { useMemo } from 'react'; Suspense
 import RecipeFormWithTabs from '@/components/RecipeFormWithTabs';
 import { parseIngredientsText } from '@/lib/utils/parse-ingredients';
 
-function NewRecipePageContent() {
+export default function NewRecipePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -137,13 +137,5 @@ function NewRecipePageContent() {
       onSubmit={handleSubmit}
       initialData={initialData}
     />
-  );
-}
-
-export default function NewRecipePage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <NewRecipePageContent />
-    </Suspense>
   );
 }

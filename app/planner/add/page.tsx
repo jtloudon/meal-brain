@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { ArrowLeft, Search } from 'lucide-react';
@@ -18,7 +18,7 @@ type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 
-export default function AddMealPage() {
+function AddMealContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<'select-recipe' | 'select-details'>('select-recipe');
@@ -346,4 +346,18 @@ export default function AddMealPage() {
 
 function getTodayDate(): string {
   return new Date().toISOString().split('T')[0];
+}
+
+export default function AddMealPage() {
+  return (
+    <Suspense fallback={
+      <AuthenticatedLayout title="Add Meal">
+        <div className="p-4">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </AuthenticatedLayout>
+    }>
+      <AddMealContent />
+    </Suspense>
+  );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -35,7 +35,7 @@ const DEFAULT_MEAL_COURSES: MealCourse[] = [
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export default function PlannerPage() {
+function PlannerContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [meals, setMeals] = useState<PlannedMeal[]>([]);
@@ -1247,5 +1247,19 @@ export default function PlannerPage() {
         )}
       </div>
     </AuthenticatedLayout>
+  );
+}
+
+export default function PlannerPage() {
+  return (
+    <Suspense fallback={
+      <AuthenticatedLayout title="Meal Planner" action={null}>
+        <div className="p-4">
+          <p className="text-gray-500">Loading planner...</p>
+        </div>
+      </AuthenticatedLayout>
+    }>
+      <PlannerContent />
+    </Suspense>
   );
 }
