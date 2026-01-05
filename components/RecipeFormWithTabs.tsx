@@ -589,7 +589,6 @@ export default function RecipeFormWithTabs({
                 flex: 1,
                 padding: '12px 16px',
                 fontSize: '17px',
-                fontFamily: 'monospace',
                 border: 'none',
                 outline: 'none',
                 resize: 'none'
@@ -653,14 +652,21 @@ export default function RecipeFormWithTabs({
       </div>
 
       {/* Keyboard Accessory Toolbar */}
-      <div style={{
-        borderTop: '1px solid #d1d5db',
-        backgroundColor: '#e5e7eb',
-        padding: '8px',
-        display: 'flex',
-        gap: '8px',
-        overflowX: 'auto'
-      }}>
+      {activeTab === 'ingredients' && (
+        <div style={{
+          position: 'sticky',
+          bottom: 0,
+          borderTop: '1px solid #d1d5db',
+          backgroundColor: '#e5e7eb',
+          padding: '8px',
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          zIndex: 10,
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
         {['⅛', '¼', '⅓', '½', '⅔', '¾', '°', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'can'].map((symbol) => (
           <button
             key={symbol}
@@ -699,7 +705,8 @@ export default function RecipeFormWithTabs({
             {symbol}
           </button>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

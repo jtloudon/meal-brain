@@ -36,10 +36,27 @@ export default function RecipesPage() {
   const [importUrl, setImportUrl] = useState('');
   const [importing, setImporting] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [mealCourses, setMealCourses] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
     fetchRecipes();
   }, [search, minRating, selectedCategory, maxTime]);
+
+  useEffect(() => {
+    // Fetch meal courses from user preferences
+    const fetchMealCourses = async () => {
+      try {
+        const response = await fetch('/api/settings/meal-courses');
+        if (response.ok) {
+          const data = await response.json();
+          setMealCourses(data.mealCourses || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch meal courses:', error);
+      }
+    };
+    fetchMealCourses();
+  }, []);
 
   const handleImportFromFile = async () => {
     if (!importFile) return;
@@ -417,8 +434,8 @@ export default function RecipesPage() {
     }
   };
 
-  // Fixed meal type categories
-  const categories = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snack'];
+  // Dynamic meal type categories from user preferences
+  const categories = ['All', ...mealCourses.map(course => course.name)];
 
   return (
     <AuthenticatedLayout
@@ -442,7 +459,7 @@ export default function RecipesPage() {
               <Search size={22} style={{ color: '#f97316' }} />
             </button>
           ) : (
-            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%' }}>
               <button
                 onClick={() => setShowSearch(false)}
                 style={{
@@ -467,6 +484,7 @@ export default function RecipesPage() {
                 autoFocus
                 style={{
                   flex: 1,
+                  minWidth: 0,
                   paddingLeft: '16px',
                   paddingRight: '16px',
                   paddingTop: '8px',
@@ -474,7 +492,7 @@ export default function RecipesPage() {
                   backgroundColor: '#f3f4f6',
                   border: 'none',
                   borderRadius: '20px',
-                  fontSize: '15px',
+                  fontSize: '16px',
                   outline: 'none'
                 }}
               />
@@ -525,14 +543,17 @@ export default function RecipesPage() {
           display: 'flex',
           gap: '6px',
           marginBottom: '8px',
-          justifyContent: 'space-between'
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
         }}>
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
               style={{
-                padding: '6px 10px',
+                padding: '6px 14px',
                 borderRadius: '16px',
                 border: 'none',
                 backgroundColor: selectedCategory === category ? '#f97316' : '#f3f4f6',
@@ -540,8 +561,8 @@ export default function RecipesPage() {
                 fontSize: '13px',
                 fontWeight: '500',
                 cursor: 'pointer',
-                flex: 1,
-                minWidth: 0
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
               {category}
