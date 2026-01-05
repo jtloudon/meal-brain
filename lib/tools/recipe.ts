@@ -37,7 +37,7 @@ export const CreateRecipeSchema = z.object({
         name: z.string().min(1, 'Ingredient name is required'),
         quantity_min: z.number().positive('Quantity must be positive'),
         quantity_max: z.number().positive().nullable().optional(),
-        unit: z.enum(VALID_UNITS),
+        unit: z.enum(VALID_UNITS).or(z.literal('')), // Allow empty string for unitless ingredients
         prep_state: z.string().optional(),
       })
     )
@@ -86,7 +86,7 @@ export const UpdateRecipeSchema = z.object({
         name: z.string().min(1, 'Ingredient name is required'),
         quantity_min: z.number().positive('Quantity must be positive'),
         quantity_max: z.number().positive().nullable().optional(),
-        unit: z.enum(VALID_UNITS),
+        unit: z.enum(VALID_UNITS).or(z.literal('')), // Allow empty string for unitless ingredients
         prep_state: z.string().optional(),
       })
     )

@@ -135,7 +135,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     if (isOpen && messages.length > 0) {
       // Use setTimeout to ensure DOM has updated
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
       }, 100);
     }
   }, [messages, isOpen]);
@@ -523,7 +523,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           style={{
             scrollbarWidth: 'auto',
             scrollbarColor: '#d1d5db #f9fafb',
-            paddingBottom: '80px', // Space for fixed input bar
+            paddingBottom: '20px', // Minimal space, input is fixed
           }}
         >
           {messages.length === 0 ? (
@@ -668,30 +668,38 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
         </div>
 
         {/* Input - Fixed above keyboard */}
-        <div style={{
-          position: 'fixed',
-          bottom: keyboardHeight,
-          left: 0,
-          right: 0,
-          padding: '12px 16px',
-          backgroundColor: 'white',
-          borderTop: '1px solid #e5e7eb',
-          zIndex: 1000001,
-          transition: 'bottom 0.2s ease-out',
-        }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSend();
+          }}
+          style={{
+            position: 'fixed',
+            bottom: keyboardHeight,
+            left: 0,
+            right: 0,
+            padding: '12px 16px',
+            backgroundColor: 'white',
+            borderTop: '1px solid #e5e7eb',
+            zIndex: 1000001,
+            transition: 'bottom 0.2s ease-out',
+          }}
+        >
           <div style={{ position: 'relative' }}>
             <input
               ref={inputRef}
               type="text"
               inputMode="text"
+              enterKeyHint="send"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder="Ask Sous Chef"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
+              data-form-type="other"
+              data-lpignore="true"
               style={{
                 width: '100%',
                 padding: '12px 50px 12px 16px',
@@ -737,7 +745,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
               <Send style={{ width: '20px', height: '20px' }} />
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </>
   );
