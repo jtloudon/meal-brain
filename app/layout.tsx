@@ -5,11 +5,21 @@ import SplashScreen from './components/SplashScreen';
 export const metadata: Metadata = {
   title: 'MealBrain',
   description: 'An AI sous chef you control - helpful, never bossy',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'MealBrain',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#f97316',
 };
 
 export default function RootLayout({
