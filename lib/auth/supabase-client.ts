@@ -32,6 +32,8 @@ export function createClient() {
         if (options?.maxAge) cookie += `; max-age=${options.maxAge}`;
         if (options?.path) cookie += `; path=${options.path}`;
         if (options?.sameSite) cookie += `; samesite=${options.sameSite}`;
+        // Secure flag required for HTTPS (production)
+        if (window.location.protocol === 'https:') cookie += `; secure`;
         document.cookie = cookie;
       },
       remove(name: string, options: any) {
