@@ -150,12 +150,30 @@ Create a staging deploy for testing before production:
 
 ## Progress Tracker
 
-- [ ] Phase 1: Supabase Cloud Setup
-- [ ] Phase 2: GitHub Preparation
-- [ ] Phase 3: Vercel Deployment
-- [ ] Phase 4: Wire Up Auth
-- [ ] Phase 5: Mobile Access
-- [ ] First successful login from phone
+- [x] Phase 1: Supabase Cloud Setup
+- [x] Phase 2: GitHub Preparation
+- [x] Phase 3: Vercel Deployment
+- [x] Phase 4: Wire Up Auth
+- [x] Phase 5: Mobile Access
+- [x] First successful login from phone
+- [x] Password login enabled for PWA
+
+## Post-Deployment Notes
+
+### PWA & Standalone App
+- **Issue**: Magic links don't work in standalone PWA (iOS limitation)
+- **Solution**: Password login implemented (Settings → Set Password)
+- **Usage**: Click "Sign in with password" on login page
+- Standalone app works perfectly with password login!
+
+### Custom Meal Types
+- Meal types pulled from Settings → Meal Planner
+- Backend validation updated to accept custom types
+- Add custom types like "Drink" in settings, they'll appear in recipe forms
+
+### Time Display
+- Supports plain numbers ("5" = 5 mins) and full strings ("5 mins")
+- Handles 0 cook time correctly
 
 ---
 
