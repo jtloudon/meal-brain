@@ -53,6 +53,7 @@ export default function RecipeFormWithTabs({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [householdId, setHouseholdId] = useState<string>('');
+  const [keyboardToolbarBottom, setKeyboardToolbarBottom] = useState(0);
 
   // Form fields
   const [title, setTitle] = useState(initialData?.title || '');
@@ -111,6 +112,29 @@ export default function RecipeFormWithTabs({
       }
     };
     getHouseholdId();
+  }, []);
+
+  // Detect keyboard and position toolbar above it
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const handleViewportChange = () => {
+      const viewport = window.visualViewport!;
+      const windowHeight = window.innerHeight;
+      const viewportHeight = viewport.height;
+      const keyboardHeight = windowHeight - viewportHeight;
+      setKeyboardToolbarBottom(keyboardHeight);
+    };
+
+    window.visualViewport.addEventListener('resize', handleViewportChange);
+    window.visualViewport.addEventListener('scroll', handleViewportChange);
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+        window.visualViewport.removeEventListener('scroll', handleViewportChange);
+      }
+    };
   }, []);
 
   const handleCancel = () => {
@@ -654,18 +678,21 @@ export default function RecipeFormWithTabs({
       {/* Keyboard Accessory Toolbar */}
       {activeTab === 'ingredients' && (
         <div style={{
-          position: 'sticky',
-          bottom: 0,
+          position: 'fixed',
+          bottom: keyboardToolbarBottom,
+          left: 0,
+          right: 0,
           borderTop: '1px solid #d1d5db',
           backgroundColor: '#e5e7eb',
           padding: '8px',
           display: 'flex',
           gap: '8px',
           overflowX: 'auto',
-          zIndex: 10,
+          zIndex: 1000,
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+          msOverflowStyle: 'none',
+          transition: 'bottom 0.2s ease-out'
         }}>
         {['⅛', '¼', '⅓', '½', '⅔', '¾', '°', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'can'].map((symbol) => (
           <button
