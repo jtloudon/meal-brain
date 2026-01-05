@@ -51,7 +51,7 @@ export const CreateRecipeSchema = z.object({
   serving_size: z.string().optional(),
   prep_time: z.string().optional(),
   cook_time: z.string().optional(),
-  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).nullable().optional(),
+  meal_type: z.string().nullable().optional(),
 });
 
 export type CreateRecipeInput = z.infer<typeof CreateRecipeSchema>;
@@ -65,7 +65,7 @@ export const ListRecipesSchema = z.object({
       tags: z.array(z.string()).optional(),
       rating: z.number().min(1).max(5).nullable().optional(),
       search: z.string().optional(),
-      meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).nullable().optional(),
+      meal_type: z.string().nullable().optional(),
     })
     .optional(),
   limit: z.number().positive().max(100).default(50),
@@ -100,7 +100,7 @@ export const UpdateRecipeSchema = z.object({
   serving_size: z.string().optional(),
   prep_time: z.string().optional(),
   cook_time: z.string().optional(),
-  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).nullable().optional(),
+  meal_type: z.string().nullable().optional(),
 });
 
 export type UpdateRecipeInput = z.infer<typeof UpdateRecipeSchema>;

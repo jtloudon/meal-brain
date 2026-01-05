@@ -377,7 +377,7 @@ export default function RecipesPage() {
   const calculateTotalTime = (prep_time: string | null, cook_time: string | null): string | null => {
     if (!prep_time && !cook_time) return null;
 
-    // Parse time strings like "10 mins", "1 hr", "30 min", "1 hr 30 min", "10-12 hours"
+    // Parse time strings like "10 mins", "1 hr", "30 min", "1 hr 30 min", "10-12 hours", or plain numbers like "5"
     const parseTime = (timeStr: string | null): number => {
       if (!timeStr) return 0;
 
@@ -395,6 +395,11 @@ export default function RecipesPage() {
 
       const minMatch = timeStr.match(/([\d.]+)\s*m(?:in|inute)?s?/i);
       if (minMatch) totalMins += parseFloat(minMatch[1]);
+
+      // If no matches yet, treat as plain number (assume minutes)
+      if (totalMins === 0 && /^\d+$/.test(timeStr.trim())) {
+        totalMins = parseFloat(timeStr);
+      }
 
       return totalMins;
     };
