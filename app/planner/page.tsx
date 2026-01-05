@@ -1253,7 +1253,7 @@ function PlannerContent() {
 export default function PlannerPage() {
   return (
     <Suspense fallback={
-      <AuthenticatedLayout title="Meal Planner" action={null}>
+      <AuthenticatedLayout title="" action={null}>
         <div className="p-4">
           <p className="text-gray-500">Loading planner...</p>
         </div>

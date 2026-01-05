@@ -67,7 +67,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <AuthenticatedLayout title="Settings">
+    <AuthenticatedLayout title="">
       <div style={{ padding: '8px 16px 80px 16px' }}>
         {settingsSections.map((section, idx) => (
           <div key={section.title} style={{ marginBottom: idx < settingsSections.length - 1 ? '32px' : '0' }}>
