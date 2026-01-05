@@ -1,12 +1,11 @@
 -- Initial schema for MealBrain
 -- Creates core tables for households, users, recipes, meal planning, and grocery lists
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Note: Using gen_random_uuid() (built-in PostgreSQL function, no extension needed)
 
 -- Households table
 CREATE TABLE households (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -21,7 +20,7 @@ CREATE TABLE users (
 
 -- User preferences table
 CREATE TABLE user_preferences (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
   household_context TEXT CHECK (household_context IN ('just-me', 'couple', 'family')),
   dietary_constraints TEXT[] DEFAULT '{}',
@@ -34,7 +33,7 @@ CREATE TABLE user_preferences (
 
 -- Recipes table
 CREATE TABLE recipes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   rating INTEGER CHECK (rating >= 1 AND rating <= 5),
@@ -47,7 +46,7 @@ CREATE TABLE recipes (
 
 -- Ingredient dictionary (canonical names)
 CREATE TABLE ingredients (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   canonical_name TEXT NOT NULL UNIQUE,
   aliases TEXT[] DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -55,7 +54,7 @@ CREATE TABLE ingredients (
 
 -- Recipe ingredients (structured, normalized)
 CREATE TABLE recipe_ingredients (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   recipe_id UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
   ingredient_id UUID REFERENCES ingredients(id) ON DELETE SET NULL,
   display_name TEXT NOT NULL,
@@ -68,7 +67,7 @@ CREATE TABLE recipe_ingredients (
 
 -- Planner meals (scheduled meals)
 CREATE TABLE planner_meals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   recipe_id UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
   date DATE NOT NULL,
@@ -78,7 +77,7 @@ CREATE TABLE planner_meals (
 
 -- Grocery lists
 CREATE TABLE grocery_lists (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -86,7 +85,7 @@ CREATE TABLE grocery_lists (
 
 -- Grocery items (aggregated from recipes)
 CREATE TABLE grocery_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   grocery_list_id UUID NOT NULL REFERENCES grocery_lists(id) ON DELETE CASCADE,
   ingredient_id UUID REFERENCES ingredients(id) ON DELETE SET NULL,
   display_name TEXT NOT NULL,
