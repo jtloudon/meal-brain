@@ -69,6 +69,30 @@ export default function RecipeFormWithTabs({
   const [prepTime, setPrepTime] = useState(initialData?.prepTime || '');
   const [cookTime, setCookTime] = useState(initialData?.cookTime || '');
   const [mealType, setMealType] = useState<string>(initialData?.mealType || '');
+  const [mealCourses, setMealCourses] = useState<Array<{id: string, name: string}>>([]);
+
+  // Fetch meal courses from user preferences
+  useEffect(() => {
+    const fetchMealCourses = async () => {
+      try {
+        const response = await fetch('/api/settings/meal-courses');
+        if (response.ok) {
+          const data = await response.json();
+          setMealCourses(data.mealCourses || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch meal courses:', error);
+        // Fallback to defaults
+        setMealCourses([
+          { id: 'breakfast', name: 'Breakfast' },
+          { id: 'lunch', name: 'Lunch' },
+          { id: 'dinner', name: 'Dinner' },
+          { id: 'snack', name: 'Snack' },
+        ]);
+      }
+    };
+    fetchMealCourses();
+  }, []);
 
   // Get household ID for photo uploads
   useEffect(() => {
@@ -509,21 +533,22 @@ export default function RecipeFormWithTabs({
                 value={mealType}
                 onChange={(e) => setMealType(e.target.value)}
                 style={{
-                  textAlign: 'right',
                   fontSize: '17px',
-                  flex: 1,
                   marginLeft: '16px',
                   border: 'none',
                   outline: 'none',
                   backgroundColor: 'transparent',
-                  color: mealType ? '#111827' : '#9ca3af'
+                  color: mealType ? '#111827' : '#9ca3af',
+                  appearance: 'none',
+                  direction: 'rtl'
                 }}
               >
                 <option value="">Select...</option>
-                <option value="breakfast">Breakfast</option>
-                <option value="lunch">Lunch</option>
-                <option value="dinner">Dinner</option>
-                <option value="snack">Snack</option>
+                {mealCourses.map(course => (
+                  <option key={course.id} value={course.id}>
+                    {course.name}
+                  </option>
+                ))}
               </select>
             </div>
 
