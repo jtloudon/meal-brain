@@ -30,6 +30,9 @@ const VALID_UNITS = [
   'tsp', 'teaspoon', 'teaspoons',
   'ml', 'milliliter', 'milliliters',
   'l', 'liter', 'liters',
+  'gallon', 'gallons',
+  'quart', 'quarts',
+  'pint', 'pints',
   'fl oz', 'fluid ounce', 'fluid ounces',
   'lb', 'pound', 'pounds',
   'oz', 'ounce', 'ounces',
@@ -38,12 +41,24 @@ const VALID_UNITS = [
   'whole',
   'clove', 'cloves',
   'can', 'cans',
+  'jar', 'jars',
+  'bottle', 'bottles',
   'package', 'packages',
+  'bag', 'bags',
+  'box', 'boxes',
   'slice', 'slices',
   'fillet', 'fillets',
   'piece', 'pieces',
   'breast', 'breasts',
   'thigh', 'thighs',
+  'head', 'heads',
+  'bunch', 'bunches',
+  'stalk', 'stalks',
+  'sprig', 'sprigs',
+  'leaf', 'leaves',
+  'pinch',
+  'dash',
+  'to taste',
 ];
 
 // Normalize plural units to singular
@@ -57,6 +72,9 @@ const UNIT_NORMALIZATION: Record<string, string> = {
   'milliliter': 'ml',
   'liters': 'l',
   'liter': 'l',
+  'gallons': 'gallon',
+  'quarts': 'quart',
+  'pints': 'pint',
   'fluid ounces': 'fl oz',
   'fluid ounce': 'fl oz',
   'pounds': 'lb',
@@ -69,12 +87,21 @@ const UNIT_NORMALIZATION: Record<string, string> = {
   'kilogram': 'kg',
   'cloves': 'clove',
   'cans': 'can',
+  'jars': 'jar',
+  'bottles': 'bottle',
   'packages': 'package',
+  'bags': 'bag',
+  'boxes': 'box',
   'slices': 'slice',
   'fillets': 'fillet',
   'pieces': 'piece',
   'breasts': 'breast',
   'thighs': 'thigh',
+  'heads': 'head',
+  'bunches': 'bunch',
+  'stalks': 'stalk',
+  'sprigs': 'sprig',
+  'leaves': 'leaf',
 };
 
 export interface ParsedIngredient {
@@ -100,7 +127,8 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
   let remaining = trimmed;
 
   // 1. Extract quantity (number, fraction, or range at start)
-  const quantityMatch = remaining.match(/^([\d.]+(?:-[\d.]+)?(?:\s*[\d/]*)?|[⅛¼⅓½⅔¾⅞])\s*/);
+  // Enhanced regex to properly capture mixed numbers like "1 1/4" or "2 1/2"
+  const quantityMatch = remaining.match(/^([\d.]+(?:\s+\d+\/\d+)?(?:-[\d.]+(?:\s+\d+\/\d+)?)?|[⅛¼⅓½⅔¾⅞])\s*/);
   if (quantityMatch) {
     const quantityStr = quantityMatch[1].trim();
 
@@ -126,16 +154,31 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
     else if (FRACTION_MAP[quantityStr]) {
       quantity_min = FRACTION_MAP[quantityStr];
     }
-    // Check if it's a mixed number (e.g., "1 1/2")
+    // Check if it's a mixed number (e.g., "1 1/2" or "1 1/4")
     else if (quantityStr.includes(' ')) {
       const parts = quantityStr.split(' ');
       const whole = parseFloat(parts[0]);
-      const fraction = FRACTION_MAP[parts[1]] || 0;
+      let fraction = 0;
+
+      // Check if fraction is in FRACTION_MAP or parse "num/denom" format
+      if (FRACTION_MAP[parts[1]]) {
+        fraction = FRACTION_MAP[parts[1]];
+      } else if (parts[1].includes('/')) {
+        const [num, denom] = parts[1].split('/').map(Number);
+        fraction = num / denom;
+      }
+
       quantity_min = whole + fraction;
     }
-    // Check if it's a fraction string (e.g., "1/2")
+    // Check if it's a fraction string (e.g., "1/2" or "3/8")
     else if (quantityStr.includes('/')) {
-      quantity_min = FRACTION_MAP[quantityStr] || 0;
+      if (FRACTION_MAP[quantityStr]) {
+        quantity_min = FRACTION_MAP[quantityStr];
+      } else {
+        // Parse any fraction format "num/denom"
+        const [num, denom] = quantityStr.split('/').map(Number);
+        quantity_min = num / denom;
+      }
     }
     // Otherwise it's a decimal number
     else {

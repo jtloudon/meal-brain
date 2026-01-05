@@ -5,6 +5,35 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { X, Send } from 'lucide-react';
 
+// Helper to get keyboard height from visual viewport
+const useKeyboardHeight = () => {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const handleViewportChange = () => {
+      const viewport = window.visualViewport!;
+      const windowHeight = window.innerHeight;
+      const viewportHeight = viewport.height;
+      const height = Math.max(0, windowHeight - viewportHeight);
+      setKeyboardHeight(height);
+    };
+
+    window.visualViewport.addEventListener('resize', handleViewportChange);
+    window.visualViewport.addEventListener('scroll', handleViewportChange);
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+        window.visualViewport.removeEventListener('scroll', handleViewportChange);
+      }
+    };
+  }, []);
+
+  return keyboardHeight;
+};
+
 interface ApprovalAction {
   id: string;
   toolName: string;
@@ -35,6 +64,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const keyboardHeight = useKeyboardHeight();
 
   // Only render on client-side and get portal root
   useEffect(() => {
@@ -407,27 +437,32 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
         }}
       />
 
-      {/* Floating Chat Panel */}
+      {/* Full-screen Chat Panel (ChatGPT style) */}
       <div
         className="flex flex-col"
         style={{
           position: 'fixed',
-          left: '50%',
-          bottom: '90px', // Closer to bottom nav
-          transform: 'translateX(-50%)',
-          width: 'calc(100% - 32px)', // 16px margins on each side
-          maxWidth: '500px',
-          height: '57.75vh', // Increased by 10% from 52.5vh
-          maxHeight: '495px', // Increased by 10% from 450px
-          borderRadius: '24px',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: keyboardHeight,
           backgroundColor: 'white',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 15px rgba(0, 0, 0, 0.05)',
           zIndex: 1000000,
-          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {/* Header */}
-        <div className="relative flex-shrink-0" style={{ padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="relative flex-shrink-0" style={{
+          paddingTop: 'max(16px, env(safe-area-inset-top))',
+          paddingLeft: '24px',
+          paddingRight: '24px',
+          paddingBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          borderBottom: '1px solid #e5e7eb',
+        }}>
           <svg
             width="24"
             height="24"
@@ -488,6 +523,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           style={{
             scrollbarWidth: 'auto',
             scrollbarColor: '#d1d5db #f9fafb',
+            paddingBottom: '80px', // Space for fixed input bar
           }}
         >
           {messages.length === 0 ? (
@@ -631,25 +667,41 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div style={{ padding: '16px 24px', backgroundColor: 'white', flexShrink: 0, borderRadius: '0 0 24px 24px' }}>
+        {/* Input - Fixed above keyboard */}
+        <div style={{
+          position: 'fixed',
+          bottom: keyboardHeight,
+          left: 0,
+          right: 0,
+          padding: '12px 16px',
+          backgroundColor: 'white',
+          borderTop: '1px solid #e5e7eb',
+          zIndex: 1000001,
+          transition: 'bottom 0.2s ease-out',
+        }}>
           <div style={{ position: 'relative' }}>
             <input
               ref={inputRef}
               type="text"
+              inputMode="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter message"
+              placeholder="Ask Sous Chef"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
               style={{
                 width: '100%',
                 padding: '12px 50px 12px 16px',
                 backgroundColor: '#f3f4f6',
                 border: 'none',
-                borderRadius: '50px',
+                borderRadius: '24px',
                 outline: 'none',
                 fontSize: '16px',
                 boxSizing: 'border-box',
+                WebkitAppearance: 'none',
               }}
               disabled={isLoading}
             />
