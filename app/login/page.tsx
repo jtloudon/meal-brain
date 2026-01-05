@@ -5,41 +5,56 @@ import { createClient } from '@/lib/auth/supabase-client';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [usePassword, setUsePassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('[LOGIN] Form submitted, email:', email);
     setLoading(true);
     setError('');
     setMessage('');
 
     try {
-      console.log('[LOGIN] Creating Supabase client...');
       const supabase = createClient();
-      console.log('[LOGIN] Supabase client created, calling signInWithOtp...');
 
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      if (usePassword && password) {
+        // Password login
+        console.log('[LOGIN] Attempting password login');
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      console.log('[LOGIN] signInWithOtp response:', { error });
-
-      if (error) {
-        console.error('[LOGIN] Error from Supabase:', error);
-        setError(error.message);
+        if (error) {
+          console.error('[LOGIN] Password error:', error);
+          setError(error.message);
+        } else if (data.user) {
+          console.log('[LOGIN] Password success, redirecting');
+          window.location.href = '/planner';
+        }
       } else {
-        console.log('[LOGIN] Success! Setting success message');
-        setMessage('Check your email for the magic link!');
-        setEmail('');
+        // Magic link login
+        console.log('[LOGIN] Sending magic link');
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+
+        if (error) {
+          console.error('[LOGIN] Magic link error:', error);
+          setError(error.message);
+        } else {
+          setMessage('Check your email for the magic link!');
+          setEmail('');
+        }
       }
     } catch (err) {
-      console.error('[LOGIN] Caught exception:', err);
+      console.error('[LOGIN] Exception:', err);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -73,7 +88,7 @@ export default function LoginPage() {
         {/* Login Form - with proper spacing */}
         <div className="flex flex-col items-center" style={{ marginTop: '64px', width: '100%', maxWidth: '288px' }}>
           <form onSubmit={handleLogin} className="w-full">
-            <div className="w-full" style={{ marginBottom: '24px' }}>
+            <div className="w-full" style={{ marginBottom: '16px' }}>
               <input
                 id="email"
                 type="email"
@@ -110,6 +125,31 @@ export default function LoginPage() {
               `}</style>
             </div>
 
+            {usePassword && (
+              <div className="w-full" style={{ marginBottom: '16px' }}>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  required={usePassword}
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '2px solid white',
+                    color: 'white',
+                    fontSize: '16px',
+                    padding: '8px 4px',
+                    outline: 'none',
+                  }}
+                  className="disabled:opacity-50"
+                />
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -122,9 +162,29 @@ export default function LoginPage() {
                 background: 'rgba(255, 255, 255, 0.15)',
                 border: 'none',
                 cursor: 'pointer',
+                marginBottom: '12px',
               }}
             >
-              {loading ? 'Sending...' : 'Send Magic Link'}
+              {loading ? 'Signing in...' : usePassword ? 'Sign In' : 'Send Magic Link'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setUsePassword(!usePassword)}
+              disabled={loading}
+              className="font-medium disabled:opacity-50"
+              style={{
+                width: '100%',
+                color: 'rgba(255, 255, 255, 0.8)',
+                padding: '8px',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                textDecoration: 'underline',
+              }}
+            >
+              {usePassword ? 'Use magic link instead' : 'Sign in with password'}
             </button>
           </form>
 

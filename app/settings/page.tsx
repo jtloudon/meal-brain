@@ -23,6 +23,11 @@ export default function SettingsPage() {
       title: 'App Settings',
       items: [
         {
+          label: 'Set Password',
+          description: 'Enable password login for standalone app',
+          href: '/settings/password',
+        },
+        {
           label: 'Shopping List',
           description: 'Edit categories and settings',
           href: '/settings/shopping-list',
