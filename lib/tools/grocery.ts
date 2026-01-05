@@ -11,19 +11,38 @@ const VALID_UNITS = [
   'tsp',
   'ml',
   'l',
-  'fl oz',
   'gallon',
+  'quart',
+  'pint',
+  'fl oz',
   // Weight
   'lb',
   'oz',
   'g',
   'kg',
-  // Count
+  // Count/Containers
   'whole',
   'clove',
   'can',
+  'jar',
+  'bottle',
   'package',
+  'bag',
+  'box',
   'slice',
+  'fillet',
+  'piece',
+  'breast',
+  'thigh',
+  'head',
+  'bunch',
+  'stalk',
+  'sprig',
+  'leaf',
+  // Seasoning
+  'pinch',
+  'dash',
+  'to taste',
 ] as const;
 
 /**
@@ -65,7 +84,7 @@ export const PushIngredientsSchema = z.object({
         display_name: z.string().min(1, 'Display name is required'),
         quantity_min: z.number().positive('Quantity must be positive'),
         quantity_max: z.number().positive().nullable().optional(),
-        unit: z.string().min(1, 'Unit is required'),
+        unit: z.string(), // Allow empty string for unitless items
         prep_state: z.string().optional(),
         source_recipe_id: z.string().optional(),
       })
@@ -91,7 +110,7 @@ export const AddItemSchema = z.object({
   grocery_list_id: z.string().uuid('Invalid grocery list ID format'),
   name: z.string().min(1, 'Name is required'),
   quantity: z.number().positive('Quantity must be positive'),
-  unit: z.enum(VALID_UNITS),
+  unit: z.enum(VALID_UNITS).or(z.literal('')), // Allow empty string for unitless items
   ingredient_id: z.string().optional(),
 });
 
