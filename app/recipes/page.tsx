@@ -875,7 +875,6 @@ export default function RecipesPage() {
               <input
                 type="file"
                 accept="image/*,.pdf"
-                capture="environment"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setImportFile(e.target.files[0]);

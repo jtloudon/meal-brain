@@ -410,7 +410,7 @@ function PlannerContent() {
 
   return (
     <AuthenticatedLayout
-      title="Meal Planner"
+      title=""
       action={null}
     >
       <div style={{ padding: '16px 16px 80px 16px' }}>
