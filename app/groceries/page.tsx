@@ -435,7 +435,7 @@ export default function GroceriesPage() {
 
   if (loading) {
     return (
-      <AuthenticatedLayout>
+      <AuthenticatedLayout title="Groceries">
         <div className="p-4">
           <p className="text-gray-500">Loading grocery lists...</p>
         </div>
@@ -445,7 +445,7 @@ export default function GroceriesPage() {
 
   if (lists.length === 0) {
     return (
-      <AuthenticatedLayout>
+      <AuthenticatedLayout title="Groceries">
         <div style={{ padding: '0 16px' }}>
           {/* Pill-shaped action button */}
           <div style={{
