@@ -199,8 +199,8 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
     quantity_max = null;
   }
 
-  // 2. Extract unit (optional - defaults to "whole" if not found)
-  let unit = 'whole';
+  // 2. Extract unit (optional - empty string if not found)
+  let unit = '';
   const unitPattern = new RegExp(`^(${VALID_UNITS.join('|')})\\s+`, 'i');
   const unitMatch = remaining.match(unitPattern);
 
@@ -210,7 +210,7 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
     unit = UNIT_NORMALIZATION[unit] || unit;
     remaining = remaining.substring(unitMatch[0].length).trim();
   }
-  // If no unit found, remaining is just the ingredient name (use "whole" as default)
+  // If no unit found, remaining is just the ingredient name (unit will be empty string)
 
   // 3. Split name and prep_state by comma
   let name = remaining;
@@ -288,7 +288,12 @@ export function ingredientsToText(ingredients: Array<{
         line += formatQuantity(ing.quantity_min);
       }
 
-      line += ` ${ing.unit} ${ing.display_name}`;
+      // Only add unit if it exists (not empty string)
+      if (ing.unit && ing.unit.trim()) {
+        line += ` ${ing.unit}`;
+      }
+
+      line += ` ${ing.display_name}`;
 
       if (ing.prep_state) {
         line += `, ${ing.prep_state}`;
