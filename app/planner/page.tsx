@@ -410,6 +410,7 @@ export default function PlannerPage() {
 
   return (
     <AuthenticatedLayout
+      title="Meal Planner"
       action={null}
     >
       <div style={{ padding: '16px 16px 80px 16px' }}>

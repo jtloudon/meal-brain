@@ -7,8 +7,10 @@ import { parseIngredientsText, ingredientsToText } from '@/lib/utils/parse-ingre
 
 interface RecipeIngredient {
   id: string;
+  ingredient_id: string | null;
   display_name: string;
-  quantity: number;
+  quantity_min: number;
+  quantity_max: number | null;
   unit: string;
   prep_state: string | null;
   optional: boolean;

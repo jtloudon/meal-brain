@@ -736,7 +736,10 @@ export default function RecipeDetailPage() {
               const displayMax = ingredient.quantity_max && adjustedServings !== null
                 ? scaleQuantity(ingredient.quantity_max, baseServings, effectiveServings)
                 : ingredient.quantity_max;
-              const displayQuantity = formatQuantity(parseFloat(displayMin), displayMax ? parseFloat(displayMax) : null);
+              const displayQuantity = formatQuantity(
+                typeof displayMin === 'string' ? parseFloat(displayMin) : displayMin,
+                displayMax ? (typeof displayMax === 'string' ? parseFloat(displayMax) : displayMax) : null
+              );
 
               return (
                 <p key={ingredient.id} style={{ color: '#111827', lineHeight: '1.5', fontSize: '16px', margin: 0 }}>

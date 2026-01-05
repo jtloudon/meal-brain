@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { ArrowLeft, Search } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 interface Recipe {
   id: string;
   title: string;
@@ -127,6 +129,7 @@ export default function AddMealPage() {
 
   return (
     <AuthenticatedLayout
+      title="Add Meal"
       action={
         <button
           onClick={() => {

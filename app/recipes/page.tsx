@@ -339,7 +339,7 @@ export default function RecipesPage() {
               return totalMins;
             };
 
-            const totalTime = parseTime(recipe.prep_time) + parseTime(recipe.cook_time);
+            const totalTime = parseTime(recipe.prep_time || null) + parseTime(recipe.cook_time || null);
             matchesTime = totalTime > 0 && totalTime <= maxTime;
           }
 
@@ -729,7 +729,7 @@ export default function RecipesPage() {
                   {/* Star Rating and Total Time */}
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     {renderStars(recipe.rating)}
-                    {calculateTotalTime(recipe.prep_time, recipe.cook_time) && (
+                    {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null) && (
                       <span style={{
                         fontSize: '12px',
                         color: '#6b7280',
@@ -737,7 +737,7 @@ export default function RecipesPage() {
                         alignItems: 'center',
                         gap: '2px'
                       }}>
-                        🕐 {calculateTotalTime(recipe.prep_time, recipe.cook_time)}
+                        🕐 {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null)}
                       </span>
                     )}
                   </div>
