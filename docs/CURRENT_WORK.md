@@ -1,5 +1,57 @@
 # Current Work in Progress
 
+## Context at 2026-01-05
+
+### ✅ Completed Today - Phone Testing Fixes
+
+#### 1. Search Box iOS Zoom Prevention
+**Problem:** Search input caused page zoom/overflow on iOS
+**Solution:**
+- Changed font size from 15px → 16px (iOS doesn't auto-zoom at 16px+)
+- Added `maxWidth: '100%'` and `minWidth: 0` for proper flex constraints
+- File: `app/recipes/page.tsx:445,470`
+
+#### 2. Dynamic Meal Type Support (Database)
+**Problem:** "Drink" meal type failed with constraint error
+**Solution:**
+- Created migration to remove hardcoded CHECK constraints
+- `recipes.meal_type` and `planner_meals.meal_type` now accept any value
+- Meal types validated by app using `user_preferences.meal_courses`
+- File: `supabase/migrations/20260105142730_remove_meal_type_constraints.sql`
+- **Note:** For fresh clones, `supabase db reset` applies this automatically
+
+#### 3. Dynamic Meal Type Pills
+**Problem:** Filter pills only showed hardcoded types (not custom ones like "Drink")
+**Solution:**
+- Fetch meal types from `/api/settings/meal-courses`
+- Pills now display all custom meal types from user settings
+- Added horizontal scrolling for overflow
+- Changed from equal-width to content-based sizing
+- Files: `app/recipes/page.tsx:39,47-59,438,542-570`
+
+#### 4. Recipe Form Font Consistency
+**Problem:** Ingredients tab used monospace font, Instructions used default
+**Solution:** Removed `fontFamily: 'monospace'` from ingredients textarea
+- File: `components/RecipeFormWithTabs.tsx:588`
+
+#### 5. Keyboard Shortcuts Above iOS Keyboard
+**Problem:** Toolbar at bottom of page was covered by iOS keyboard
+**Solution:**
+- Changed from `position: sticky` to `position: fixed`
+- Added Visual Viewport API to detect keyboard height
+- Toolbar dynamically positions above keyboard
+- Only shows on ingredients tab
+- Files: `components/RecipeFormWithTabs.tsx:56,117-138,680-696`
+
+#### 6. Recipe Page Scroll Fix
+**Problem:** Scroll snap-back when reaching bottom of recipe list
+**Solution:**
+- Increased bottom padding from `pb-20` (80px) to `calc(80px + env(safe-area-inset-bottom))`
+- Accounts for iOS safe area insets
+- File: `components/AuthenticatedLayout.tsx:92`
+
+---
+
 ## Context at 2026-01-04
 
 ### ✅ Completed Today
