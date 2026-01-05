@@ -18,6 +18,9 @@ const nextConfig = {
     // Don't build with errors
     ignoreBuildErrors: false,
   },
+
+  // Disable static optimization for now (authenticated app)
+  output: 'standalone',
 };
 
 module.exports = nextConfig;
