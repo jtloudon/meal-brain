@@ -92,15 +92,30 @@ export default function RecipesPage() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to import recipe from file');
+        const errorText = await response.text();
+        console.error('[Import File] API error response:', errorText);
+        try {
+          const data = JSON.parse(errorText);
+          throw new Error(data.error || 'Failed to import recipe from file');
+        } catch (e) {
+          throw new Error(`API returned error: ${errorText}`);
+        }
       }
 
-      const { recipe: importedRecipe } = await response.json();
+      const responseText = await response.text();
+      console.log('[Import File] Raw API response:', responseText.substring(0, 200));
 
-      console.log('[Import File] Recipe from Claude:', importedRecipe);
-      console.log('[Import File] Image URL:', importedRecipe.imageUrl || importedRecipe.image_url || 'none');
-      console.log('[Import File] Title:', importedRecipe.title);
+      let importedRecipe;
+      try {
+        const parsed = JSON.parse(responseText);
+        importedRecipe = parsed.recipe;
+        console.log('[Import File] Recipe from Claude:', importedRecipe);
+        console.log('[Import File] Image URL:', importedRecipe?.imageUrl || importedRecipe?.image_url || 'none');
+        console.log('[Import File] Title:', importedRecipe?.title);
+      } catch (parseError) {
+        console.error('[Import File] JSON parse error:', parseError);
+        throw new Error(`Failed to parse API response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}. Response was: ${responseText.substring(0, 100)}`);
+      }
 
       // Use same parsing logic as URL import
       await processImportedRecipe(importedRecipe);
