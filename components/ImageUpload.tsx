@@ -132,11 +132,19 @@ export default function ImageUpload({
       </div>
 
       {preview ? (
-        <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden" style={{ border: '3px solid red' }}>
+        <div
+          className="relative w-full bg-gray-100 rounded-lg overflow-hidden"
+          style={{
+            border: '3px solid red',
+            height: '128px', // Force height with inline style
+            minHeight: '128px',
+            maxHeight: '128px'
+          }}
+        >
           <img
             src={preview}
             alt="Recipe preview"
-            className="w-full h-full object-cover"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
           <button
             type="button"
