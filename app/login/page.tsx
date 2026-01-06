@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [usePassword, setUsePassword] = useState(false);
+  const [usePassword, setUsePassword] = useState(true); // Default to password login
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

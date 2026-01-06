@@ -20,6 +20,13 @@ export function createClient() {
   }
 
   return createBrowserClient(url, key, {
+    auth: {
+      persistSession: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storageKey: 'meal-brain-auth',
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
     cookies: {
       get(name: string) {
         const cookie = document.cookie
