@@ -107,7 +107,12 @@ export default function RecipesPage() {
       setError(null);
       fetchRecipes();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to import recipe from file');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to import recipe from file';
+      // Show detailed error for debugging
+      const detailedError = err instanceof Error && err.stack
+        ? `${errorMessage}\n\nDetails: ${err.stack.substring(0, 200)}`
+        : errorMessage;
+      setError(detailedError);
       console.error('Import from file error:', err);
     } finally {
       setImporting(false);
