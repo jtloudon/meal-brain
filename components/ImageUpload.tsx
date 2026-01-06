@@ -136,7 +136,8 @@ export default function ImageUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+        accept="image/*"
+        capture="environment"
         onChange={handleFileSelect}
         className="hidden"
         disabled={uploading}

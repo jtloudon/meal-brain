@@ -847,7 +847,7 @@ export default function RecipesPage() {
                   padding: '12px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   outline: 'none',
                   opacity: importFile ? 0.5 : 1
                 }}
@@ -893,7 +893,7 @@ export default function RecipesPage() {
                 }}
               />
               <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
-                Accepts: Images (PNG, JPG), PDFs, Screenshots
+                Choose a file, take a photo, or upload: Images (PNG, JPG), PDFs
               </p>
               {importFile && (
                 <p style={{ fontSize: '14px', color: '#111827', marginTop: '8px' }}>

@@ -4,9 +4,44 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { ChevronRight } from 'lucide-react';
+import { createClient } from '@/lib/auth/supabase-client';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const [householdName, setHouseholdName] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
+
+  useEffect(() => {
+    const fetchHouseholdInfo = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        setUserEmail(user.email || '');
+
+        // Get household name
+        const { data: userData } = await supabase
+          .from('users')
+          .select('household_id')
+          .eq('id', user.id)
+          .single();
+
+        if (userData?.household_id) {
+          const { data: householdData } = await supabase
+            .from('households')
+            .select('name')
+            .eq('id', userData.household_id)
+            .single();
+
+          if (householdData) {
+            setHouseholdName(householdData.name);
+          }
+        }
+      }
+    };
+
+    fetchHouseholdInfo();
+  }, []);
 
   const settingsSections = [
     {
@@ -69,6 +104,44 @@ export default function SettingsPage() {
   return (
     <AuthenticatedLayout title="">
       <div style={{ padding: '8px 16px 80px 16px' }}>
+        {/* Household Info Banner */}
+        {householdName && (
+          <div style={{
+            backgroundColor: '#fff7ed',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '24px',
+            border: '1px solid #fed7aa'
+          }}>
+            <div style={{
+              fontSize: '12px',
+              color: '#9a3412',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontWeight: '600',
+              marginBottom: '4px'
+            }}>
+              Household
+            </div>
+            <div style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#ea580c',
+              marginBottom: '4px'
+            }}>
+              {householdName}
+            </div>
+            {userEmail && (
+              <div style={{
+                fontSize: '13px',
+                color: '#9a3412'
+              }}>
+                {userEmail}
+              </div>
+            )}
+          </div>
+        )}
+
         {settingsSections.map((section, idx) => (
           <div key={section.title} style={{ marginBottom: idx < settingsSections.length - 1 ? '32px' : '0' }}>
             <h2 style={{
