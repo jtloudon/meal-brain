@@ -22,7 +22,8 @@ export function createClient() {
   return createBrowserClient(url, key, {
     auth: {
       persistSession: true,
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      // Don't specify storage - let Supabase use cookies via the cookies config below
+      // This allows server-side middleware to read the session
       storageKey: 'meal-brain-auth',
       autoRefreshToken: true,
       detectSessionInUrl: true,
