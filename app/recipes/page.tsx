@@ -65,7 +65,10 @@ export default function RecipesPage() {
       setImporting(true);
       setError(null);
 
-      // Convert file to base64
+      // Compress image before sending to avoid payload size limits
+      const compressedFile = await compressImage(importFile, 1024, 0.8); // Max 1024px, 80% quality
+
+      // Convert compressed file to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = () => {
@@ -76,9 +79,10 @@ export default function RecipesPage() {
         };
         reader.onerror = reject;
       });
-      reader.readAsDataURL(importFile);
+      reader.readAsDataURL(compressedFile);
 
       const base64Data = await base64Promise;
+      console.log('[Import] Original size:', importFile.size, 'Compressed size:', compressedFile.size);
 
       // Call import-file API
       const response = await fetch('/api/recipes/import-file', {
