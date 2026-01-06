@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/auth/supabase-client';
 import { Camera, X, Upload } from 'lucide-react';
 
@@ -21,6 +21,19 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  console.log('[ImageUpload] Render:', {
+    hasCurrentImageUrl: !!currentImageUrl,
+    currentImageUrl,
+    hasPreview: !!preview,
+    preview,
+  });
+
+  // Sync preview with currentImageUrl when it changes
+  useEffect(() => {
+    console.log('[ImageUpload] currentImageUrl changed:', currentImageUrl);
+    setPreview(currentImageUrl || null);
+  }, [currentImageUrl]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
