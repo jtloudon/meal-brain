@@ -113,10 +113,11 @@ export default function ImageUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+            className="absolute top-2 right-2 p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
             aria-label="Remove image"
+            style={{ zIndex: 10, minWidth: '44px', minHeight: '44px' }}
           >
-            <X size={16} />
+            <X size={20} />
           </button>
         </div>
       ) : (
