@@ -293,8 +293,9 @@ export default function RecipesPage() {
       });
     }
 
-    // Navigate to create page with pre-filled data
-    const queryParams = new URLSearchParams({
+    // Store recipe data in sessionStorage instead of URL params
+    // (URL params can't handle special characters and have size limits)
+    const recipeData = {
       title: importedRecipe.title || '',
       ingredients: JSON.stringify(ingredients),
       instructions: formatInstructions(importedRecipe.instructions || ''),
@@ -305,9 +306,10 @@ export default function RecipesPage() {
       servingSize: importedRecipe.servingSize || importedRecipe.serving_size || '',
       imageUrl: importedRecipe.imageUrl || importedRecipe.image_url || '',
       source: importedRecipe.source || '',
-    });
+    };
 
-    router.push(`/recipes/new?${queryParams.toString()}`);
+    sessionStorage.setItem('imported-recipe', JSON.stringify(recipeData));
+    router.push(`/recipes/new?imported=true`);
     } catch (err) {
       console.error('[Import] Error processing imported recipe:', err);
       setError(err instanceof Error ? err.message : 'Failed to process imported recipe');

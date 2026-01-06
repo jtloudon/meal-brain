@@ -9,8 +9,59 @@ function NewRecipePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Parse initial data from URL params (from import)
+  // Parse initial data from sessionStorage or URL params (from import)
   const initialData = useMemo(() => {
+    // Check if this is an imported recipe from sessionStorage
+    const isImported = searchParams.get('imported') === 'true';
+    if (isImported) {
+      const storedData = sessionStorage.getItem('imported-recipe');
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          sessionStorage.removeItem('imported-recipe'); // Clear after reading
+
+          // Parse ingredients from JSON string
+          let ingredientsText = '';
+          if (parsedData.ingredients) {
+            const ingredients = JSON.parse(parsedData.ingredients);
+            ingredientsText = ingredients
+              .map((ing: any) => {
+                const qty = ing.quantity_max !== null && ing.quantity_max !== undefined
+                  ? `${ing.quantity_min}-${ing.quantity_max}`
+                  : ing.quantity_min;
+                return `${qty} ${ing.unit} ${ing.name}${ing.prep_state ? `, ${ing.prep_state}` : ''}`;
+              })
+              .join('\n');
+          }
+
+          // Parse tags from JSON string
+          let tagsString = '';
+          if (parsedData.tags) {
+            const tagsArray = JSON.parse(parsedData.tags);
+            tagsString = tagsArray.join(', ');
+          }
+
+          return {
+            title: parsedData.title || '',
+            ingredientsText,
+            instructions: parsedData.instructions || '',
+            notes: parsedData.notes || '',
+            tags: tagsString,
+            prepTime: parsedData.prepTime || '',
+            cookTime: parsedData.cookTime || '',
+            servingSize: parsedData.servingSize || '',
+            imageUrl: parsedData.imageUrl || '',
+            source: parsedData.source || '',
+            rating: null,
+            mealType: null,
+          };
+        } catch (e) {
+          console.error('Failed to parse imported recipe from sessionStorage:', e);
+        }
+      }
+    }
+
+    // Fallback to URL params (old import method)
     const title = searchParams.get('title') || '';
     const ingredientsParam = searchParams.get('ingredients');
     const instructions = searchParams.get('instructions') || '';
