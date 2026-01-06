@@ -116,20 +116,20 @@ export default function ImageUpload({
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">Recipe Image</label>
 
-      {/* Debug info - remove after fixing */}
-      <div style={{
-        padding: '12px',
-        backgroundColor: '#fef3c7',
-        border: '2px solid #f59e0b',
-        borderRadius: '8px',
-        marginBottom: '12px',
-        fontSize: '14px'
-      }}>
-        <div>🔍 Debug Info:</div>
-        <div>preview={preview ? 'YES ✓' : 'NO ✗'}</div>
-        <div>currentUrl={currentImageUrl ? 'YES ✓' : 'NO ✗'}</div>
-        <div>Button should render: {preview ? 'YES ✓' : 'NO ✗'}</div>
-      </div>
+      {/* Upload status indicator */}
+      {uploading && (
+        <div style={{
+          padding: '12px',
+          backgroundColor: '#dbeafe',
+          border: '2px solid #3b82f6',
+          borderRadius: '8px',
+          marginBottom: '12px',
+          fontSize: '14px',
+          textAlign: 'center'
+        }}>
+          📤 Uploading photo... Please wait before saving!
+        </div>
+      )}
 
       {preview ? (
         <div
