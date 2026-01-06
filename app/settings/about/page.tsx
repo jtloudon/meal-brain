@@ -6,6 +6,11 @@ import { ArrowLeft } from 'lucide-react';
 export default function AboutPage() {
   const router = useRouter();
 
+  // Get version info from environment (set by Vercel at build time)
+  const version = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0';
+  const commitSha = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.substring(0, 7) || 'dev';
+  const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME || 'unknown';
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
       {/* Header */}
@@ -46,8 +51,21 @@ export default function AboutPage() {
           paddingBottom: '16px',
           borderBottom: '1px solid #e5e7eb'
         }}>
-          <span style={{ fontSize: '17px', color: '#9ca3af' }}>MealBrain</span>
-          <span style={{ fontSize: '17px', color: '#111827' }}>1.0.0</span>
+          <span style={{ fontSize: '17px', color: '#9ca3af' }}>Version</span>
+          <span style={{ fontSize: '17px', color: '#111827' }}>{version}</span>
+        </div>
+
+        {/* Build info */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: '16px',
+          paddingBottom: '16px',
+          borderBottom: '1px solid #e5e7eb'
+        }}>
+          <span style={{ fontSize: '17px', color: '#9ca3af' }}>Build</span>
+          <span style={{ fontSize: '14px', color: '#6b7280', fontFamily: 'monospace' }}>{commitSha}</span>
         </div>
 
         {/* Contact */}
