@@ -107,13 +107,26 @@ export default function RecipesPage() {
       setError(null);
       fetchRecipes();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to import recipe from file';
-      // Show detailed error for debugging
-      const detailedError = err instanceof Error && err.stack
-        ? `${errorMessage}\n\nDetails: ${err.stack.substring(0, 200)}`
-        : errorMessage;
+      // Show FULL error details for debugging on mobile
+      let detailedError = 'Failed to import recipe from file';
+
+      if (err instanceof Error) {
+        detailedError = `❌ ${err.message}`;
+
+        // Add helpful context
+        if (err.message.includes('pattern')) {
+          detailedError += '\n\n🔍 Validation failed. Common causes:';
+          detailedError += '\n• Invalid image URL';
+          detailedError += '\n• Unrecognized ingredient unit';
+          detailedError += '\n• Special characters';
+        }
+
+        // Show error properties
+        detailedError += '\n\n📋 Error details: ' + JSON.stringify(err, null, 2);
+      }
+
       setError(detailedError);
-      console.error('Import from file error:', err);
+      console.error('[Import] Full error:', err);
     } finally {
       setImporting(false);
     }
