@@ -149,9 +149,25 @@ export default function ImageUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute top-2 right-2 p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
             aria-label="Remove image"
-            style={{ zIndex: 10, minWidth: '44px', minHeight: '44px' }}
+            style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              padding: '12px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              borderRadius: '50%',
+              border: 'none',
+              cursor: 'pointer',
+              zIndex: 10,
+              minWidth: '44px',
+              minHeight: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+            }}
           >
             <X size={20} />
           </button>
