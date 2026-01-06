@@ -98,6 +98,10 @@ export default function RecipesPage() {
 
       const { recipe: importedRecipe } = await response.json();
 
+      console.log('[Import File] Recipe from Claude:', importedRecipe);
+      console.log('[Import File] Image URL:', importedRecipe.imageUrl || importedRecipe.image_url || 'none');
+      console.log('[Import File] Title:', importedRecipe.title);
+
       // Use same parsing logic as URL import
       await processImportedRecipe(importedRecipe);
 
