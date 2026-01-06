@@ -113,20 +113,35 @@ export default function RecipesPage() {
       if (err instanceof Error) {
         detailedError = `❌ ${err.message}`;
 
-        // Add helpful context
-        if (err.message.includes('pattern')) {
-          detailedError += '\n\n🔍 Validation failed. Common causes:';
-          detailedError += '\n• Invalid image URL';
+        // Check if this is a Zod validation error
+        if ('issues' in err && Array.isArray((err as any).issues)) {
+          detailedError += '\n\n🔍 Validation Issues:\n';
+          (err as any).issues.forEach((issue: any) => {
+            detailedError += `\n• Field: ${issue.path.join('.')}\n`;
+            detailedError += `  Problem: ${issue.message}\n`;
+            detailedError += `  Value: ${JSON.stringify(issue.received)}\n`;
+          });
+        } else if (err.message.includes('pattern')) {
+          detailedError += '\n\n🔍 Common causes:';
+          detailedError += '\n• Invalid image URL format';
           detailedError += '\n• Unrecognized ingredient unit';
-          detailedError += '\n• Special characters';
+          detailedError += '\n• Special characters in text';
         }
 
-        // Show error properties
-        detailedError += '\n\n📋 Error details: ' + JSON.stringify(err, null, 2);
+        // Show all error properties
+        detailedError += '\n\n📋 Raw error:\n';
+        detailedError += `Message: ${err.message}\n`;
+        detailedError += `Name: ${err.name}\n`;
+        if ('cause' in err) detailedError += `Cause: ${err.cause}\n`;
+        if ('code' in err) detailedError += `Code: ${(err as any).code}\n`;
+      } else {
+        detailedError += '\n\n📋 Error: ' + String(err);
       }
 
       setError(detailedError);
       console.error('[Import] Full error:', err);
+      console.error('[Import] Error type:', typeof err);
+      console.error('[Import] Error keys:', err ? Object.keys(err) : 'null');
     } finally {
       setImporting(false);
     }
