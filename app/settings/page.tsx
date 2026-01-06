@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/auth/supabase-client';
 
 export default function SettingsPage() {
@@ -42,6 +42,12 @@ export default function SettingsPage() {
 
     fetchHouseholdInfo();
   }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   const settingsSections = [
     {
@@ -203,6 +209,34 @@ export default function SettingsPage() {
             </div>
           </div>
         ))}
+
+        {/* Sign Out Button */}
+        <div style={{ marginTop: '32px' }}>
+          <button
+            onClick={handleSignOut}
+            style={{
+              width: '100%',
+              padding: '16px',
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              fontSize: '16px',
+              fontWeight: '500',
+              color: '#ef4444',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+          >
+            <LogOut size={20} />
+            Sign Out
+          </button>
+        </div>
       </div>
     </AuthenticatedLayout>
   );

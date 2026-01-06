@@ -93,6 +93,9 @@ Return ONLY the JSON object, no other text.`,
     // Parse the JSON response
     const recipe = JSON.parse(responseText);
 
+    console.log('[Import File] Parsed recipe:', JSON.stringify(recipe, null, 2));
+    console.log('[Import File] Ingredients:', recipe.ingredients);
+
     return NextResponse.json({ recipe });
   } catch (error) {
     console.error('[Import File] Error:', error);

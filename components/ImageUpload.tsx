@@ -26,10 +26,13 @@ export default function ImageUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
-    if (!validTypes.includes(file.type)) {
-      setError('Please upload a JPEG, PNG, WebP, or HEIC image');
+    console.log('[ImageUpload] File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
+
+    // Validate file type - be lenient with image types
+    // Some mobile cameras don't report standard MIME types
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      console.error('[ImageUpload] Invalid file type:', file.type);
       return;
     }
 
@@ -52,8 +55,10 @@ export default function ImageUpload({
 
       // Upload to Supabase Storage
       const supabase = createClient();
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${householdId}/${recipeId || 'temp'}-${Date.now()}.${fileExt}`;
+
+      console.log('[ImageUpload] Uploading to:', fileName);
 
       const { data, error: uploadError } = await supabase.storage
         .from('recipe-images')
@@ -63,17 +68,22 @@ export default function ImageUpload({
         });
 
       if (uploadError) {
+        console.error('[ImageUpload] Upload error:', uploadError);
         throw uploadError;
       }
+
+      console.log('[ImageUpload] Upload successful:', data);
 
       // Get public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from('recipe-images').getPublicUrl(data.path);
 
+      console.log('[ImageUpload] Public URL:', publicUrl);
+
       onImageChange(publicUrl);
     } catch (err) {
-      console.error('Upload error:', err);
+      console.error('[ImageUpload] Upload error:', err);
       setError(err instanceof Error ? err.message : 'Failed to upload image');
       setPreview(currentImageUrl || null);
     } finally {

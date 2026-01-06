@@ -115,6 +115,7 @@ export default function RecipesPage() {
   };
 
   const processImportedRecipe = async (importedRecipe: any) => {
+    try {
     // Parse ISO 8601 duration format (PT20M -> "20 min")
     const parseDuration = (duration: string | null): string | null => {
       if (!duration) return null;
@@ -237,6 +238,24 @@ export default function RecipesPage() {
 
     console.log('[Import] Final parsed ingredients:', ingredients);
 
+    // Validate that all ingredients have valid units
+    const invalidIngredients = ingredients.filter(ing => {
+      const validUnits = ['cup', 'tbsp', 'tsp', 'ml', 'l', 'gallon', 'quart', 'pint', 'fl oz',
+                         'lb', 'oz', 'g', 'kg', 'whole', 'clove', 'can', 'jar', 'bottle',
+                         'package', 'bag', 'box', 'slice', 'fillet', 'piece', 'breast', 'thigh',
+                         'head', 'bunch', 'stalk', 'sprig', 'leaf', 'pinch', 'dash', 'to taste', ''];
+      return !validUnits.includes(ing.unit);
+    });
+
+    if (invalidIngredients.length > 0) {
+      console.error('[Import] Invalid ingredient units:', invalidIngredients);
+      // Convert invalid units to 'whole'
+      invalidIngredients.forEach(ing => {
+        console.log(`[Import] Converting invalid unit "${ing.unit}" to "whole" for ingredient: ${ing.name}`);
+        ing.unit = 'whole';
+      });
+    }
+
     // Navigate to create page with pre-filled data
     const queryParams = new URLSearchParams({
       title: importedRecipe.title || '',
@@ -252,6 +271,11 @@ export default function RecipesPage() {
     });
 
     router.push(`/recipes/new?${queryParams.toString()}`);
+    } catch (err) {
+      console.error('[Import] Error processing imported recipe:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process imported recipe');
+      throw err;
+    }
   };
 
   const handleImportFromUrl = async () => {
