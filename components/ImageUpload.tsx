@@ -116,6 +116,11 @@ export default function ImageUpload({
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">Recipe Image</label>
 
+      {/* Debug info - remove after fixing */}
+      <div style={{ fontSize: '10px', color: '#999', marginBottom: '8px' }}>
+        Debug: preview={preview ? 'YES' : 'NO'} | currentUrl={currentImageUrl ? 'YES' : 'NO'}
+      </div>
+
       {preview ? (
         <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
           <img
