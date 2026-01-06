@@ -32,7 +32,10 @@ export default function LoginPage() {
           console.error('[LOGIN] Password error:', error);
           setError(error.message);
         } else if (data.user) {
-          console.log('[LOGIN] Password success, redirecting');
+          console.log('[LOGIN] Password success');
+          console.log('[LOGIN] Session:', data.session);
+          console.log('[LOGIN] Cookies:', document.cookie);
+          // Redirect to planner - middleware will handle session
           window.location.href = '/planner';
         }
       } else {
