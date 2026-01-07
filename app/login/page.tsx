@@ -10,6 +10,36 @@ export default function LoginPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [usePassword, setUsePassword] = useState(true); // Default to password login
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/settings/password`,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setMessage('Password reset link sent! Check your email.');
+        setShowForgotPassword(false);
+      }
+    } catch (err) {
+      setError('Failed to send reset link');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,28 +159,47 @@ export default function LoginPage() {
             </div>
 
             {usePassword && (
-              <div className="w-full" style={{ marginBottom: '16px' }}>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  required={usePassword}
+              <>
+                <div className="w-full" style={{ marginBottom: '8px' }}>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    required={usePassword}
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: '2px solid white',
+                      color: 'white',
+                      fontSize: '16px',
+                      padding: '8px 4px',
+                      outline: 'none',
+                    }}
+                    className="disabled:opacity-50"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
                   disabled={loading}
                   style={{
-                    width: '100%',
-                    background: 'transparent',
-                    border: 'none',
-                    borderBottom: '2px solid white',
+                    fontSize: '14px',
                     color: 'white',
-                    fontSize: '16px',
-                    padding: '8px 4px',
-                    outline: 'none',
+                    textDecoration: 'underline',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    marginBottom: '16px',
+                    opacity: loading ? 0.5 : 0.8,
                   }}
-                  className="disabled:opacity-50"
-                />
-              </div>
+                >
+                  Forgot password?
+                </button>
+              </>
             )}
 
             <button
