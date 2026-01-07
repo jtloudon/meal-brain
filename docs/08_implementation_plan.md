@@ -778,6 +778,28 @@ See `docs/17_dev_login_blocker.md` for details.
 
 ---
 
+#### 4. UI Styling Inconsistencies 🎨
+**Problem**: Some pages don't follow the established design system (orange branding, proper spacing).
+
+**Pages Affected**:
+- `/onboarding` - Join Household screen (colors/styling don't match brand)
+- `/settings/password` - Set password page (inconsistent with main app design)
+
+**Current State**:
+- Functional but visually inconsistent
+- No user-blocking issues
+- Lower priority than security/functionality
+
+**TODO**:
+- [ ] Update onboarding Join Household UI to match brand (orange accents, proper spacing)
+- [ ] Redesign settings/password page to match main app aesthetic
+- [ ] Audit all auth-related pages for design consistency
+- [ ] Apply unified design tokens (colors, spacing, typography)
+
+**Priority**: LOW - Cosmetic, not blocking usage
+
+---
+
 ### Known Limitations (Document, Don't Fix Yet)
 
 1. **PWA Session Persistence**: iOS PWA may still log out occasionally (testing in progress)
