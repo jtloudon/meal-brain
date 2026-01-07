@@ -718,3 +718,73 @@ See `docs/17_dev_login_blocker.md` for details.
 - Option A: Continue with manual magic link (current)
 - Option B: Implement custom auth bypass middleware (future)
 - Option C: Debug Supabase local config (time intensive)
+
+---
+
+## Technical Debt & Pre-Public Checklist
+
+**Status**: IN PROGRESS (2026-01-07)
+
+### Issues to Resolve Before GitHub Public Release
+
+#### 1. Migration Sync Issue 🔴 BLOCKING
+**Problem**: `supabase db push` fails due to local/remote migration history mismatch.
+
+**Impact**:
+- New contributors can't easily apply migrations
+- Manual SQL execution required in Supabase Dashboard
+- Migration history has duplicate/mismatched timestamps
+
+**Current Workaround**:
+- Apply migrations manually via Supabase Dashboard SQL Editor
+- Document process in README
+
+**TODO Before Public Release**:
+- [ ] Clean up migration file naming (remove duplicate timestamps: 20251228, 20251229, 20251230)
+- [ ] Run `supabase migration repair` to sync history
+- [ ] Test `supabase db push` works cleanly on fresh project
+- [ ] Document migration process in CONTRIBUTING.md
+
+**Files Affected**:
+- `supabase/migrations/20251228_*.sql` (3 files with inconsistent timestamps)
+- `supabase/migrations/20251229_*.sql` (3 files)
+- `supabase/migrations/20251230_*.sql` (1 file)
+
+**Priority**: HIGH - Blocks contributor onboarding
+
+---
+
+#### 2. Environment Variables Documentation 📝
+**TODO**:
+- [ ] Create `.env.local.example` with all required variables
+- [ ] Document Supabase setup process
+- [ ] Document Anthropic API key requirement
+- [ ] Add troubleshooting guide for common setup issues
+
+**Priority**: HIGH - Required for contributors
+
+---
+
+#### 3. README Updates 📝
+**TODO**:
+- [ ] Add project description and goals
+- [ ] Document local development setup
+- [ ] Add contribution guidelines
+- [ ] Document invitation system (how to use as first user)
+- [ ] Add screenshots of UI
+- [ ] License file (MIT or other)
+
+**Priority**: MEDIUM - Expected for public repos
+
+---
+
+### Known Limitations (Document, Don't Fix Yet)
+
+1. **PWA Session Persistence**: iOS PWA may still log out occasionally (testing in progress)
+2. **Migration History**: Manual repair needed for clean local setup
+3. **First User Bootstrap**: Requires creating invite code via SQL for first household
+
+---
+
+### Version History
+- **2026-01-07**: Added tech debt section for pre-public release tracking
