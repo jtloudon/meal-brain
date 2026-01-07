@@ -572,7 +572,7 @@ export default function GroceriesPage() {
               minWidth: 0
             }}
           >
-            Clear Checked
+            Delete Checked
           </button>
           <button
             onClick={() => setShowCopyToModal(true)}
@@ -913,6 +913,13 @@ export default function GroceriesPage() {
                 return acc;
               }, {} as Record<string, GroceryItem[]>);
 
+              // Sort items alphabetically within each category
+              Object.keys(grouped).forEach(category => {
+                grouped[category].sort((a, b) =>
+                  a.display_name.localeCompare(b.display_name, undefined, { sensitivity: 'base' })
+                );
+              });
+
               // Render each category group
               return Object.entries(grouped).map(([category, categoryItems], index) => (
                 <div key={category} className={index > 0 ? 'mt-6' : ''}>
@@ -957,8 +964,7 @@ export default function GroceriesPage() {
                             style={{
                               fontSize: '15px',
                               lineHeight: '1.4',
-                              textDecoration: item.checked ? 'line-through' : 'none',
-                              color: item.checked ? '#9ca3af' : '#111827',
+                              color: '#111827',
                               marginBottom: (item.recipes || item.notes) ? '6px' : '0',
                               margin: 0
                             }}
@@ -1630,7 +1636,7 @@ export default function GroceriesPage() {
           </div>
         )}
 
-        {/* Clear Checked Confirmation Modal */}
+        {/* Delete Checked Confirmation Modal */}
         {showClearCheckedConfirm && (
           <div style={{
             position: 'fixed',
@@ -1658,7 +1664,7 @@ export default function GroceriesPage() {
                 color: '#111827',
                 marginBottom: '8px'
               }}>
-                Clear Checked Items?
+                Delete Checked Items?
               </h3>
               <p style={{
                 fontSize: '14px',
@@ -1703,7 +1709,7 @@ export default function GroceriesPage() {
                     opacity: saving ? 0.5 : 1
                   }}
                 >
-                  {saving ? 'Clearing...' : 'Clear Checked'}
+                  {saving ? 'Deleting...' : 'Delete Checked'}
                 </button>
               </div>
             </div>
