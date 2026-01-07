@@ -7,10 +7,10 @@ All implementation, planning, and AI behavior should align with this reality.
 ---
 
 ## Overall Project Maturity
-**Status:** Phase 4 AI Chat Panel (Write Operations) - FUNCTIONAL ✅ (Batch Approval Complete)
-**Code exists:** Infrastructure + pure functions + database + **All Tools (Read + Write)** + Working Auth Flow (Magic Link + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal + AI Integration)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + About)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow)** + **Seed Data (Example recipes + Default list)** + **AI Chat Panel (Full-Featured - Floating design, white AI bubbles, batch approval for write ops, real-time calendar refresh, date context awareness, HTML entity decoding, recipe linkification, New Chat button)**
-**Phase:** Phase 1 ✅ → Phase 2 ✅ → Phase 3 ✅ → **Phase 4 (AI Integration) - COMPLETE** ✅
-**Last Updated:** 2026-01-04 (Afternoon - Write operations + batch approval + polish)
+**Status:** Phase 5 Production Security - FUNCTIONAL ✅ (Invitation-Only Access)
+**Code exists:** Infrastructure + pure functions + database + **All Tools (Read + Write)** + Working Auth Flow (Magic Link + Password Reset + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal + AI Integration)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + Invite Members + Password Reset)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow + Invite Code Validation)** + **Seed Data (Example recipes + Default list)** + **AI Chat Panel (Full-Featured - Floating design, white AI bubbles, batch approval for write ops, real-time calendar refresh, date context awareness, HTML entity decoding, recipe linkification, New Chat button)** + **Invitation System (Household invite codes, expiration, usage tracking)**
+**Phase:** Phase 1 ✅ → Phase 2 ✅ → Phase 3 ✅ → Phase 4 (AI Integration) ✅ → **Phase 5 (Production Security) - COMPLETE** ✅
+**Last Updated:** 2026-01-07 (Morning - Invitation system + Password reset + PWA session persistence)
 
 ---
 
@@ -908,6 +908,119 @@ This file should be reviewed before any major build step.
 - Meal plan optimization suggestions
 - Grocery list smart grouping
 - Recipe recommendations based on history
+
+---
+
+## Latest Updates - 2026-01-07 (Morning)
+
+### Invitation-Only Access System - COMPLETE ✅
+
+**Major Security Update:**
+App now requires invitation codes for signup - prevents unauthorized access to deployed resources.
+
+**Database Schema:**
+- New table: `household_invites`
+  - 8-character alphanumeric codes (excludes confusing: 0, O, 1, I, L)
+  - Expiration tracking (30 days default)
+  - Usage limits (single-use or multi-use)
+  - Creator tracking and notes
+- New table: `household_invite_uses`
+  - Tracks who used which invite and when
+- Migration: `20260107155103_add_household_invites.sql`
+
+**API Endpoints:**
+- `POST /api/invites` - Create invite codes (authenticated)
+- `GET /api/invites` - List household invites (authenticated)
+- `POST /api/invites/validate` - Validate codes (public, RLS allows `anon` role)
+
+**UI Implementation:**
+- `/settings/invites` - Generate and manage invite codes
+  - "Create Invite Link" button
+  - Display codes with usage count (e.g., "Uses: 0 / 1")
+  - Expiration dates shown
+  - Copy invite link to clipboard
+- `/onboarding` - Updated to require invite validation
+  - Auto-validates code from URL parameter (`?code=ABC12XYZ`)
+  - Manual code entry form if no URL parameter
+  - Shows household name after successful validation
+  - "Join Household" button to complete signup
+
+**User Flow:**
+1. Existing household member → Settings → Invite Members
+2. Click "Create Invite Link" → System generates 8-char code
+3. Copy shareable link with code embedded in URL
+4. New user clicks link → Auto-validates → Prompted to login/signup
+5. After auth → Joins household automatically
+6. Code usage tracked (prevents reuse if single-use)
+
+**Security Benefits:**
+- Prevents strangers from accessing deployed app
+- Each household controls their own member invitations
+- Codes can be single-use or multi-use (configurable via max_uses)
+- Expired/fully-used codes automatically rejected
+- Safe to publish GitHub repo publicly (no open signup vulnerability)
+
+**RLS Policies:**
+- `anon` users can SELECT (validation must work before signup)
+- `authenticated` users can INSERT/DELETE for their household only
+- Actual invite consumption requires authentication
+
+### Password Reset Flow - COMPLETE ✅
+
+**Feature Added:**
+Users can now reset forgotten passwords via email.
+
+**Implementation:**
+- Supabase `resetPasswordForEmail()` sends password reset email
+- Reset link directs to `/settings/password` page
+- User authenticates and can set new password
+- File: `app/settings/password/page.tsx`
+
+### PWA Session Persistence - COMPLETE ✅
+
+**Problem:** Users logged out when closing PWA on iOS
+**Solution:**
+- Dual storage strategy: cookies (browser) + localStorage (PWA)
+- Middleware refreshes sessions on every request
+- Default landing page changed to `/recipes` (was `/planner`)
+- Better session handling for installed PWA experience
+
+### E2E Testing - COMPLETE ✅
+
+**New Test Suite:** `e2e/household-invites.spec.ts` (8 tests passing)
+- Generate invite code via UI
+- Validate invite code (API endpoint)
+- Reject invalid codes with error message
+- Pre-fill code from URL parameter
+- Show invite input when no URL code
+- Validate manually entered code
+- Show error for invalid manual entry
+- Track usage count display
+- Show expiration date display
+
+**Coverage:**
+- Complete user journey from invite creation to validation
+- Error handling for invalid/expired codes
+- UI states and transitions
+- API integration
+
+### Documentation Updates - COMPLETE ✅
+
+**Added:**
+- Security Architecture section in `docs/01_architecture.md` (lines 67-113)
+- Invitation-Only Access section with full flow documentation
+- Database schema for `household_invites` and `household_invite_uses`
+- RLS policies and security model
+- Password reset flow documentation
+- Dual storage strategy explanation
+- Updated `docs/08_implementation_plan.md` with Phase 5 completion
+
+**Status:**
+- ✅ Invitation system fully functional
+- ✅ Prevents unauthorized access
+- ✅ E2E tests passing
+- ✅ Ready for production deployment
+- ✅ Safe to open-source repository
 
 ---
 

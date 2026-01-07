@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/auth/supabase-client';
 
-export default function LoginPage() {
+function LoginContent() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -11,6 +13,16 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [usePassword, setUsePassword] = useState(true); // Default to password login
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if invite code is in URL
+    const code = searchParams.get('invite');
+    if (code) {
+      setInviteCode(code);
+      console.log('[LOGIN] Invite code detected:', code);
+    }
+  }, [searchParams]);
 
   const handleForgotPassword = async () => {
     if (!email) {
@@ -52,7 +64,7 @@ export default function LoginPage() {
 
       if (usePassword && password) {
         // Password login
-        console.log('[LOGIN] Attempting password login');
+        console.log('[LOGIN] Attempting password login', inviteCode ? `with invite code: ${inviteCode}` : '');
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -65,16 +77,25 @@ export default function LoginPage() {
           console.log('[LOGIN] Password success');
           console.log('[LOGIN] Session:', data.session);
           console.log('[LOGIN] Cookies:', document.cookie);
-          // Redirect to planner - middleware will handle session
-          window.location.href = '/recipes';
+
+          // If invite code present, redirect to callback with invite for processing
+          // Otherwise go straight to recipes
+          const redirectUrl = inviteCode
+            ? `/auth/callback?invite=${inviteCode}`
+            : '/recipes';
+          window.location.href = redirectUrl;
         }
       } else {
         // Magic link login
-        console.log('[LOGIN] Sending magic link');
+        console.log('[LOGIN] Sending magic link', inviteCode ? `with invite code: ${inviteCode}` : '');
+        const redirectUrl = inviteCode
+          ? `${window.location.origin}/auth/callback?invite=${inviteCode}`
+          : `${window.location.origin}/auth/callback`;
+
         const { error } = await supabase.auth.signInWithOtp({
           email,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: redirectUrl,
           },
         });
 
@@ -252,5 +273,19 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[#f97316]">
+        <div className="text-center" style={{ color: 'white' }}>
+          <div className="text-lg">Loading...</div>
+        </div>
+      </main>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,72 @@
 # Current Work in Progress
 
+## Context at 2026-01-07
+
+### ✅ Completed Today - Invitation System & Security
+
+#### 1. Invitation-Only Signup System
+**Problem:** Open signup allows anyone to use deployed app resources
+**Solution:**
+- Database migration: `household_invites` table with 8-char alphanumeric codes
+- API endpoints:
+  - `POST /api/invites` - Create invite codes (authenticated)
+  - `GET /api/invites` - List household invites (authenticated)
+  - `POST /api/invites/validate` - Validate codes (public)
+- Settings page: `/settings/invites` to generate & manage invite codes
+- Updated onboarding: `/onboarding` requires valid invite code to join
+- Codes expire in 30 days, track usage count (0/1, 0/5, etc.)
+- Files:
+  - `supabase/migrations/20260107155103_add_household_invites.sql`
+  - `app/api/invites/route.ts`
+  - `app/api/invites/validate/route.ts`
+  - `app/settings/invites/page.tsx`
+  - `app/onboarding/page.tsx`
+  - `app/onboarding/actions.ts`
+
+#### 2. Password Reset Flow
+**Problem:** Users couldn't reset forgotten passwords
+**Solution:**
+- Supabase `resetPasswordForEmail()` triggers password reset email
+- Reset link directs to `/settings/password` page
+- User can set new password after authentication
+- Files: `app/settings/password/page.tsx`
+
+#### 3. PWA Session Persistence
+**Problem:** Users logged out when PWA closed on iOS
+**Solution:**
+- Dual storage strategy: cookies (browser) + localStorage (PWA)
+- Middleware refreshes sessions on every request
+- Default landing page changed to `/recipes` (was `/planner`)
+- Files: `middleware.ts`, auth utilities
+
+#### 4. E2E Testing for Invitations
+**Tests Added:**
+- Generate invite code (UI + API)
+- Validate invite code (valid + invalid)
+- Pre-fill from URL parameter (`/onboarding?code=ABC12XYZ`)
+- Manual code entry
+- Error handling
+- Usage tracking display
+- Expiration date display
+- File: `e2e/household-invites.spec.ts` (8 tests)
+
+#### 5. Public Invite Validation Fix
+**Problem:** Validation endpoint returned 401 for unauthenticated users
+**Solution:**
+- RLS policy allows `anon` users to SELECT from `household_invites`
+- Validation works before user signs up
+- Actual invite consumption still requires authentication
+- File: `supabase/migrations/20260107155103_add_household_invites.sql`
+
+#### 6. Documentation Updates
+**Added:**
+- Security Architecture section in `docs/01_architecture.md`
+- Invitation flow documentation with database schema
+- RLS policy explanations
+- Password reset flow
+
+---
+
 ## Context at 2026-01-05
 
 ### ✅ Completed Today - Phone Testing Fixes

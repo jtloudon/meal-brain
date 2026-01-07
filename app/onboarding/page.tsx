@@ -65,21 +65,10 @@ function OnboardingContent() {
   const handleJoinHousehold = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
-    try {
-      // Join household using invite code
-      const result = await createHousehold('', inviteCode);
-
-      if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-      }
-      // If successful, the server action will redirect to /recipes
-    } catch (err) {
-      setError('An unexpected error occurred');
-      setLoading(false);
-    }
+    // Redirect to login page with invite code in URL
+    // After authentication, auth callback will check for invite code and auto-join
+    router.push(`/login?invite=${inviteCode}`);
   };
 
   return (
