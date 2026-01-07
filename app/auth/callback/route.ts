@@ -77,8 +77,8 @@ export async function GET(request: NextRequest) {
           household_id: householdId,
         });
 
-        // Continue to planner
-        return NextResponse.redirect(`${requestUrl.origin}/planner`);
+        // Continue to recipes
+        return NextResponse.redirect(`${requestUrl.origin}/recipes`);
       }
     }
 
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${requestUrl.origin}/onboarding`);
     }
 
-    return NextResponse.redirect(`${requestUrl.origin}/planner`);
+    return NextResponse.redirect(`${requestUrl.origin}/recipes`);
   }
 
   return NextResponse.redirect(`${requestUrl.origin}/login`);

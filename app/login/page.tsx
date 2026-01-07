@@ -36,7 +36,7 @@ export default function LoginPage() {
           console.log('[LOGIN] Session:', data.session);
           console.log('[LOGIN] Cookies:', document.cookie);
           // Redirect to planner - middleware will handle session
-          window.location.href = '/planner';
+          window.location.href = '/recipes';
         }
       } else {
         // Magic link login
