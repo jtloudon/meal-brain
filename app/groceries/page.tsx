@@ -17,6 +17,7 @@ interface GroceryItem {
   source_recipe_id: string | null;
   prep_state: string | null;
   category: string;
+  notes: string | null;
   recipes?: {
     id: string;
     title: string;
@@ -53,6 +54,7 @@ export default function GroceriesPage() {
   const [editCategory, setEditCategory] = useState('');
   const [editQuantity, setEditQuantity] = useState('1');
   const [editUnit, setEditUnit] = useState('whole');
+  const [editNotes, setEditNotes] = useState('');
   const [editListId, setEditListId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showClearCheckedConfirm, setShowClearCheckedConfirm] = useState(false);
@@ -215,8 +217,9 @@ export default function GroceriesPage() {
       const updateData: any = {
         display_name: editName,
         quantity: quantity,
-        unit: editUnit,
+        unit: editUnit || '',  // Empty string if blank
         category: editCategory,
+        notes: editNotes || null,  // NULL if empty
       };
 
       // If list changed, add grocery_list_id to update
@@ -243,8 +246,9 @@ export default function GroceriesPage() {
                     ...item,
                     display_name: editName,
                     quantity: quantity,
-                    unit: editUnit,
-                    category: editCategory
+                    unit: editUnit || '',
+                    category: editCategory,
+                    notes: editNotes || null
                   }
                 : item
             )
@@ -955,30 +959,58 @@ export default function GroceriesPage() {
                               lineHeight: '1.4',
                               textDecoration: item.checked ? 'line-through' : 'none',
                               color: item.checked ? '#9ca3af' : '#111827',
-                              marginBottom: item.recipes ? '6px' : '0',
+                              marginBottom: (item.recipes || item.notes) ? '6px' : '0',
                               margin: 0
                             }}
                           >
-                            {item.quantity} {item.unit} {decodeHTML(item.display_name)}
+                            {item.quantity} {item.unit ? item.unit + ' ' : ''}{decodeHTML(item.display_name)}
                           </p>
 
-                          {/* Recipe source link */}
-                          {item.recipes && (
-                            <a
-                              href={`/recipes/${item.recipes.id}`}
-                              style={{
-                                fontSize: '13px',
-                                color: '#f97316',
-                                display: 'block',
-                                textDecoration: 'none',
-                                lineHeight: '1.2'
-                              }}
-                              onClick={(e) => e.stopPropagation()}
-                              onMouseEnter={(e) => e.currentTarget.style.color = '#d97316'}
-                              onMouseLeave={(e) => e.currentTarget.style.color = '#f97316'}
-                            >
-                              {item.recipes.title}
-                            </a>
+                          {/* Recipe source and notes on same line */}
+                          {(item.recipes || item.notes) && (
+                            <div style={{
+                              fontSize: '13px',
+                              lineHeight: '1.2',
+                              display: 'flex',
+                              gap: '8px',
+                              flexWrap: 'wrap',
+                              alignItems: 'center'
+                            }}>
+                              {/* Recipe source link */}
+                              {item.recipes && (
+                                <a
+                                  href={`/recipes/${item.recipes.id}`}
+                                  style={{
+                                    color: '#f97316',
+                                    textDecoration: 'none',
+                                    flexShrink: 0
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onMouseEnter={(e) => e.currentTarget.style.color = '#d97316'}
+                                  onMouseLeave={(e) => e.currentTarget.style.color = '#f97316'}
+                                >
+                                  {item.recipes.title}
+                                </a>
+                              )}
+
+                              {/* Notes */}
+                              {item.notes && (
+                                <>
+                                  {item.recipes && <span style={{ color: '#d1d5db' }}>•</span>}
+                                  <span style={{
+                                    color: '#6b7280',
+                                    fontStyle: 'italic',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    flex: 1,
+                                    minWidth: 0
+                                  }}>
+                                    {item.notes.length > 40 ? item.notes.substring(0, 40) + '...' : item.notes}
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           )}
                         </div>
 
@@ -989,7 +1021,8 @@ export default function GroceriesPage() {
                             setEditName(item.display_name);
                             setEditCategory(item.category || 'Other');
                             setEditQuantity(item.quantity.toString());
-                            setEditUnit(item.unit);
+                            setEditUnit(item.unit || '');
+                            setEditNotes(item.notes || '');
                             setEditListId(selectedListId);
                             setCurrentView('edit');
                           }}
@@ -1383,6 +1416,7 @@ export default function GroceriesPage() {
                       outline: 'none'
                     }}
                   >
+                    <option value="">(none)</option>
                     <option value="whole">whole</option>
                     <option value="lb">lb</option>
                     <option value="oz">oz</option>
@@ -1395,6 +1429,11 @@ export default function GroceriesPage() {
                     <option value="l">l</option>
                     <option value="can">can</option>
                     <option value="package">package</option>
+                    <option value="jar">jar</option>
+                    <option value="bottle">bottle</option>
+                    <option value="bag">bag</option>
+                    <option value="box">box</option>
+                    <option value="dozen">dozen</option>
                   </select>
                 </div>
               </div>
@@ -1456,6 +1495,35 @@ export default function GroceriesPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* Notes Field */}
+              <div style={{
+                padding: '12px 0',
+                borderBottom: '1px solid #e5e7eb',
+                marginTop: '16px'
+              }}>
+                <label htmlFor="edit-notes" style={{ color: '#9ca3af', fontSize: '16px', display: 'block', marginBottom: '8px' }}>
+                  Notes (optional)
+                </label>
+                <textarea
+                  id="edit-notes"
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="e.g., check expiration date, get organic, etc."
+                  rows={2}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    backgroundColor: 'white',
+                    color: '#111827',
+                    resize: 'vertical',
+                    fontFamily: 'inherit'
+                  }}
+                />
               </div>
 
               <button
