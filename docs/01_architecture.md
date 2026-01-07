@@ -38,16 +38,20 @@ Optional later:
 **Database + Auth**:
 - Supabase
   - Postgres (database)
-  - Auth (magic-link with PKCE, household isolation)
-  - Storage (recipe images - Phase 3+, OCR inputs - Phase 5)
+  - Auth (magic-link + password with PKCE, household isolation)
+  - Storage (recipe images)
     - Recipe images stored with `image_url` field in recipes table
+    - Client-side compression (max 1024px, 80% quality) prevents payload errors
     - Supports user uploads (JPEG, PNG, WebP, HEIC)
     - External URLs also supported (for imported recipes)
   - **Auth Pattern**: Server-side callback route (`app/auth/callback/route.ts`)
     - Uses Next.js Route Handler with `createServerClient`
     - Handles PKCE code exchange with cookie-based session storage
-    - Avoids client-side PKCE verifier storage issues
+    - Dual storage strategy: cookies (browser) + localStorage (PWA)
+    - Middleware refreshes sessions on every request (SSR compatible)
     - Redirects based on user state (onboarding vs authenticated home)
+  - **Password Reset**: Supabase `resetPasswordForEmail()` → `/settings/password`
+  - **Invitation System**: Household invite codes for controlled access (see Security section)
 
 **AI Orchestrator**:
 - **Decision**: Vercel API Routes (chosen over Supabase Edge Functions)
@@ -57,6 +61,54 @@ Optional later:
   - Perfect for 2-user household scale
   - Serverless on Vercel (pay per request)
   - Easy to migrate to Edge Functions later if needed
+
+---
+
+## Security Architecture
+
+### Invitation-Only Access (Added 2026-01-07)
+
+**Problem**: Open signup allows anyone to use deployed app resources and data.
+
+**Solution**: Invitation-only system with household invite codes.
+
+**User Flow**:
+1. Existing household member → Settings → Invite Members
+2. Generate 8-character alphanumeric code (excludes confusing: 0,O,1,I,L)
+3. System creates shareable link: `https://app.com/onboarding?code=ABC12XYZ`
+4. New user clicks link → validates code → prompted to login/signup
+5. After authentication → joins household automatically
+6. Codes tracked: usage count, expiration (30 days), creator
+
+**Database Schema**:
+```sql
+household_invites (
+  id UUID, household_id UUID, invite_code TEXT UNIQUE,
+  created_by UUID, created_at, expires_at,
+  max_uses INT, use_count INT, notes TEXT
+)
+
+household_invite_uses (
+  id UUID, invite_id UUID, used_by UUID, used_at
+)
+```
+
+**RLS Policies**:
+- `anon` users can SELECT (validation must work before signup)
+- `authenticated` users can INSERT/DELETE for their household only
+- `use_invite_code()` function requires authentication to actually consume codes
+
+**Security Benefits**:
+- Prevents unauthorized access to deployment
+- Each household controls their own member invitations
+- Codes can be single-use or multi-use (configurable)
+- Expired/fully-used codes automatically rejected
+- Public GitHub repo safe (no open signup vulnerability)
+
+**API Endpoints**:
+- `POST /api/invites` - Create invite (authenticated)
+- `GET /api/invites` - List household invites (authenticated)
+- `POST /api/invites/validate` - Validate code (public)
 
 ---
 
