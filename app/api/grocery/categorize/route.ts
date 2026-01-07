@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const prompt = `Categorize this grocery item: "${itemName}"
 
 Available categories:
-${categories.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+${categories.map((c: string, i: number) => `${i + 1}. ${c}`).join('\n')}
 
 Instructions:
 - Choose the SINGLE most appropriate category from the list above
