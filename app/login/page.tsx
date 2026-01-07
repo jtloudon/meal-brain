@@ -11,7 +11,7 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [usePassword, setUsePassword] = useState(true); // Default to password login
+  const [usePassword, setUsePassword] = useState(true); // Default to password login (will change if invite detected)
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
 
@@ -20,7 +20,8 @@ function LoginContent() {
     const code = searchParams.get('invite');
     if (code) {
       setInviteCode(code);
-      console.log('[LOGIN] Invite code detected:', code);
+      setUsePassword(false); // New users from invites should use magic link by default
+      console.log('[LOGIN] Invite code detected:', code, '- defaulting to magic link');
     }
   }, [searchParams]);
 
