@@ -549,12 +549,21 @@ export default function GroceriesPage() {
       title=""
     >
       <div style={{ padding: '0 16px 80px 16px' }}>
-        {/* Pill-shaped action buttons */}
+        {/* Pill-shaped action buttons - sticky on scroll */}
         <div style={{
           display: 'flex',
           gap: '6px',
           padding: '16px 0',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: '72px', // Below the list name header
+          backgroundColor: 'white',
+          zIndex: 10,
+          marginLeft: '-16px',
+          marginRight: '-16px',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
         }}>
           <button
             onClick={() => setShowClearCheckedConfirm(true)}
@@ -694,7 +703,17 @@ export default function GroceriesPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: '24px'
+            marginBottom: '24px',
+            position: 'sticky',
+            top: 0,
+            backgroundColor: 'white',
+            zIndex: 20,
+            paddingTop: '16px',
+            paddingBottom: '8px',
+            marginLeft: '-16px',
+            marginRight: '-16px',
+            paddingLeft: '16px',
+            paddingRight: '16px'
           }}>
             {/* Check All checkbox */}
             {items.length > 0 && (

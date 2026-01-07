@@ -35,27 +35,46 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Step 2: Get shopping categories from user preferences
-    const { data: prefs } = await supabase
-      .from('user_preferences')
-      .select('shopping_categories')
-      .eq('user_id', user.id)
-      .single();
+    // Step 2: Get shopping categories from settings API (same source as UI)
+    // This ensures perfect consistency with user's dropdown
+    let categories: string[] = [];
 
-    const categories = prefs?.shopping_categories || [
-      'Produce',
-      'Meat & Seafood',
-      'Dairy & Eggs',
-      'Bakery',
-      'Frozen',
-      'Canned Goods',
-      'Condiments & Sauces',
-      'Beverages',
-      'Snacks & Treats',
-      'Pantry Staples',
-      'Household',
-      'Other'
-    ];
+    try {
+      const categoriesResponse = await fetch(
+        `${request.nextUrl.origin}/api/settings/shopping-categories`,
+        {
+          method: 'GET',
+          headers: {
+            'Cookie': request.headers.get('cookie') || '',
+          },
+        }
+      );
+
+      if (categoriesResponse.ok) {
+        const { categories: userCategories } = await categoriesResponse.json();
+        categories = userCategories || [];
+      }
+    } catch (error) {
+      console.error('[Categorize] Failed to fetch categories:', error);
+    }
+
+    // Fallback if API fails
+    if (categories.length === 0) {
+      categories = [
+        'Produce',
+        'Meat & Seafood',
+        'Dairy & Eggs',
+        'Bakery',
+        'Frozen',
+        'Canned Goods',
+        'Condiments & Sauces',
+        'Beverages',
+        'Snacks & Treats',
+        'Pantry',
+        'Household',
+        'Other'
+      ];
+    }
 
     // Step 3: Call Claude API for categorization
     if (!process.env.ANTHROPIC_API_KEY) {
