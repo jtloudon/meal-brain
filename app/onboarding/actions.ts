@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/auth/supabase-server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
-export async function createHousehold(householdName: string) {
+export async function createHousehold(householdName: string, inviteCode?: string) {
   // First, verify user is authenticated using the regular client
   const supabase = await createClient();
 
@@ -28,9 +28,38 @@ export async function createHousehold(householdName: string) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // DEV MODE: If "Demo Household", join the SEEDED household (with recipes)
+  // If invite code provided, use it to join existing household
   let household;
-  if (householdName === 'Demo Household') {
+  if (inviteCode) {
+    console.log('[SERVER ACTION] Using invite code:', inviteCode);
+
+    // Call the use_invite_code function
+    const { data: householdId, error: inviteError } = await serviceClient
+      .rpc('use_invite_code', {
+        code: inviteCode.toUpperCase(),
+        user_id: user.id,
+      });
+
+    if (inviteError) {
+      console.error('[SERVER ACTION] Invite error:', inviteError);
+      return { error: inviteError.message };
+    }
+
+    // Get household details
+    const { data: householdData, error: fetchError } = await serviceClient
+      .from('households')
+      .select('id')
+      .eq('id', householdId)
+      .single();
+
+    if (fetchError || !householdData) {
+      console.error('[SERVER ACTION] Household fetch error:', fetchError);
+      return { error: 'Failed to join household' };
+    }
+
+    household = householdData;
+  } else if (householdName === 'Demo Household') {
+    // DEV MODE: If "Demo Household", join the SEEDED household (with recipes)
     const SEEDED_HOUSEHOLD_ID = '00000000-0000-4000-8000-000000000001';
     const { data: existingHousehold } = await serviceClient
       .from('households')
@@ -80,8 +109,8 @@ export async function createHousehold(householdName: string) {
     }
   }
 
-  console.log('[SERVER ACTION] Success - household created:', household.id);
+  console.log('[SERVER ACTION] Success - household joined/created:', household.id);
 
-  // Redirect to preferences onboarding
-  redirect('/onboarding/preferences');
+  // Redirect to recipes (skip preferences for invited users - they can set later)
+  redirect('/recipes');
 }

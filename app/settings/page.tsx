@@ -61,6 +61,16 @@ export default function SettingsPage() {
       ],
     },
     {
+      title: 'Household',
+      items: [
+        {
+          label: 'Invite Members',
+          description: 'Generate invite links for family members',
+          href: '/settings/invites',
+        },
+      ],
+    },
+    {
       title: 'App Settings',
       items: [
         {
