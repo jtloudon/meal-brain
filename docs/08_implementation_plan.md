@@ -448,10 +448,10 @@ The MVP is complete when:
 
 ## Current Status
 
-**Active Phase**: Phase 2 In Progress - Auth Architecture Fix Required ⚠️
-**Completion**: 60/67 total tests passing (90%), all Tools at 100% (34/34), Recipe + Planner + Grocery UI complete
-**Blocking Issue**: Dev login loop - need working /dev-login
-**Estimated Timeline to MVP**: 1 week (part-time) after auth fix
+**Active Phase**: Phase 3 - Production Ready & Invitation System Complete ✅
+**Completion**: All core features shipped to production, invitation-only access secured
+**Latest Deployment**: e5af7a2 (2026-01-07)
+**Status**: **PRODUCTION READY** - App fully functional for household use
 
 **Recent Work**:
 - ✅ Grocery List UI complete (list view, check/uncheck items)
@@ -786,5 +786,37 @@ See `docs/17_dev_login_blocker.md` for details.
 
 ---
 
+---
+
+## Recent Accomplishments (2026-01-07)
+
+### Security & Authentication
+- ✅ **Invitation-Only Signup System** - Complete with code generation, validation, and household joining
+- ✅ **PWA Session Persistence** - localStorage for iOS PWAs to prevent frequent logouts
+- ✅ **Password Reset Flow** - "Forgot password?" link on login page
+- ✅ **Sign Out Button** - Added to settings page
+
+### UI/UX Improvements
+- ✅ **Version Tracking** - Git SHA and build info in Settings → About
+- ✅ **Default Landing Page** - Changed from /planner to /recipes
+- ✅ **Splash Screen** - Reduced from 2.5s to 2s
+- ✅ **Mobile Zoom Fix** - URL inputs now 16px to prevent iOS zoom
+- ✅ **Photo Upload Status** - Shows "Uploading..." indicator
+
+### Bug Fixes
+- ✅ **Recipe Import** - Image compression fixes FUNCTION_PAYLOAD_TOO_LARGE error
+- ✅ **Session Storage** - Import uses sessionStorage instead of URL params (fixes validation errors)
+- ✅ **Image Upload** - More lenient file type validation, camera capture enabled
+- ✅ **Photo Remove Button** - Larger (44x44px) with proper state syncing
+- ✅ **Zod Validation** - Fixed image_url schema (union instead of chained .or())
+
+### Infrastructure
+- ✅ **Middleware** - Added Supabase auth middleware for SSR
+- ✅ **Database Migration** - household_invites tables and RLS policies
+- ✅ **RLS Fix** - Public access policy for invite validation (anon users)
+
+---
+
 ### Version History
+- **2026-01-07**: Production deployment complete, invitation system live, tech debt documented
 - **2026-01-07**: Added tech debt section for pre-public release tracking
