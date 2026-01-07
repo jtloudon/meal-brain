@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createHousehold } from './actions';
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [inviteCode, setInviteCode] = useState('');
@@ -161,5 +161,19 @@ export default function OnboardingPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex min-h-screen flex-col items-center justify-center p-6">
+        <div className="text-center">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </main>
+    }>
+      <OnboardingContent />
+    </Suspense>
   );
 }
