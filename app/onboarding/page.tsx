@@ -27,6 +27,8 @@ function OnboardingContent() {
     setValidatingCode(true);
     setError('');
 
+    console.log('[Onboarding] Validating code:', code);
+
     try {
       const response = await fetch('/api/invites/validate', {
         method: 'POST',
@@ -35,6 +37,7 @@ function OnboardingContent() {
       });
 
       const data = await response.json();
+      console.log('[Onboarding] Validation response:', data);
 
       if (data.valid) {
         setCodeValid(true);
@@ -44,6 +47,7 @@ function OnboardingContent() {
         setError(data.error || 'Invalid invite code');
       }
     } catch (err) {
+      console.error('[Onboarding] Validation error:', err);
       setCodeValid(false);
       setError('Failed to validate invite code');
     } finally {

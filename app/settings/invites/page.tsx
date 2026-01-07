@@ -154,17 +154,25 @@ export default function InvitesPage() {
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{
-                        fontSize: '20px',
+                        fontSize: '13px',
+                        color: '#6b7280',
+                        marginBottom: '8px',
+                        wordBreak: 'break-all',
+                      }}>
+                        {`${window.location.origin}/onboarding?code=${invite.invite_code}`}
+                      </div>
+                      <div style={{
+                        fontSize: '16px',
                         fontWeight: '600',
                         fontFamily: 'monospace',
-                        color: isExpired || isUsed ? '#9ca3af' : '#111827',
-                        marginBottom: '4px',
+                        color: isExpired || isUsed ? '#9ca3af' : '#f97316',
+                        marginBottom: '8px',
                       }}>
-                        {invite.invite_code}
+                        Code: {invite.invite_code}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                      <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>
                         Uses: {invite.use_count} / {invite.max_uses}
                       </div>
                       <div style={{ fontSize: '12px', color: '#6b7280' }}>

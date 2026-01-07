@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
 
     const { inviteCode } = await request.json();
 
+    console.log('[API /invites/validate] Received code:', inviteCode);
+
     if (!inviteCode) {
       return NextResponse.json(
         { error: 'Invite code is required', valid: false },
@@ -32,17 +34,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const codeUpper = inviteCode.toUpperCase();
+    console.log('[API /invites/validate] Looking for code:', codeUpper);
+
     // Check if invite exists and is valid (not auth required - public check)
     const { data: invite, error } = await supabase
       .from('household_invites')
       .select('id, household_id, expires_at, max_uses, use_count, households(name)')
-      .eq('invite_code', inviteCode.toUpperCase())
+      .eq('invite_code', codeUpper)
       .single();
 
+    console.log('[API /invites/validate] Query result:', { invite, error });
+
     if (error || !invite) {
+      console.error('[API /invites/validate] Error or not found:', error);
       return NextResponse.json({
         valid: false,
-        error: 'Invalid invite code'
+        error: error ? error.message : 'Invalid invite code'
       });
     }
 
