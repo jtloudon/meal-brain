@@ -61,6 +61,8 @@ export default function GroceriesPage() {
   const [editListName, setEditListName] = useState('');
   const [showDeleteListConfirm, setShowDeleteListConfirm] = useState(false);
   const [listToDelete, setListToDelete] = useState<string | null>(null);
+  const [showCopyToModal, setShowCopyToModal] = useState(false);
+  const [copySuccessMessage, setCopySuccessMessage] = useState('');
 
   // Fetch shopping categories on mount
   useEffect(() => {
@@ -365,6 +367,59 @@ export default function GroceriesPage() {
     }
   };
 
+  const handleCopyToList = async (destinationListId: string) => {
+    const checkedItems = items.filter(item => item.checked);
+    if (checkedItems.length === 0 || !destinationListId) return;
+
+    try {
+      setSaving(true);
+
+      // Copy checked items to destination list (unchecked state)
+      await Promise.all(
+        checkedItems.map(item =>
+          fetch('/api/grocery/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              grocery_list_id: destinationListId,
+              display_name: item.display_name,
+              quantity: item.quantity,
+              unit: item.unit,
+              category: item.category,
+              checked: false, // Copy as unchecked
+            }),
+          })
+        )
+      );
+
+      // Uncheck all source items
+      await Promise.all(
+        checkedItems.map(item =>
+          fetch(`/api/grocery/items/${item.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ checked: false }),
+          })
+        )
+      );
+
+      // Update local state
+      setItems(prev => prev.map(item => ({ ...item, checked: false })));
+
+      // Show success message
+      const destListName = lists.find(l => l.id === destinationListId)?.name || 'list';
+      setCopySuccessMessage(`Copied ${checkedItems.length} item${checkedItems.length !== 1 ? 's' : ''} to ${destListName}`);
+      setShowCopyToModal(false);
+
+      // Clear message after 3 seconds
+      setTimeout(() => setCopySuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error copying items:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
 
@@ -516,6 +571,24 @@ export default function GroceriesPage() {
             Clear Checked
           </button>
           <button
+            onClick={() => setShowCopyToModal(true)}
+            disabled={!items.some(item => item.checked)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '16px',
+              border: 'none',
+              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+              color: items.some(item => item.checked) ? 'white' : '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+              flex: 1,
+              minWidth: 0
+            }}
+          >
+            Copy to...
+          </button>
+          <button
             onClick={() => setShowInlineAddForm(!showInlineAddForm)}
             style={{
               padding: '6px 10px',
@@ -619,6 +692,42 @@ export default function GroceriesPage() {
             gap: '12px',
             marginBottom: '24px'
           }}>
+            {/* Check All checkbox */}
+            {items.length > 0 && (
+              <button
+                onClick={() => {
+                  const allChecked = items.every(item => item.checked);
+                  const newChecked = !allChecked;
+                  setItems(prev => prev.map(item => ({ ...item, checked: newChecked })));
+
+                  // Update all items in database
+                  items.forEach(async (item) => {
+                    await fetch(`/api/grocery/items/${item.id}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ checked: newChecked }),
+                    });
+                  });
+                }}
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  border: '2px solid ' + (items.every(item => item.checked) ? '#f97316' : '#d1d5db'),
+                  backgroundColor: items.every(item => item.checked) ? '#f97316' : 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                {items.every(item => item.checked) && (
+                  <Check size={18} style={{ color: 'white', strokeWidth: 3 }} />
+                )}
+              </button>
+            )}
+
             <button
               onClick={() => setShowListSelector(true)}
               style={{
@@ -1612,6 +1721,125 @@ export default function GroceriesPage() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Copy To List Modal */}
+        {showCopyToModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 150,
+            padding: '0 16px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '100%'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: '8px'
+              }}>
+                Copy to List
+              </h3>
+              <p style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                marginBottom: '16px'
+              }}>
+                Copy {items.filter(item => item.checked).length} checked item{items.filter(item => item.checked).length !== 1 ? 's' : ''} to:
+              </p>
+
+              {/* List of destination lists */}
+              <div style={{
+                maxHeight: '300px',
+                overflowY: 'auto',
+                marginBottom: '16px'
+              }}>
+                {lists
+                  .filter(list => list.id !== selectedListId)
+                  .map(list => (
+                    <button
+                      key={list.id}
+                      onClick={() => handleCopyToList(list.id)}
+                      disabled={saving}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        textAlign: 'left',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        marginBottom: '8px',
+                        backgroundColor: 'white',
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        opacity: saving ? 0.5 : 1
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        {list.id === defaultListId && (
+                          <Star size={16} style={{ color: '#f97316', fill: '#f97316' }} />
+                        )}
+                        <span style={{ fontWeight: '500' }}>{list.name}</span>
+                      </div>
+                    </button>
+                  ))}
+              </div>
+
+              <button
+                onClick={() => setShowCopyToModal(false)}
+                disabled={saving}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  backgroundColor: '#e5e7eb',
+                  color: '#374151',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  opacity: saving ? 0.5 : 1
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Copy Success Message */}
+        {copySuccessMessage && (
+          <div style={{
+            position: 'fixed',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: '#10b981',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            zIndex: 200,
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            {copySuccessMessage}
           </div>
         )}
       </div>
