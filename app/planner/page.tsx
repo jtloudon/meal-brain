@@ -971,7 +971,7 @@ function PlannerContent() {
             </div>
 
             {/* Content */}
-            <div style={{ padding: '16px', overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
+            <div style={{ padding: '8px 16px 16px 16px', overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
               {/* Date */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>

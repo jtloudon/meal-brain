@@ -1385,7 +1385,7 @@ export default function GroceriesPage() {
             </div>
 
             {/* Content */}
-            <div style={{ padding: '16px' }}>
+            <div style={{ padding: '8px 16px 16px 16px' }}>
               <input
                 type="text"
                 value={editName}

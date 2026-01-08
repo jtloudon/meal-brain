@@ -348,7 +348,19 @@ export default function RecipeDetailPage() {
   };
 
   const scaleQuantity = (originalQuantity: number, baseServings: number, targetServings: number): string => {
+    // Defensive check: if any value is invalid, return original quantity
+    if (originalQuantity == null || baseServings == null || targetServings == null ||
+        isNaN(originalQuantity) || isNaN(baseServings) || isNaN(targetServings) ||
+        baseServings === 0 || targetServings === 0) {
+      return originalQuantity?.toString() || '0';
+    }
+
     const scaled = (originalQuantity * targetServings) / baseServings;
+
+    // Check if scaled is NaN
+    if (isNaN(scaled)) {
+      return originalQuantity.toString();
+    }
 
     // Format to reasonable precision
     if (scaled % 1 === 0) {
