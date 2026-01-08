@@ -356,11 +356,13 @@ export default function RecipeDetailPage() {
     } else if (scaled < 1) {
       // For fractions, try to display as common fractions
       const fraction = scaled;
-      if (Math.abs(fraction - 0.25) < 0.01) return '1/4';
-      if (Math.abs(fraction - 0.33) < 0.01) return '1/3';
-      if (Math.abs(fraction - 0.5) < 0.01) return '1/2';
-      if (Math.abs(fraction - 0.67) < 0.01) return '2/3';
-      if (Math.abs(fraction - 0.75) < 0.01) return '3/4';
+      if (Math.abs(fraction - 0.125) < 0.01) return '⅛';
+      if (Math.abs(fraction - 0.25) < 0.01) return '¼';
+      if (Math.abs(fraction - 0.333) < 0.01) return '⅓';
+      if (Math.abs(fraction - 0.5) < 0.01) return '½';
+      if (Math.abs(fraction - 0.667) < 0.01) return '⅔';
+      if (Math.abs(fraction - 0.75) < 0.01) return '¾';
+      if (Math.abs(fraction - 0.875) < 0.01) return '⅞';
       return scaled.toFixed(2);
     } else {
       // For numbers > 1, show up to 2 decimal places
@@ -613,7 +615,7 @@ export default function RecipeDetailPage() {
             margin: 0,
             textShadow: '0 2px 8px rgba(0,0,0,0.6)'
           }}>
-            {recipe.title}
+            {decodeHTML(recipe.title)}
           </h1>
           {recipe.tags.length > 0 && (
             <p style={{

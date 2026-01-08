@@ -14,16 +14,18 @@ interface MealCourse {
 
 interface PlannedMeal {
   id: string;
-  recipe_id: string;
+  recipe_id: string | null; // Nullable for custom items
   date: string;
   meal_type: string;
   serving_size: number | null;
   notes: string | null;
-  recipe: {
+  custom_title: string | null; // For custom items (sides, leftovers, etc.)
+  custom_item_type: 'side' | 'leftovers' | 'other' | null; // Type of custom item
+  recipe?: {
     title: string;
     tags: string[];
     rating: number | null;
-  };
+  } | null; // Optional when it's a custom item
 }
 
 const DEFAULT_MEAL_COURSES: MealCourse[] = [
@@ -51,7 +53,10 @@ function PlannerContent() {
   const [editingMeal, setEditingMeal] = useState<PlannedMeal | null>(null);
   const [editDate, setEditDate] = useState('');
   const [editMealType, setEditMealType] = useState('dinner');
+  const [editMode, setEditMode] = useState<'recipe' | 'custom'>('recipe'); // Mode: recipe or custom item
   const [editRecipeId, setEditRecipeId] = useState('');
+  const [editCustomTitle, setEditCustomTitle] = useState(''); // For custom items
+  const [editCustomItemType, setEditCustomItemType] = useState<'side' | 'leftovers' | 'other'>('side'); // Type of custom item
   const [editServingSize, setEditServingSize] = useState(4);
   const [editNotes, setEditNotes] = useState('');
   const [saving, setSaving] = useState(false);
@@ -169,23 +174,36 @@ function PlannerContent() {
   };
 
   const handleSaveMeal = async () => {
-    if (!editRecipeId) return;
+    // Validate: either recipe or custom item must be provided
+    if (editMode === 'recipe' && !editRecipeId) return;
+    if (editMode === 'custom' && !editCustomTitle.trim()) return;
 
     try {
       setSaving(true);
+
+      // Build request body based on mode
+      const bodyData = {
+        date: editDate,
+        meal_type: editMealType,
+        serving_size: editServingSize,
+        notes: editNotes.trim() ? editNotes : null,
+        ...(editMode === 'recipe' ? {
+          recipe_id: editRecipeId,
+          custom_title: null,
+          custom_item_type: null,
+        } : {
+          recipe_id: null,
+          custom_title: editCustomTitle.trim(),
+          custom_item_type: editCustomItemType,
+        }),
+      };
 
       if (editingMeal) {
         // Update existing meal
         const response = await fetch(`/api/planner/${editingMeal.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            date: editDate,
-            meal_type: editMealType,
-            recipe_id: editRecipeId,
-            serving_size: editServingSize,
-            notes: editNotes.trim() ? editNotes : null,
-          }),
+          body: JSON.stringify(bodyData),
         });
 
         if (!response.ok) {
@@ -196,13 +214,7 @@ function PlannerContent() {
         const response = await fetch('/api/planner', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recipe_id: editRecipeId,
-            date: editDate,
-            meal_type: editMealType,
-            serving_size: editServingSize,
-            notes: editNotes.trim() ? editNotes : null,
-          }),
+          body: JSON.stringify(bodyData),
         });
 
         if (!response.ok) {
@@ -249,7 +261,17 @@ function PlannerContent() {
     setEditingMeal(meal);
     setEditDate(meal.date);
     setEditMealType(meal.meal_type);
-    setEditRecipeId(meal.recipe_id);
+    // Determine if this is a recipe or custom item
+    if (meal.custom_title) {
+      setEditMode('custom');
+      setEditCustomTitle(meal.custom_title);
+      setEditCustomItemType(meal.custom_item_type || 'side');
+      setEditRecipeId('');
+    } else {
+      setEditMode('recipe');
+      setEditRecipeId(meal.recipe_id || '');
+      setEditCustomTitle('');
+    }
     setEditServingSize(meal.serving_size || 4);
     setEditNotes(meal.notes || '');
     setShowEditModal(true);
@@ -259,7 +281,10 @@ function PlannerContent() {
     setEditingMeal(null);
     setEditDate(formatDate(date || new Date()));
     setEditMealType('dinner');
+    setEditMode('recipe'); // Default to recipe mode
     setEditRecipeId('');
+    setEditCustomTitle('');
+    setEditCustomItemType('side');
     setEditServingSize(4);
     setEditNotes('');
     setRecipeSearch('');
@@ -272,7 +297,10 @@ function PlannerContent() {
     setEditingMeal(null);
     setEditDate('');
     setEditMealType('dinner');
+    setEditMode('recipe');
     setEditRecipeId('');
+    setEditCustomTitle('');
+    setEditCustomItemType('side');
     setEditServingSize(4);
     setEditNotes('');
     setRecipeSearch('');
@@ -670,11 +698,24 @@ function PlannerContent() {
                   />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                      {getMealLabel(meal.meal_type)}: {meal.recipe.title}
+                      {getMealLabel(meal.meal_type)}: {meal.custom_title || meal.recipe?.title}
+                      {meal.custom_item_type && (
+                        <span style={{
+                          fontSize: '12px',
+                          marginLeft: '8px',
+                          padding: '2px 8px',
+                          backgroundColor: '#fef3c7',
+                          color: '#92400e',
+                          borderRadius: '4px',
+                          fontWeight: 'normal'
+                        }}>
+                          {meal.custom_item_type}
+                        </span>
+                      )}
                     </div>
-                    {meal.serving_size && (
-                      <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                        Serves {meal.serving_size}
+                    {meal.notes && (
+                      <div style={{ fontSize: '14px', color: '#6b7280', fontStyle: 'italic' }}>
+                        {meal.notes}
                       </div>
                     )}
                   </div>
@@ -831,14 +872,27 @@ function PlannerContent() {
                                   color: '#111827',
                                   marginBottom: '4px'
                                 }}>
-                                  {meal.recipe.title}
+                                  {meal.custom_title || meal.recipe?.title}
+                                  {meal.custom_item_type && (
+                                    <span style={{
+                                      fontSize: '11px',
+                                      marginLeft: '8px',
+                                      padding: '2px 6px',
+                                      backgroundColor: '#fef3c7',
+                                      color: '#92400e',
+                                      borderRadius: '4px',
+                                      fontWeight: 'normal'
+                                    }}>
+                                      {meal.custom_item_type}
+                                    </span>
+                                  )}
                                 </div>
-                                {meal.serving_size && (
-                                  <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                                    Serves {meal.serving_size}
+                                {meal.notes && (
+                                  <div style={{ fontSize: '13px', color: '#6b7280', fontStyle: 'italic', marginBottom: '4px' }}>
+                                    {meal.notes}
                                   </div>
                                 )}
-                                {meal.recipe.tags && meal.recipe.tags.length > 0 && (
+                                {meal.recipe?.tags && meal.recipe.tags.length > 0 && (
                                   <div style={{ display: 'flex', gap: '4px', marginTop: '6px', flexWrap: 'wrap' }}>
                                     {meal.recipe.tags.slice(0, 3).map(tag => (
                                       <span
@@ -902,14 +956,14 @@ function PlannerContent() {
               </h3>
               <button
                 onClick={handleSaveMeal}
-                disabled={saving || !editRecipeId}
+                disabled={saving || (editMode === 'recipe' ? !editRecipeId : !editCustomTitle.trim())}
                 style={{
-                  color: (saving || !editRecipeId) ? '#d1d5db' : '#f97316',
+                  color: (saving || (editMode === 'recipe' ? !editRecipeId : !editCustomTitle.trim())) ? '#d1d5db' : '#f97316',
                   fontWeight: 500,
                   background: 'none',
                   border: 'none',
                   fontSize: '17px',
-                  cursor: (saving || !editRecipeId) ? 'not-allowed' : 'pointer'
+                  cursor: (saving || (editMode === 'recipe' ? !editRecipeId : !editCustomTitle.trim())) ? 'not-allowed' : 'pointer'
                 }}
               >
                 {saving ? 'Saving...' : 'Save'}
@@ -975,11 +1029,53 @@ function PlannerContent() {
                 </div>
               </div>
 
-              {/* Recipe */}
+              {/* Mode Toggle: Recipe or Custom Item */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-                  Recipe
+                  Type
                 </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => setEditMode('recipe')}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      border: editMode === 'recipe' ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      backgroundColor: editMode === 'recipe' ? '#fff7ed' : 'white',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      fontWeight: editMode === 'recipe' ? '600' : 'normal',
+                      color: editMode === 'recipe' ? '#f97316' : '#6b7280'
+                    }}
+                  >
+                    Recipe
+                  </button>
+                  <button
+                    onClick={() => setEditMode('custom')}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      border: editMode === 'custom' ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      backgroundColor: editMode === 'custom' ? '#fff7ed' : 'white',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      fontWeight: editMode === 'custom' ? '600' : 'normal',
+                      color: editMode === 'custom' ? '#f97316' : '#6b7280'
+                    }}
+                  >
+                    Custom Item
+                  </button>
+                </div>
+              </div>
+
+              {/* Recipe Picker (shown only in recipe mode) */}
+              {editMode === 'recipe' && (
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                    Recipe
+                  </label>
                 <div
                   onClick={() => setShowRecipePicker(!showRecipePicker)}
                   style={{
@@ -1043,6 +1139,54 @@ function PlannerContent() {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {/* Custom Item Fields (shown only in custom mode) */}
+              {editMode === 'custom' && (
+                <>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                      Item Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editCustomTitle}
+                      onChange={(e) => setEditCustomTitle(e.target.value)}
+                      placeholder="e.g., BBQ Chicken, Coleslaw"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                      Item Type
+                    </label>
+                    <select
+                      value={editCustomItemType}
+                      onChange={(e) => setEditCustomItemType(e.target.value as 'side' | 'leftovers' | 'other')}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        outline: 'none',
+                        backgroundColor: 'white'
+                      }}
+                    >
+                      <option value="side">Side</option>
+                      <option value="leftovers">Leftovers</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </>
               )}
 
               {/* Serving Size */}

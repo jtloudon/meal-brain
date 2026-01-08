@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Plus, Search, Star } from 'lucide-react';
+import { decodeHTML } from '@/lib/utils/decode-html';
 
 interface Recipe {
   id: string;
@@ -875,7 +876,7 @@ export default function RecipesPage() {
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                   }}>
-                    {recipe.title}
+                    {decodeHTML(recipe.title)}
                   </h3>
                   {/* Star Rating and Total Time */}
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

@@ -25,6 +25,7 @@ export type ToolResult<T> =
 
 /**
  * Zod schema for adding a meal to the planner.
+ * Either recipe_id OR custom_title must be provided (not both, not neither).
  */
 export const AddMealSchema = z.object({
   recipe_id: z
@@ -32,12 +33,21 @@ export const AddMealSchema = z.object({
     .regex(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
       'Invalid recipe ID format'
-    ),
+    )
+    .optional()
+    .nullable(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format - must be YYYY-MM-DD'),
-  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']),
+  meal_type: z.string(), // Support custom meal types
   serving_size: z.number().int().positive().optional().nullable(),
   notes: z.string().optional().nullable(),
-});
+  custom_title: z.string().optional().nullable(), // For custom items
+  custom_item_type: z.enum(['side', 'leftovers', 'other']).optional().nullable(), // Type of custom item
+}).refine(
+  (data) => (data.recipe_id && !data.custom_title) || (!data.recipe_id && data.custom_title),
+  {
+    message: 'Either recipe_id or custom_title must be provided, but not both',
+  }
+);
 
 export type AddMealInput = z.infer<typeof AddMealSchema>;
 
@@ -61,11 +71,14 @@ export const UpdateMealSchema = z.object({
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
       'Invalid recipe ID format'
     )
-    .optional(),
+    .optional()
+    .nullable(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format - must be YYYY-MM-DD').optional(),
-  meal_type: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).optional(),
+  meal_type: z.string().optional(), // Support custom meal types
   serving_size: z.number().int().positive().nullable().optional(),
   notes: z.string().nullable().optional(),
+  custom_title: z.string().nullable().optional(), // For custom items
+  custom_item_type: z.enum(['side', 'leftovers', 'other']).nullable().optional(), // Type of custom item
 });
 
 export type UpdateMealInput = z.infer<typeof UpdateMealSchema>;
@@ -96,22 +109,24 @@ export async function addMeal(
     // Validate input
     const validated = AddMealSchema.parse(input);
 
-    // Verify recipe exists and belongs to household
-    const { data: recipe, error: recipeError } = await supabase
-      .from('recipes')
-      .select('id')
-      .eq('id', validated.recipe_id)
-      .eq('household_id', context.householdId)
-      .single();
+    // Verify recipe exists and belongs to household (only if recipe_id is provided)
+    if (validated.recipe_id) {
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipes')
+        .select('id')
+        .eq('id', validated.recipe_id)
+        .eq('household_id', context.householdId)
+        .single();
 
-    if (recipeError || !recipe) {
-      return {
-        success: false,
-        error: {
-          type: 'NOT_FOUND',
-          message: 'Recipe not found or does not belong to your household',
-        },
-      };
+      if (recipeError || !recipe) {
+        return {
+          success: false,
+          error: {
+            type: 'NOT_FOUND',
+            message: 'Recipe not found or does not belong to your household',
+          },
+        };
+      }
     }
 
     // Create planner meal
@@ -119,11 +134,13 @@ export async function addMeal(
       .from('planner_meals')
       .insert({
         household_id: context.householdId,
-        recipe_id: validated.recipe_id,
+        recipe_id: validated.recipe_id ?? null,
         date: validated.date,
         meal_type: validated.meal_type,
         serving_size: validated.serving_size ?? null,
         notes: validated.notes ?? null,
+        custom_title: validated.custom_title ?? null,
+        custom_item_type: validated.custom_item_type ?? null,
       })
       .select('id')
       .single();
@@ -332,6 +349,8 @@ export async function updateMeal(
     if (validated.meal_type !== undefined) updateData.meal_type = validated.meal_type;
     if (validated.serving_size !== undefined) updateData.serving_size = validated.serving_size;
     if (validated.notes !== undefined) updateData.notes = validated.notes;
+    if (validated.custom_title !== undefined) updateData.custom_title = validated.custom_title;
+    if (validated.custom_item_type !== undefined) updateData.custom_item_type = validated.custom_item_type;
 
     // Update the meal
     const { error: updateError } = await supabase
@@ -395,16 +414,18 @@ export async function listMeals(
   ToolResult<{
     meals: Array<{
       id: string;
-      recipe_id: string;
+      recipe_id: string | null;
       date: string;
       meal_type: string;
       serving_size: number | null;
       notes: string | null;
-      recipe: {
+      custom_title: string | null;
+      custom_item_type: string | null;
+      recipe?: {
         title: string;
         tags: string[];
         rating: number | null;
-      };
+      } | null;
     }>;
     total: number;
   }>
@@ -424,6 +445,8 @@ export async function listMeals(
         meal_type,
         serving_size,
         notes,
+        custom_title,
+        custom_item_type,
         recipes (
           title,
           tags,
@@ -455,11 +478,13 @@ export async function listMeals(
       meal_type: meal.meal_type,
       serving_size: meal.serving_size ?? null,
       notes: meal.notes ?? null,
-      recipe: {
-        title: meal.recipes?.title ?? 'Unknown Recipe',
-        tags: meal.recipes?.tags ?? [],
-        rating: meal.recipes?.rating ?? null,
-      },
+      custom_title: meal.custom_title ?? null,
+      custom_item_type: meal.custom_item_type ?? null,
+      recipe: meal.recipes ? {
+        title: meal.recipes.title,
+        tags: meal.recipes.tags ?? [],
+        rating: meal.recipes.rating ?? null,
+      } : null,
     }));
 
     return {

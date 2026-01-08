@@ -127,8 +127,12 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
   let remaining = trimmed;
 
   // 1. Extract quantity (number, fraction, or range at start)
-  // Enhanced regex to properly capture mixed numbers like "1 1/4" or "2 1/2"
-  const quantityMatch = remaining.match(/^([\d.]+(?:\s+\d+\/\d+)?(?:-[\d.]+(?:\s+\d+\/\d+)?)?|[⅛¼⅓½⅔¾⅞])\s*/);
+  // Enhanced regex to properly capture:
+  // - Mixed numbers like "1 1/4" or "2 1/2"
+  // - Standalone fractions like "1/2" or "3/4"
+  // - Simple numbers and ranges
+  // - Unicode fractions
+  const quantityMatch = remaining.match(/^([\d.]+\s+\d+\/\d+|\d+\/\d+|[\d.]+(?:-[\d.]+)?|[⅛¼⅓½⅔¾⅞])\s*/);
   if (quantityMatch) {
     const quantityStr = quantityMatch[1].trim();
 
