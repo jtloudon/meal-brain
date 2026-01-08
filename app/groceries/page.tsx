@@ -847,6 +847,12 @@ export default function GroceriesPage() {
                 <option value="l">l</option>
                 <option value="can">can</option>
                 <option value="package">package</option>
+                <option value="jar">jar</option>
+                <option value="bottle">bottle</option>
+                <option value="bag">bag</option>
+                <option value="box">box</option>
+                <option value="bunch">bunch</option>
+                <option value="dozen">dozen</option>
               </select>
             </div>
 
@@ -1307,6 +1313,12 @@ export default function GroceriesPage() {
                     <option value="l">l</option>
                     <option value="can">can</option>
                     <option value="package">package</option>
+                    <option value="jar">jar</option>
+                    <option value="bottle">bottle</option>
+                    <option value="bag">bag</option>
+                    <option value="box">box</option>
+                    <option value="bunch">bunch</option>
+                    <option value="dozen">dozen</option>
                   </select>
                 </div>
               </div>
@@ -1457,6 +1469,7 @@ export default function GroceriesPage() {
                     <option value="bottle">bottle</option>
                     <option value="bag">bag</option>
                     <option value="box">box</option>
+                    <option value="bunch">bunch</option>
                     <option value="dozen">dozen</option>
                   </select>
                 </div>

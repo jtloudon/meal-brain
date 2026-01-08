@@ -144,7 +144,7 @@ function SignupContent() {
               />
               <style jsx>{`
                 input::placeholder {
-                  color: rgba(255, 255, 255, 0.65);
+                  color: #78350f;
                   opacity: 1;
                 }
                 input:-webkit-autofill,
