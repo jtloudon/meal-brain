@@ -549,94 +549,6 @@ export default function GroceriesPage() {
       title=""
     >
       <div style={{ padding: '0 16px 80px 16px' }}>
-        {/* Pill-shaped action buttons - sticky on scroll */}
-        <div style={{
-          display: 'flex',
-          gap: '6px',
-          padding: '16px 0',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: '72px', // Below the list name header
-          backgroundColor: 'white',
-          zIndex: 10,
-          marginLeft: '-16px',
-          marginRight: '-16px',
-          paddingLeft: '16px',
-          paddingRight: '16px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
-        }}>
-          <button
-            onClick={() => setShowClearCheckedConfirm(true)}
-            disabled={!items.some(item => item.checked)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
-              border: 'none',
-              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
-              color: items.some(item => item.checked) ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-              flex: 1,
-              minWidth: 0
-            }}
-          >
-            Delete Checked
-          </button>
-          <button
-            onClick={() => setShowCopyToModal(true)}
-            disabled={!items.some(item => item.checked)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
-              border: 'none',
-              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
-              color: items.some(item => item.checked) ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-              flex: 1,
-              minWidth: 0
-            }}
-          >
-            Copy to...
-          </button>
-          <button
-            onClick={() => setShowInlineAddForm(!showInlineAddForm)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
-              border: 'none',
-              backgroundColor: showInlineAddForm ? '#f97316' : '#f3f4f6',
-              color: showInlineAddForm ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              flex: 1,
-              minWidth: 0
-            }}
-          >
-            Add Item
-          </button>
-          <button
-            onClick={() => router.push('/groceries/new')}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
-              border: 'none',
-              backgroundColor: '#f3f4f6',
-              color: '#6b7280',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              flex: 1,
-              minWidth: 0
-            }}
-          >
-            New List
-          </button>
-        </div>
-
         {/* List Selector - Clickable name with arrow + Edit button */}
         {editingListName ? (
           <div style={{
@@ -703,7 +615,7 @@ export default function GroceriesPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: '24px',
+            marginBottom: '16px',
             position: 'sticky',
             top: 0,
             backgroundColor: 'white',
@@ -796,6 +708,94 @@ export default function GroceriesPage() {
             </button>
           </div>
         )}
+
+        {/* Pill-shaped action buttons - sticky below list name */}
+        <div style={{
+          display: 'flex',
+          gap: '6px',
+          padding: '16px 0',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: '72px',
+          backgroundColor: 'white',
+          zIndex: 10,
+          marginLeft: '-16px',
+          marginRight: '-16px',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+        }}>
+          <button
+            onClick={() => setShowClearCheckedConfirm(true)}
+            disabled={!items.some(item => item.checked)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '16px',
+              border: 'none',
+              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+              color: items.some(item => item.checked) ? 'white' : '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+              flex: 1,
+              minWidth: 0
+            }}
+          >
+            Delete Checked
+          </button>
+          <button
+            onClick={() => setShowCopyToModal(true)}
+            disabled={!items.some(item => item.checked)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '16px',
+              border: 'none',
+              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+              color: items.some(item => item.checked) ? 'white' : '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+              flex: 1,
+              minWidth: 0
+            }}
+          >
+            Copy to...
+          </button>
+          <button
+            onClick={() => setShowInlineAddForm(!showInlineAddForm)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '16px',
+              border: 'none',
+              backgroundColor: showInlineAddForm ? '#f97316' : '#f3f4f6',
+              color: showInlineAddForm ? 'white' : '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              flex: 1,
+              minWidth: 0
+            }}
+          >
+            Add Item
+          </button>
+          <button
+            onClick={() => router.push('/groceries/new')}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '16px',
+              border: 'none',
+              backgroundColor: '#f3f4f6',
+              color: '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              flex: 1,
+              minWidth: 0
+            }}
+          >
+            New List
+          </button>
+        </div>
 
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
@@ -1058,7 +1058,6 @@ export default function GroceriesPage() {
                             border: 'none',
                             cursor: 'pointer',
                             padding: 0,
-                            paddingRight: '70px', // Extra padding to avoid Sous Chef button overlap
                             marginTop: '1px',
                             transition: 'color 0.2s'
                           }}

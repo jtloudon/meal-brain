@@ -80,6 +80,31 @@
 
 ---
 
+## After Completing Features/Fixes
+
+**When user-facing changes are ready**:
+
+### 1. Commit to Git
+```bash
+git status
+git diff
+git add .
+git commit -m "descriptive message"
+```
+
+### 2. Push to GitHub
+```bash
+git push origin main
+```
+
+### 3. Deploy to Vercel
+- Push to GitHub triggers automatic Vercel deployment
+- Verify deployment succeeded
+
+**Note**: This comes up frequently - don't wait for user to remind you!
+
+---
+
 ## Before Ending Session
 
 **Final checklist**:
@@ -88,6 +113,7 @@
 - [ ] README doesn't duplicate status/plans
 - [ ] No extraneous files created
 - [ ] All architectural decisions documented
+- [ ] Changes committed and pushed to GitHub (if features/fixes completed)
 
 ---
 
