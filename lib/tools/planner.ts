@@ -38,7 +38,6 @@ export const AddMealSchema = z.object({
     .nullable(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format - must be YYYY-MM-DD'),
   meal_type: z.string(), // Support custom meal types
-  serving_size: z.number().int().positive().optional().nullable(),
   notes: z.string().optional().nullable(),
   custom_title: z.string().optional().nullable(), // For custom items
   custom_item_type: z.enum(['side', 'leftovers', 'other']).optional().nullable(), // Type of custom item
@@ -75,7 +74,6 @@ export const UpdateMealSchema = z.object({
     .nullable(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format - must be YYYY-MM-DD').optional(),
   meal_type: z.string().optional(), // Support custom meal types
-  serving_size: z.number().int().positive().nullable().optional(),
   notes: z.string().nullable().optional(),
   custom_title: z.string().nullable().optional(), // For custom items
   custom_item_type: z.enum(['side', 'leftovers', 'other']).nullable().optional(), // Type of custom item
@@ -137,7 +135,6 @@ export async function addMeal(
         recipe_id: validated.recipe_id ?? null,
         date: validated.date,
         meal_type: validated.meal_type,
-        serving_size: validated.serving_size ?? null,
         notes: validated.notes ?? null,
         custom_title: validated.custom_title ?? null,
         custom_item_type: validated.custom_item_type ?? null,
@@ -347,7 +344,6 @@ export async function updateMeal(
     if (validated.recipe_id !== undefined) updateData.recipe_id = validated.recipe_id;
     if (validated.date !== undefined) updateData.date = validated.date;
     if (validated.meal_type !== undefined) updateData.meal_type = validated.meal_type;
-    if (validated.serving_size !== undefined) updateData.serving_size = validated.serving_size;
     if (validated.notes !== undefined) updateData.notes = validated.notes;
     if (validated.custom_title !== undefined) updateData.custom_title = validated.custom_title;
     if (validated.custom_item_type !== undefined) updateData.custom_item_type = validated.custom_item_type;
@@ -417,7 +413,6 @@ export async function listMeals(
       recipe_id: string | null;
       date: string;
       meal_type: string;
-      serving_size: number | null;
       notes: string | null;
       custom_title: string | null;
       custom_item_type: string | null;
@@ -443,7 +438,6 @@ export async function listMeals(
         recipe_id,
         date,
         meal_type,
-        serving_size,
         notes,
         custom_title,
         custom_item_type,
@@ -476,7 +470,6 @@ export async function listMeals(
       recipe_id: meal.recipe_id,
       date: meal.date,
       meal_type: meal.meal_type,
-      serving_size: meal.serving_size ?? null,
       notes: meal.notes ?? null,
       custom_title: meal.custom_title ?? null,
       custom_item_type: meal.custom_item_type ?? null,

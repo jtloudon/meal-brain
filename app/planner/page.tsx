@@ -17,7 +17,6 @@ interface PlannedMeal {
   recipe_id: string | null; // Nullable for custom items
   date: string;
   meal_type: string;
-  serving_size: number | null;
   notes: string | null;
   custom_title: string | null; // For custom items (sides, leftovers, etc.)
   custom_item_type: 'side' | 'leftovers' | 'other' | null; // Type of custom item
@@ -57,7 +56,6 @@ function PlannerContent() {
   const [editRecipeId, setEditRecipeId] = useState('');
   const [editCustomTitle, setEditCustomTitle] = useState(''); // For custom items
   const [editCustomItemType, setEditCustomItemType] = useState<'side' | 'leftovers' | 'other'>('side'); // Type of custom item
-  const [editServingSize, setEditServingSize] = useState(4);
   const [editNotes, setEditNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -185,7 +183,6 @@ function PlannerContent() {
       const bodyData = {
         date: editDate,
         meal_type: editMealType,
-        serving_size: editServingSize,
         notes: editNotes.trim() ? editNotes : null,
         ...(editMode === 'recipe' ? {
           recipe_id: editRecipeId,
@@ -272,7 +269,6 @@ function PlannerContent() {
       setEditRecipeId(meal.recipe_id || '');
       setEditCustomTitle('');
     }
-    setEditServingSize(meal.serving_size || 4);
     setEditNotes(meal.notes || '');
     setShowEditModal(true);
   };
@@ -285,7 +281,6 @@ function PlannerContent() {
     setEditRecipeId('');
     setEditCustomTitle('');
     setEditCustomItemType('side');
-    setEditServingSize(4);
     setEditNotes('');
     setRecipeSearch('');
     setShowRecipePicker(false);
@@ -301,7 +296,6 @@ function PlannerContent() {
     setEditRecipeId('');
     setEditCustomTitle('');
     setEditCustomItemType('side');
-    setEditServingSize(4);
     setEditNotes('');
     setRecipeSearch('');
     setShowRecipePicker(false);
@@ -1189,60 +1183,6 @@ function PlannerContent() {
                   </div>
                 </>
               )}
-
-              {/* Serving Size */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-                  Serving size
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <button
-                    onClick={() => setEditServingSize(Math.max(1, editServingSize - 1))}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      fontSize: '20px',
-                      color: '#f97316',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    −
-                  </button>
-                  <div style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    fontSize: '24px',
-                    fontWeight: '600',
-                    color: '#111827'
-                  }}>
-                    {editServingSize}
-                  </div>
-                  <button
-                    onClick={() => setEditServingSize(editServingSize + 1)}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      fontSize: '20px',
-                      color: '#f97316',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
 
               {/* Notes */}
               <div style={{ marginBottom: '24px' }}>
