@@ -1090,10 +1090,9 @@ function PlannerContent() {
                 >
                   {selectedRecipe ? selectedRecipe.title : 'Select a recipe'}
                 </div>
-              </div>
 
-              {/* Recipe Picker Dropdown */}
-              {showRecipePicker && (
+                {/* Recipe Picker Dropdown */}
+                {showRecipePicker && (
                 <div style={{ marginBottom: '16px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
                   <div style={{ padding: '12px', borderBottom: '1px solid #e5e7eb' }}>
                     <input
@@ -1139,6 +1138,8 @@ function PlannerContent() {
                     ))}
                   </div>
                 </div>
+                )}
+              </div>
               )}
 
               {/* Custom Item Fields (shown only in custom mode) */}
