@@ -112,6 +112,91 @@ household_invite_uses (
 
 ---
 
+## AI-Powered Grocery Categorization (Added 2026-01-07)
+
+### Learning Cache System
+
+**Problem:** Grocery items need accurate categorization, but calling Claude API for every item is expensive.
+
+**Solution:** Cache-first categorization with progressive learning.
+
+### Architecture
+
+**Three-Step Flow:**
+1. **Check Cache** (`category_mappings` table)
+   - Query by normalized item name
+   - If found → Return cached category (FREE, instant)
+   - Update usage statistics
+
+2. **Call Claude API** (if cache miss)
+   - Uses Claude Haiku (fast, cheap model)
+   - Provides user's actual shopping categories
+   - Single-shot prompt: categorize item
+   - Cost: ~$0.001 per item
+
+3. **Save to Cache**
+   - Store normalized name → category mapping
+   - Shared across all users (universal knowledge)
+   - Future requests for same item → cache hit
+
+### Database Schema
+
+**`category_mappings` Table:**
+```sql
+- id: UUID
+- item_name_normalized: TEXT UNIQUE (e.g., "plums")
+- category: TEXT (e.g., "Produce")
+- times_used: INTEGER (popularity tracking)
+- last_used_at: TIMESTAMPTZ
+- created_at: TIMESTAMPTZ
+```
+
+**Functions:**
+- `normalize_item_name(TEXT)` - Lowercase, remove parentheses, trim
+  - Example: "Plums (honey?)" → "plums"
+- `get_suggested_category(TEXT)` - Check cache, update stats
+- `save_category_mapping(TEXT, TEXT)` - Store learned mapping
+
+### API Endpoints
+
+**POST `/api/grocery/categorize`:**
+- Input: `{ itemName: string }`
+- Output: `{ category: string, source: 'cache' | 'claude' | 'error' }`
+- Used internally by item creation endpoint
+
+**POST `/api/grocery/items`:**
+- Auto-categorizes if category not provided or is "Other"
+- Validates Claude's suggestion against user's categories
+- If unknown category → adds note: "AI suggested: 'CategoryName' (add via Settings)"
+- Falls back to "Other" gracefully
+
+### Cost Economics
+
+- **Week 1**: ~$1 (learning common items)
+- **Month 2**: ~$0.10 (90% cache hits)
+- **Month 6+**: ~$0.01 (99% cache hits)
+
+**Example:**
+- First "Plums" → Claude API ($0.001) → Saved to cache
+- Next "plums" / "PLUMS" / "Plums (honey?)" → Cache hit (FREE)
+
+### User Control
+
+- User manages categories via Settings → Shopping Categories
+- Claude learns ONLY from user's actual categories
+- Unknown suggestions → noted on item, user decides whether to add category
+- Categories fetched from `/api/settings/shopping-categories` (single source of truth)
+
+### Benefits
+
+1. **Cost Efficiency**: API calls decrease exponentially over time
+2. **Speed**: Cache hits are instant
+3. **Consistency**: Same items always get same categories
+4. **Shared Learning**: All users benefit from cached mappings
+5. **User Autonomy**: User controls final category list
+
+---
+
 ## Major Components
 
 **Frontend** (Next.js):

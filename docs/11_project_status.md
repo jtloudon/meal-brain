@@ -1024,6 +1024,116 @@ Users can now reset forgotten passwords via email.
 
 ---
 
+## Latest Updates - 2026-01-07 (Afternoon)
+
+### Grocery List Intelligence & UX Improvements - COMPLETE ✅
+
+**Major enhancements to grocery list management with AI categorization:**
+
+#### 1. Claude Auto-Categorization System
+**Problem:** Items defaulted to "Other" or required manual categorization
+
+**Solution:**
+- New API endpoint: `/api/grocery/categorize`
+- Three-step intelligent flow:
+  1. Check `category_mappings` cache (free, instant)
+  2. If cache miss → Call Claude Haiku API (~$0.001 per item)
+  3. Save result to cache for future use
+- Auto-runs when adding items without categories
+- Validates suggestions against user's actual categories
+- Unknown categories → Adds note: "AI suggested: 'CategoryName' (add via Settings)"
+- Falls back to "Other" gracefully
+
+**Database Schema:**
+- New table: `category_mappings`
+  - Caches learned categorizations
+  - Shared across all users (universal food knowledge)
+  - Tracks usage statistics (times_used, last_used_at)
+- Functions:
+  - `normalize_item_name()` - Handles variations ("Plums" = "plums" = "PLUMS (honey?)")
+  - `get_suggested_category()` - Checks cache, updates stats
+  - `save_category_mapping()` - Stores learned mappings
+
+**Cost Economics:**
+- Week 1: ~$1 (learning common items)
+- Month 2: ~$0.10 (90% cache hits)
+- Month 6+: ~$0.01 (99% cache hits)
+- Example: First "Plums" → Claude API → Saved. Next "plums" → Cache hit (free!)
+
+**Migration:** `20260107200000_add_notes_and_category_learning.sql`
+
+#### 2. Notes Field for Grocery Items
+**Problem:** No way to add custom notes/reminders for items
+
+**Solution:**
+- Added `notes TEXT` column to `grocery_items`
+- Edit form: Textarea for custom notes (e.g., "check expiration date")
+- List view: Notes display inline with recipe source
+- Format: "Recipe Name • check expiration..." (truncated to 40 chars)
+- Styling: Italic gray text with ellipsis for overflow
+
+#### 3. Optional Units
+**Problem:** "whole" unit shown for everything, even when inappropriate
+
+**Solution:**
+- Unit field now optional (empty string = no unit displayed)
+- Dropdown: Added blank option "(none)" at top
+- Display: "2 Plums" (no unit) vs "1 lb Chicken"
+- Added units: jar, bottle, bag, box, dozen
+- Backend: Stores empty string (not NULL) for cleaner queries
+
+#### 4. UX Improvements
+**No Strikethrough:**
+- Removed strikethrough styling from checked items
+- Makes sense since checked = ready to delete/copy (not "done")
+
+**"Delete Checked" (was "Clear Checked"):**
+- Renamed for clarity (delete vs clear all checkmarks)
+- Updated button, modal title, confirmation text
+
+**Alphabetical Sorting:**
+- Items sorted A-Z by name within each category
+- Case-insensitive locale comparison
+- Makes finding items in large lists much easier
+- Example: Easy to find "Butter" in Dairy section
+
+**Sticky Headers:**
+- List name + Check All → Sticky at top (zIndex: 20)
+- Action buttons row → Sticky below header (zIndex: 10, top: 72px)
+- Maintains context while scrolling long lists
+- Subtle shadow for depth
+
+#### 5. Bulk List Operations
+**Check All:**
+- Checkbox in list header (next to list name)
+- Toggles all items checked/unchecked at once
+- Updates all items in database
+
+**Copy to... :**
+- New button in action row (4 buttons now)
+- Enabled only when items are checked
+- Opens modal showing other lists
+- Copies checked items to selected list (unchecked state)
+- Source items auto-uncheck after copy
+- Green success message appears for 3 seconds
+
+**Workflow:** Master list = permanent catalog → Copy to Active for this week → After shopping: Check All → Delete Checked
+
+**Files Modified:**
+- `app/groceries/page.tsx` - UI improvements, sorting, sticky headers
+- `app/api/grocery/categorize/route.ts` - NEW - Claude categorization
+- `app/api/grocery/items/route.ts` - Auto-categorize on item add
+- `supabase/migrations/20260107200000_add_notes_and_category_learning.sql`
+
+**Status:**
+- ✅ AI categorization learning over time
+- ✅ Notes field fully functional
+- ✅ Optional units working
+- ✅ UX improvements deployed
+- ✅ Bulk operations complete
+
+---
+
 ## Latest Updates - 2026-01-04 (Evening)
 
 ### Quantity Range Support - COMPLETE ✅

@@ -837,6 +837,19 @@ See `docs/17_dev_login_blocker.md` for details.
 - ✅ **Database Migration** - household_invites tables and RLS policies
 - ✅ **RLS Fix** - Public access policy for invite validation (anon users)
 
+### Grocery List Intelligence & UX (Afternoon)
+- ✅ **Claude Auto-Categorization** - AI-powered category suggestions with learning cache
+- ✅ **Category Mappings Table** - Caches learned categorizations, reduces API costs over time
+- ✅ **Notes Field** - Custom notes for items (e.g., "check expiration date")
+- ✅ **Optional Units** - Blank unit option, displays "2 Plums" instead of "2 whole Plums"
+- ✅ **No Strikethrough** - Removed strikethrough from checked items (cleaner UI)
+- ✅ **"Delete Checked" Rename** - Clearer than "Clear Checked"
+- ✅ **Alphabetical Sorting** - Items sorted A-Z within each category
+- ✅ **Sticky Headers** - List name and action buttons stay visible on scroll
+- ✅ **Check All** - Checkbox in header to toggle all items at once
+- ✅ **Copy to...** - Bulk copy checked items between lists
+- ✅ **Unknown Category Handling** - AI suggestions validated, added to notes if category doesn't exist
+
 ---
 
 ### Version History
