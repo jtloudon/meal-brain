@@ -114,7 +114,6 @@ function PlannerContent() {
         setEditRecipeId(recipeId);
         setEditDate(date || formatDate(new Date()));
         setEditMealType('dinner');
-        setEditServingSize(4);
         setEditNotes('');
         setShowEditModal(true);
       });
