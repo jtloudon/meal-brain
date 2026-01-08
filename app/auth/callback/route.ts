@@ -133,5 +133,80 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${requestUrl.origin}/recipes`);
   }
 
+  // No PKCE code - check if this is a password signup with invite code
+  if (inviteCode) {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      console.log('[CALLBACK ROUTE] Password signup detected with invite:', inviteCode);
+
+      // Check if user already has household
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('household_id')
+        .eq('id', user.id)
+        .single();
+
+      // If no household, process invite
+      if (!userRecord || !userRecord.household_id) {
+        const serviceClient = createServiceClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        try {
+          const { data: householdId, error: inviteError } = await serviceClient.rpc('use_invite_code', {
+            code: inviteCode.toUpperCase(),
+            user_id: user.id,
+          });
+
+          if (inviteError) {
+            console.error('[CALLBACK ROUTE] Invite error:', inviteError);
+            return NextResponse.redirect(`${requestUrl.origin}/onboarding?error=invalid_invite`);
+          }
+
+          // Create/update user record with household_id
+          const { error: upsertError } = await serviceClient.from('users').upsert({
+            id: user.id,
+            email: user.email,
+            household_id: householdId,
+          });
+
+          if (upsertError) {
+            console.error('[CALLBACK ROUTE] User upsert error:', upsertError);
+            return NextResponse.redirect(`${requestUrl.origin}/onboarding?error=join_failed`);
+          }
+
+          console.log('[CALLBACK ROUTE] Successfully joined household:', householdId);
+          return NextResponse.redirect(`${requestUrl.origin}/recipes`);
+        } catch (err) {
+          console.error('[CALLBACK ROUTE] Auto-join exception:', err);
+          return NextResponse.redirect(`${requestUrl.origin}/onboarding?error=unexpected`);
+        }
+      }
+
+      // User already has household
+      return NextResponse.redirect(`${requestUrl.origin}/recipes`);
+    }
+  }
+
   return NextResponse.redirect(`${requestUrl.origin}/login`);
 }
