@@ -7,6 +7,29 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Check, Plus, Pencil, ChevronDown, Trash2, Star } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
+// Centralized list of units - single source of truth
+const GROCERY_UNITS = [
+  'whole',
+  'lb',
+  'oz',
+  'cup',
+  'tbsp',
+  'tsp',
+  'g',
+  'kg',
+  'ml',
+  'l',
+  'can',
+  'package',
+  'jar',
+  'bottle',
+  'bag',
+  'box',
+  'bunch',
+  'tub',
+  'dozen',
+] as const;
+
 interface GroceryItem {
   id: string;
   display_name: string;
@@ -835,25 +858,9 @@ export default function GroceriesPage() {
                   outline: 'none'
                 }}
               >
-                <option value="whole">whole</option>
-                <option value="lb">lb</option>
-                <option value="oz">oz</option>
-                <option value="cup">cup</option>
-                <option value="tbsp">tbsp</option>
-                <option value="tsp">tsp</option>
-                <option value="g">g</option>
-                <option value="kg">kg</option>
-                <option value="ml">ml</option>
-                <option value="l">l</option>
-                <option value="can">can</option>
-                <option value="package">package</option>
-                <option value="jar">jar</option>
-                <option value="bottle">bottle</option>
-                <option value="bag">bag</option>
-                <option value="box">box</option>
-                <option value="bunch">bunch</option>
-                <option value="tub">tub</option>
-                <option value="dozen">dozen</option>
+                {GROCERY_UNITS.map((unit) => (
+                  <option key={unit} value={unit}>{unit}</option>
+                ))}
               </select>
             </div>
 
@@ -1302,25 +1309,9 @@ export default function GroceriesPage() {
                     onChange={(e) => setNewItemUnit(e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="whole">whole</option>
-                    <option value="lb">lb</option>
-                    <option value="oz">oz</option>
-                    <option value="cup">cup</option>
-                    <option value="tbsp">tbsp</option>
-                    <option value="tsp">tsp</option>
-                    <option value="g">g</option>
-                    <option value="kg">kg</option>
-                    <option value="ml">ml</option>
-                    <option value="l">l</option>
-                    <option value="can">can</option>
-                    <option value="package">package</option>
-                    <option value="jar">jar</option>
-                    <option value="bottle">bottle</option>
-                    <option value="bag">bag</option>
-                    <option value="box">box</option>
-                    <option value="bunch">bunch</option>
-                    <option value="tub">tub</option>
-                    <option value="dozen">dozen</option>
+                    {GROCERY_UNITS.map((unit) => (
+                      <option key={unit} value={unit}>{unit}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1455,25 +1446,9 @@ export default function GroceriesPage() {
                     }}
                   >
                     <option value="">(none)</option>
-                    <option value="whole">whole</option>
-                    <option value="lb">lb</option>
-                    <option value="oz">oz</option>
-                    <option value="cup">cup</option>
-                    <option value="tbsp">tbsp</option>
-                    <option value="tsp">tsp</option>
-                    <option value="g">g</option>
-                    <option value="kg">kg</option>
-                    <option value="ml">ml</option>
-                    <option value="l">l</option>
-                    <option value="can">can</option>
-                    <option value="package">package</option>
-                    <option value="jar">jar</option>
-                    <option value="bottle">bottle</option>
-                    <option value="bag">bag</option>
-                    <option value="box">box</option>
-                    <option value="bunch">bunch</option>
-                    <option value="tub">tub</option>
-                    <option value="dozen">dozen</option>
+                    {GROCERY_UNITS.map((unit) => (
+                      <option key={unit} value={unit}>{unit}</option>
+                    ))}
                   </select>
                 </div>
               </div>
