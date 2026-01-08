@@ -56,16 +56,17 @@ export default function PasswordSettingsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="sticky top-0 bg-white border-b border-gray-200 z-10">
+      {/* Header - Orange bar */}
+      <header className="sticky top-0 bg-[#f97316] z-10">
         <div className="flex items-center px-4 py-3">
           <button
             onClick={() => router.back()}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-white hover:text-white/80"
+            style={{ fontSize: '14px', fontWeight: '500' }}
           >
             ← Back
           </button>
-          <h1 className="flex-1 text-center text-lg font-semibold">Set Password</h1>
+          <h1 className="flex-1 text-center text-lg font-semibold text-white">Set Password</h1>
           <div style={{ width: '60px' }} /> {/* Spacer for centering */}
         </div>
       </header>
@@ -73,9 +74,9 @@ export default function PasswordSettingsPage() {
       {/* Content */}
       <div className="p-6 max-w-md mx-auto">
         <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2">Enable Password Login</h2>
+          <h2 className="text-xl font-bold mb-2 text-gray-900">Enable Password Login</h2>
           <p className="text-gray-600 text-sm">
-            Set a password to login directly from the standalone app without using magic links.
+            Set a password to login directly without using magic links.
           </p>
         </div>
 
@@ -92,8 +93,9 @@ export default function PasswordSettingsPage() {
               required
               minLength={8}
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent disabled:opacity-50"
               placeholder="At least 8 characters"
+              style={{ borderRadius: '9999px' }}
             />
           </div>
 
@@ -109,8 +111,9 @@ export default function PasswordSettingsPage() {
               required
               minLength={8}
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent disabled:opacity-50"
               placeholder="Re-enter password"
+              style={{ borderRadius: '9999px' }}
             />
           </div>
 
@@ -129,19 +132,20 @@ export default function PasswordSettingsPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#f97316] text-white py-3 font-medium hover:bg-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ borderRadius: '9999px' }}
           >
             {loading ? 'Setting Password...' : 'Set Password'}
           </button>
         </form>
 
         <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-          <h3 className="font-semibold text-sm mb-2">How to use password login:</h3>
+          <h3 className="font-semibold text-sm mb-2 text-gray-900">How to use password login:</h3>
           <ol className="text-sm text-gray-700 space-y-1 list-decimal list-inside">
             <li>Set your password here</li>
             <li>On the login page, click "Sign in with password"</li>
             <li>Enter your email and password</li>
-            <li>Works great for standalone app!</li>
+            <li>Works great for the app!</li>
           </ol>
         </div>
       </div>

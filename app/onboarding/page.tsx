@@ -66,9 +66,10 @@ function OnboardingContent() {
     e.preventDefault();
     setLoading(true);
 
-    // Redirect to login page with invite code in URL
+    // Redirect to signup page with invite code in URL
+    // Password-based signup avoids Safari iOS PKCE issues with magic links
     // After authentication, auth callback will check for invite code and auto-join
-    router.push(`/login?invite=${inviteCode}`);
+    router.push(`/signup?invite=${inviteCode}`);
   };
 
   return (

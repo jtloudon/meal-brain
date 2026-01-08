@@ -53,6 +53,22 @@ Optional later:
   - **Password Reset**: Supabase `resetPasswordForEmail()` → `/settings/password`
   - **Invitation System**: Household invite codes for controlled access (see Security section)
 
+  - **Safari iOS PKCE Issue (Added 2026-01-07)**:
+    - **Problem**: Magic links fail on Safari iOS for new users
+      - Safari's "Prevent Cross-Site Tracking" blocks cross-site cookies during first auth
+      - Mail app opens links in Safari View Controller (isolated from Safari browser cookies)
+      - PKCE code verifier cannot be retrieved → authentication fails
+    - **Solution**: Password-based signup for invited users
+      - New page: `/signup` with password creation form
+      - Invite flow: onboarding → signup (with invite) → direct auth → callback → auto-join
+      - No email redirect, no PKCE cross-context issue
+      - Styled to match login page (orange background, pill inputs, brand consistency)
+    - **Why Not Fix PKCE?**: No reliable way to share storage between Safari contexts on iOS
+    - **Magic Links Still Work For**:
+      - Existing users (established sessions, middleware refresh)
+      - Desktop browsers (no cross-context issues)
+      - Password reset (handled separately if needed)
+
 **AI Orchestrator**:
 - **Decision**: Vercel API Routes (chosen over Supabase Edge Functions)
 - **Location**: `/app/api/agent/route.ts`
