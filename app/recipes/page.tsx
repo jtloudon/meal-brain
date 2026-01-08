@@ -125,6 +125,7 @@ export default function RecipesPage() {
 
       const base64Data = await base64Promise;
       console.log('[Import] Original size:', importFile.size, 'Compressed size:', compressedFile.size);
+      console.log('[Import] Original type:', importFile.type, 'Compressed type:', compressedFile.type);
 
       // Call import-file API
       const response = await fetch('/api/recipes/import-file', {
@@ -132,7 +133,7 @@ export default function RecipesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fileData: base64Data,
-          mimeType: importFile.type,
+          mimeType: compressedFile.type, // Use compressed file's type (JPEG), not original
           fileName: importFile.name,
         }),
       });
