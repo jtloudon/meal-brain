@@ -835,10 +835,10 @@ export default function GroceriesPage() {
                   });
                 }}
                 style={{
-                  width: '16px',
-                  height: '16px',
-                  borderRadius: '3px',
-                  border: '1.5px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '4px',
+                  border: '2px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
                   backgroundColor: items.every(item => item.checked) ? '#9ca3af' : 'white',
                   display: 'flex',
                   alignItems: 'center',
@@ -848,7 +848,7 @@ export default function GroceriesPage() {
                 }}
               >
                 {items.every(item => item.checked) && (
-                  <Check size={12} style={{ color: 'white', strokeWidth: 3 }} />
+                  <Check size={14} style={{ color: 'white', strokeWidth: 3.5 }} />
                 )}
               </button>
               <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '400' }}>
@@ -1039,8 +1039,8 @@ export default function GroceriesPage() {
                           onClick={() => toggleOutOfStock(item.id, item.out_of_stock || false)}
                           style={{
                             flexShrink: 0,
-                            width: '20px',
-                            height: '20px',
+                            width: '24px',
+                            height: '24px',
                             borderRadius: '3px',
                             border: 'none',
                             backgroundColor: 'transparent',
@@ -1049,15 +1049,16 @@ export default function GroceriesPage() {
                             justifyContent: 'center',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
-                            marginTop: '1px'
+                            marginTop: '0px',
+                            padding: '2px'
                           }}
                           aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
                         >
                           <ThumbsDown
                             fill={item.out_of_stock ? '#ef4444' : '#d1d5db'}
                             style={{
-                              width: '18px',
-                              height: '18px',
+                              width: '20px',
+                              height: '20px',
                               color: item.out_of_stock ? '#ef4444' : '#d1d5db',
                               strokeWidth: 0,
                               transition: 'all 0.2s'

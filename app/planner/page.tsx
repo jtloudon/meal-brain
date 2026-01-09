@@ -964,17 +964,22 @@ function PlannerContent() {
               </button>
             </div>
 
-            {/* Content */}
-            <div style={{ padding: '0 16px 16px 16px', overflowY: 'auto', height: 'calc(100vh - 70px)' }}>
+            {/* Content - scrollable area */}
+            <div style={{
+              padding: '0 16px 20px 16px',
+              overflowY: 'auto',
+              height: 'calc(100vh - 70px)',
+              WebkitOverflowScrolling: 'touch'
+            }}>
               {/* Date */}
-              <div style={{ marginBottom: '12px' }}>
+              <div style={{ marginBottom: '10px' }}>
                 <input
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
                   style={{
                     width: 'calc(50% - 4px)',
-                    padding: '12px',
+                    padding: '8px 12px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '16px',
@@ -985,8 +990,8 @@ function PlannerContent() {
               </div>
 
               {/* Meal Type */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '6px' }}>
                   Meal
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
@@ -1022,8 +1027,8 @@ function PlannerContent() {
               </div>
 
               {/* Mode Toggle: Recipe or Custom Item */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '6px' }}>
                   Type
                 </label>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -1064,8 +1069,8 @@ function PlannerContent() {
 
               {/* Recipe Picker (shown only in recipe mode) */}
               {editMode === 'recipe' && (
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '6px' }}>
                     Recipe
                   </label>
                 <div
@@ -1137,8 +1142,8 @@ function PlannerContent() {
               {/* Custom Item Fields (shown only in custom mode) */}
               {editMode === 'custom' && (
                 <>
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                  <div style={{ marginBottom: '10px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '6px' }}>
                       Item Name
                     </label>
                     <input
@@ -1157,8 +1162,8 @@ function PlannerContent() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                  <div style={{ marginBottom: '10px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '6px' }}>
                       Item Type
                     </label>
                     <select
@@ -1183,23 +1188,24 @@ function PlannerContent() {
               )}
 
               {/* Notes */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '6px' }}>
                   Notes
                 </label>
                 <textarea
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
                   placeholder="Add notes (optional)"
-                  rows={3}
+                  rows={2}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    padding: '10px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '16px',
                     outline: 'none',
-                    resize: 'vertical'
+                    resize: 'vertical',
+                    minHeight: '60px'
                   }}
                 />
               </div>
@@ -1210,7 +1216,8 @@ function PlannerContent() {
                   onClick={() => router.push(`/recipes/${selectedRecipe.id}`)}
                   style={{
                     width: '100%',
-                    padding: '8px',
+                    padding: '10px',
+                    marginTop: '8px',
                     marginBottom: '8px',
                     border: 'none',
                     borderRadius: '8px',
@@ -1232,8 +1239,9 @@ function PlannerContent() {
                   disabled={saving}
                   style={{
                     width: '100%',
-                    padding: '8px',
-                    marginBottom: '16px',
+                    padding: '10px',
+                    marginTop: selectedRecipe ? '0' : '8px',
+                    marginBottom: '40px',
                     border: 'none',
                     borderRadius: '8px',
                     backgroundColor: '#fef2f2',
