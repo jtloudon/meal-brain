@@ -53,7 +53,7 @@ Optional later:
   - **Password Reset**: Supabase `resetPasswordForEmail()` → `/settings/password`
   - **Invitation System**: Household invite codes for controlled access (see Security section)
 
-  - **Safari iOS PKCE Issue (Added 2026-01-07)**:
+  - **Safari iOS PKCE Issue (Added 2026-01-07, Fixed 2026-01-09)**:
     - **Problem**: Magic links fail on Safari iOS for new users
       - Safari's "Prevent Cross-Site Tracking" blocks cross-site cookies during first auth
       - Mail app opens links in Safari View Controller (isolated from Safari browser cookies)
@@ -68,6 +68,28 @@ Optional later:
       - Existing users (established sessions, middleware refresh)
       - Desktop browsers (no cross-context issues)
       - Password reset (handled separately if needed)
+
+  - **Email Confirmation + Invite Code Persistence (Added 2026-01-09)**:
+    - **Problem**: Email confirmations enabled in production → Safari opens link in new tab → PKCE fails → invite code lost
+    - **Solution**: Dual-storage strategy for invite codes
+      1. **User Metadata Storage**: Invite code saved to `user.user_metadata.invite_code` during signup
+         - Persists in Supabase auth.users table
+         - Survives email confirmation, PKCE failures, new tabs
+         - Backup if URL parameter lost
+      2. **URL Parameter Preservation**: When PKCE fails, redirect to `/login?invite=XXX` (not just `/login`)
+         - Login page sees invite code → passes to callback after successful auth
+         - Primary flow for invite processing
+      3. **Callback Fallback**: Auth callback checks URL first, then user metadata
+         - Handles both successful PKCE and manual login scenarios
+    - **Security**: Email confirmations stay enabled (prevents DDOS), invite codes still required for household access
+    - **User Flow**:
+      - Click invite link → validate code → signup with email/password
+      - Invite code stored in metadata + URL parameter
+      - Receive email confirmation → click link → Safari opens new tab
+      - PKCE fails → redirect to `/login?invite=XXX`
+      - Enter password → login redirects to `/auth/callback?invite=XXX`
+      - Callback processes invite (from URL or metadata) → joins household
+    - **Files**: `app/signup/page.tsx` (metadata storage), `app/auth/callback/route.ts` (dual check + URL preservation)
 
 **AI Orchestrator**:
 - **Decision**: Vercel API Routes (chosen over Supabase Edge Functions)
@@ -286,6 +308,58 @@ household_invite_uses (
 - Interaction: Tap to expand chat panel from bottom
 - Visual: Same orange branding, slides over content
 - Purpose: AI assistant for meal planning, recipe suggestions, grocery help
+
+---
+
+## Grocery List UX Architecture (Added 2026-01-09)
+
+### Out-of-Stock Marking System
+**Problem:** Users need to distinguish between "in cart" (ready to check out) vs "out of stock" (store doesn't have it).
+
+**Solution:** Dual-state item tracking with visual icons.
+
+**UI Design:**
+- **In Cart**: Orange checkbox (20px) next to item
+- **Out of Stock**: Filled thumbs-down icon (20px, gray default, red when marked)
+  - Always visible (not just when marked)
+  - Filled icon for better mobile visibility
+  - Color changes: Gray (#d1d5db) → Red (#ef4444)
+
+**Database:**
+- `grocery_items.out_of_stock` BOOLEAN column
+- Separate from `checked` state
+- Indexed for query performance
+
+### Mobile-First Density Optimizations
+**Goal:** Match iOS native app density (e.g., iOS Mail reference design)
+
+**Header Spacing:**
+- Reduced header padding from py-3 (12px) to py-2 (8px)
+- Removed all top padding from list name area
+- Sticky headers with minimal padding (4px)
+
+**Edit Meal Modal:**
+- Reduced date input padding from 12px to 8px
+- Date input width: 50% (matches meal type button grid)
+- All section margins: 12px → 10px
+- All label margins: 8px → 6px
+- Notes textarea: 3 rows → 2 rows with minHeight 60px
+- Delete button: 40px bottom margin for scroll accessibility
+- Fixed scroll issue: maxHeight → height + WebkitOverflowScrolling
+
+**Grocery List Enhancements:**
+- **Select All**: Positioned below action buttons, iOS Mail style
+  - 18px checkbox with 2px border
+  - 14px checkmark with 3.5 strokeWidth for visibility
+  - 11px gray text (#9ca3af)
+- **Thumbs Down Icon**: 24px container, 20px filled icon (matches checkbox height)
+- **Minimal whitespace**: Zero padding at list name, reduced throughout
+
+**Design Philosophy:**
+- Every pixel matters on mobile
+- Actions visible without scrolling
+- iOS-native feel and density
+- Accessible touch targets (44x44px minimum for buttons)
 
 ---
 

@@ -10,7 +10,7 @@ All implementation, planning, and AI behavior should align with this reality.
 **Status:** Phase 5 Production Security - FUNCTIONAL ✅ (Invitation-Only Access)
 **Code exists:** Infrastructure + pure functions + database + **All Tools (Read + Write)** + Working Auth Flow (Magic Link + Password Reset + Dev-Login) + **Recipe UI (Full CRUD)** + **Meal Planner (Apple Calendar Style + Add/Edit Modal + AI Integration)** + **Grocery List (Full CRUD + Rename + Delete + Clear Checked)** + **Settings (Preferences + Shopping Categories + Invite Members + Password Reset)** + **Action Buttons (All Working)** + **Splash Screen** + **Branded Login** + **Orange Navigation** + **Floating AI Button (Chef's Hat FAB)** + **User Onboarding (6-step preferences flow + Invite Code Validation)** + **Seed Data (Example recipes + Default list)** + **AI Chat Panel (Full-Featured - Floating design, white AI bubbles, batch approval for write ops, real-time calendar refresh, date context awareness, HTML entity decoding, recipe linkification, New Chat button)** + **Invitation System (Household invite codes, expiration, usage tracking)**
 **Phase:** Phase 1 ✅ → Phase 2 ✅ → Phase 3 ✅ → Phase 4 (AI Integration) ✅ → **Phase 5 (Production Security) - COMPLETE** ✅
-**Last Updated:** 2026-01-07 (Morning - Invitation system + Password reset + PWA session persistence)
+**Last Updated:** 2026-01-09 (Email confirmation + invite code persistence fix)
 
 ---
 
@@ -1197,4 +1197,76 @@ Recipe ingredients now support quantity ranges (e.g., "1-2 salmon fillets")
 - Add grocery items with ranges
 - Search UI behavior
 - Bottom nav fixed position
+
+---
+
+## Latest Updates - 2026-01-09
+
+### Email Confirmation + Invite Code Persistence - COMPLETE ✅
+
+**Problem Identified:**
+When email confirmations are enabled in production Supabase, invited users couldn't complete onboarding:
+- Safari iOS opens email confirmation links in new tab (Mail app → Safari View Controller)
+- PKCE code verifier lost in tab switch
+- Invite code parameter disappeared during auth failure redirect
+- User lands on `/login` with no context → joins no household → sees no data
+
+**Root Cause:**
+Two separate issues compounded:
+1. **PKCE Failure**: Safari tab switching breaks PKCE flow (expected, documented)
+2. **Invite Code Loss**: When PKCE failed, callback redirected to `/login` without preserving `?invite=XXX` parameter
+
+**Solution Implemented:**
+Dual-storage strategy ensures invite codes survive all failure scenarios:
+
+1. **User Metadata Storage** (`app/signup/page.tsx:53-54`):
+   - Invite code saved to `user.user_metadata.invite_code` during signup
+   - Persists in Supabase `auth.users` table permanently
+   - Survives: email confirmation, PKCE failures, new tabs, browser switches
+   - Backup mechanism if URL parameters lost
+
+2. **URL Parameter Preservation** (`app/auth/callback/route.ts:46-49`):
+   - When PKCE fails, redirect to `/login?invite=XXX` (not just `/login`)
+   - Login page detects invite parameter → passes to callback after auth
+   - Primary flow for invite processing
+
+3. **Callback Dual Check** (`app/auth/callback/route.ts:67-71, 168-171`):
+   - Checks URL parameter first: `inviteCode || user.user_metadata?.invite_code`
+   - Falls back to metadata if URL missing
+   - Handles both successful PKCE and manual login paths
+   - Auto-joins household using whichever source available
+
+**User Flow (Working):**
+1. Click invite link → `/onboarding?code=LSP04YME`
+2. Click "Join Household" → `/signup?invite=LSP04YME`
+3. Enter email/password → Invite stored in **both** metadata and URL
+4. Receive confirmation email → Click link
+5. Safari opens in new tab → PKCE fails (expected)
+6. Redirect to `/login?invite=LSP04YME` ✅ (invite preserved)
+7. Enter password → Login redirects to `/auth/callback?invite=LSP04YME`
+8. Callback finds invite (URL **or** metadata) → Joins household ✅
+9. User sees recipes, grocery lists, all household data ✅
+
+**Security Maintained:**
+- ✅ Email confirmations stay enabled (prevents DDOS/spam accounts)
+- ✅ Invite codes still required for household access
+- ✅ No exposure to external actors (invite-only system intact)
+
+**Testing:**
+- Tested clean onboarding flow with spouse's account
+- Confirmed household join successful
+- Verified recipe visibility and data access
+- Production deployment tested on real devices
+
+**Files Modified:**
+- `app/signup/page.tsx` - Added `data: { invite_code }` to signup options
+- `app/auth/callback/route.ts` - Dual invite check (URL + metadata) + preserve invite in login redirect
+- `docs/01_architecture.md` - Documented email confirmation persistence solution
+- `docs/11_project_status.md` - Added this completion note
+
+**Status:**
+- ✅ Onboarding flow works end-to-end with email confirmations
+- ✅ Invite codes persist through all failure scenarios
+- ✅ Production-ready for spouse and future household members
+- ✅ Safe against DDOS (email confirmations + invite codes)
 
