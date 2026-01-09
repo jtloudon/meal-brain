@@ -744,16 +744,18 @@ export default function RecipeDetailPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {group.ingredients.map((ingredient) => {
               const effectiveServings = getEffectiveServings();
-              const displayMin = adjustedServings !== null
-                ? scaleQuantity(ingredient.quantity_min, baseServings, effectiveServings)
+              // Calculate scaled numeric values first
+              const scaledMin = adjustedServings !== null
+                ? (ingredient.quantity_min * effectiveServings) / baseServings
                 : ingredient.quantity_min;
-              const displayMax = ingredient.quantity_max && adjustedServings !== null
-                ? scaleQuantity(ingredient.quantity_max, baseServings, effectiveServings)
+              const scaledMax = ingredient.quantity_max && adjustedServings !== null
+                ? (ingredient.quantity_max * effectiveServings) / baseServings
                 : ingredient.quantity_max;
-              const displayQuantity = formatQuantity(
-                typeof displayMin === 'string' ? parseFloat(displayMin) : displayMin,
-                displayMax ? (typeof displayMax === 'string' ? parseFloat(displayMax) : displayMax) : null
-              );
+
+              // Format quantities for display (handles fractions)
+              const displayQuantity = adjustedServings !== null
+                ? formatQuantity(scaledMin, scaledMax)
+                : formatQuantity(ingredient.quantity_min, ingredient.quantity_max);
 
               return (
                 <p key={ingredient.id} style={{ color: '#111827', lineHeight: '1.5', fontSize: '16px', margin: 0 }}>
