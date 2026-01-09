@@ -662,13 +662,13 @@ export default function GroceriesPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: '8px',
+            marginBottom: '4px',
             position: 'sticky',
             top: 0,
             backgroundColor: 'white',
             zIndex: 20,
-            paddingTop: '4px',
-            paddingBottom: '4px',
+            paddingTop: '0',
+            paddingBottom: '0',
             marginLeft: '-16px',
             marginRight: '-16px',
             paddingLeft: '16px',
@@ -723,21 +723,21 @@ export default function GroceriesPage() {
         {/* Pill-shaped action buttons - sticky below list name */}
         <div style={{
           position: 'sticky',
-          top: '52px',
+          top: '48px',
           backgroundColor: 'white',
           zIndex: 10,
           marginLeft: '-16px',
           marginRight: '-16px',
           paddingLeft: '16px',
           paddingRight: '16px',
-          paddingTop: '8px',
-          paddingBottom: '8px'
+          paddingTop: '4px',
+          paddingBottom: '4px'
         }}>
           <div style={{
             display: 'flex',
             gap: '6px',
             justifyContent: 'space-between',
-            marginBottom: '4px'
+            marginBottom: '2px'
           }}>
           <button
             onClick={() => setShowClearCheckedConfirm(true)}
@@ -835,10 +835,10 @@ export default function GroceriesPage() {
                   });
                 }}
                 style={{
-                  width: '14px',
-                  height: '14px',
+                  width: '16px',
+                  height: '16px',
                   borderRadius: '3px',
-                  border: '1px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
+                  border: '1.5px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
                   backgroundColor: items.every(item => item.checked) ? '#9ca3af' : 'white',
                   display: 'flex',
                   alignItems: 'center',
@@ -848,7 +848,7 @@ export default function GroceriesPage() {
                 }}
               >
                 {items.every(item => item.checked) && (
-                  <Check size={10} style={{ color: 'white', strokeWidth: 3 }} />
+                  <Check size={12} style={{ color: 'white', strokeWidth: 3 }} />
                 )}
               </button>
               <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '400' }}>
@@ -1053,13 +1053,16 @@ export default function GroceriesPage() {
                           }}
                           aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
                         >
-                          <ThumbsDown style={{
-                            width: '16px',
-                            height: '16px',
-                            color: item.out_of_stock ? '#ef4444' : '#d1d5db',
-                            strokeWidth: 2,
-                            transition: 'color 0.2s'
-                          }} />
+                          <ThumbsDown
+                            fill={item.out_of_stock ? '#ef4444' : '#d1d5db'}
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              color: item.out_of_stock ? '#ef4444' : '#d1d5db',
+                              strokeWidth: 0,
+                              transition: 'all 0.2s'
+                            }}
+                          />
                         </button>
 
                         {/* Item Details */}

@@ -440,8 +440,8 @@ function PlannerContent() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '16px',
-          paddingTop: '16px'
+          marginBottom: '12px',
+          paddingTop: '4px'
         }}>
           <button
             onClick={prevMonth}
@@ -965,15 +965,15 @@ function PlannerContent() {
             </div>
 
             {/* Content */}
-            <div style={{ padding: '0 16px 16px 16px', overflowY: 'auto', maxHeight: 'calc(100vh - 70px)' }}>
+            <div style={{ padding: '0 16px 16px 16px', overflowY: 'auto', height: 'calc(100vh - 70px)' }}>
               {/* Date */}
-              <div style={{ marginBottom: '16px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <input
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
                   style={{
-                    width: 'auto',
+                    width: 'calc(50% - 4px)',
                     padding: '12px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
@@ -985,7 +985,7 @@ function PlannerContent() {
               </div>
 
               {/* Meal Type */}
-              <div style={{ marginBottom: '16px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
                   Meal
                 </label>
@@ -1022,7 +1022,7 @@ function PlannerContent() {
               </div>
 
               {/* Mode Toggle: Recipe or Custom Item */}
-              <div style={{ marginBottom: '16px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
                   Type
                 </label>
@@ -1064,7 +1064,7 @@ function PlannerContent() {
 
               {/* Recipe Picker (shown only in recipe mode) */}
               {editMode === 'recipe' && (
-                <div style={{ marginBottom: '16px' }}>
+                <div style={{ marginBottom: '12px' }}>
                   <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
                     Recipe
                   </label>
@@ -1137,7 +1137,7 @@ function PlannerContent() {
               {/* Custom Item Fields (shown only in custom mode) */}
               {editMode === 'custom' && (
                 <>
-                  <div style={{ marginBottom: '16px' }}>
+                  <div style={{ marginBottom: '12px' }}>
                     <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
                       Item Name
                     </label>
@@ -1157,7 +1157,7 @@ function PlannerContent() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '16px' }}>
+                  <div style={{ marginBottom: '12px' }}>
                     <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
                       Item Type
                     </label>
@@ -1183,7 +1183,7 @@ function PlannerContent() {
               )}
 
               {/* Notes */}
-              <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
                   Notes
                 </label>
@@ -1211,7 +1211,7 @@ function PlannerContent() {
                   style={{
                     width: '100%',
                     padding: '8px',
-                    marginBottom: '12px',
+                    marginBottom: '8px',
                     border: 'none',
                     borderRadius: '8px',
                     backgroundColor: '#f0f9ff',
@@ -1233,6 +1233,7 @@ function PlannerContent() {
                   style={{
                     width: '100%',
                     padding: '8px',
+                    marginBottom: '16px',
                     border: 'none',
                     borderRadius: '8px',
                     backgroundColor: '#fef2f2',
