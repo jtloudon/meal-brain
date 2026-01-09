@@ -41,7 +41,9 @@ export async function GET(request: NextRequest) {
 
     if (exchangeError) {
       console.error('[CALLBACK ROUTE] Exchange error:', exchangeError);
-      return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_failed`);
+      // PKCE might fail due to Safari tab switching - redirect to login
+      // User metadata will be checked on manual login
+      return NextResponse.redirect(`${requestUrl.origin}/login`);
     }
 
     // Check if user has a household
@@ -61,9 +63,16 @@ export async function GET(request: NextRequest) {
 
     console.log('[CALLBACK ROUTE] User record:', userRecord);
 
+    // Check for invite code in URL or user metadata
+    const inviteCodeToUse = inviteCode || user.user_metadata?.invite_code;
+
+    if (inviteCodeToUse) {
+      console.log('[CALLBACK ROUTE] Invite code found:', inviteCodeToUse, inviteCode ? '(from URL)' : '(from metadata)');
+    }
+
     // If invite code present, auto-join household
-    if (inviteCode && (!userRecord || !userRecord.household_id)) {
-      console.log('[CALLBACK ROUTE] Auto-joining household with invite:', inviteCode);
+    if (inviteCodeToUse && (!userRecord || !userRecord.household_id)) {
+      console.log('[CALLBACK ROUTE] Auto-joining household with invite:', inviteCodeToUse);
 
       const serviceClient = createServiceClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -73,7 +82,7 @@ export async function GET(request: NextRequest) {
       try {
         // Call use_invite_code function to join household
         const { data: householdId, error: inviteError } = await serviceClient.rpc('use_invite_code', {
-          code: inviteCode.toUpperCase(),
+          code: inviteCodeToUse.toUpperCase(),
           user_id: user.id,
         });
 
@@ -133,30 +142,33 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${requestUrl.origin}/recipes`);
   }
 
-  // No PKCE code - check if this is a password signup with invite code
-  if (inviteCode) {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          },
+  // No PKCE code - check if user has session and invite code (URL or metadata)
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
         },
-      }
-    );
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
 
-    const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    if (user) {
-      console.log('[CALLBACK ROUTE] Password signup detected with invite:', inviteCode);
+  if (user) {
+    // Check for invite code in URL or user metadata
+    const inviteCodeToUse = inviteCode || user.user_metadata?.invite_code;
+
+    if (inviteCodeToUse) {
+      console.log('[CALLBACK ROUTE] Invite detected:', inviteCodeToUse, inviteCode ? '(from URL)' : '(from metadata)');
 
       // Check if user already has household
       const { data: userRecord } = await supabase
@@ -174,7 +186,7 @@ export async function GET(request: NextRequest) {
 
         try {
           const { data: householdId, error: inviteError } = await serviceClient.rpc('use_invite_code', {
-            code: inviteCode.toUpperCase(),
+            code: inviteCodeToUse.toUpperCase(),
             user_id: user.id,
           });
 

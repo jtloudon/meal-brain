@@ -50,6 +50,8 @@ function SignupContent() {
         email,
         password,
         options: {
+          // Store invite code in user metadata so it survives email confirmation and PKCE issues
+          data: inviteCode ? { invite_code: inviteCode } : undefined,
           // Redirect to callback with invite code if present
           emailRedirectTo: inviteCode
             ? `${window.location.origin}/auth/callback?invite=${inviteCode}`
