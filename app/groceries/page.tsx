@@ -967,7 +967,12 @@ export default function GroceriesPage() {
                       <div
                         key={item.id}
                         className="flex"
-                        style={{ gap: '12px', alignItems: 'flex-start', paddingTop: '14px', paddingBottom: '14px' }}
+                        style={{
+                          gap: '12px',
+                          alignItems: 'flex-start',
+                          paddingTop: (item.recipes || item.notes) ? '12px' : '8px',
+                          paddingBottom: (item.recipes || item.notes) ? '12px' : '8px'
+                        }}
                       >
                         {/* Checkbox */}
                         <button
