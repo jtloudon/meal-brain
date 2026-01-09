@@ -434,13 +434,14 @@ function PlannerContent() {
       title=""
       action={null}
     >
-      <div style={{ padding: '16px 16px 80px 16px' }}>
+      <div style={{ padding: '0 16px 80px 16px' }}>
         {/* Month Navigation */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '16px'
+          marginBottom: '16px',
+          paddingTop: '16px'
         }}>
           <button
             onClick={prevMonth}
@@ -964,23 +965,21 @@ function PlannerContent() {
             </div>
 
             {/* Content */}
-            <div style={{ padding: '8px 16px 16px 16px', overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
+            <div style={{ padding: '0 16px 16px 16px', overflowY: 'auto', maxHeight: 'calc(100vh - 70px)' }}>
               {/* Date */}
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-                  Date
-                </label>
                 <input
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
                   style={{
-                    width: '100%',
+                    width: 'auto',
                     padding: '12px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '16px',
-                    outline: 'none'
+                    outline: 'none',
+                    backgroundColor: 'white'
                   }}
                 />
               </div>
@@ -1211,8 +1210,8 @@ function PlannerContent() {
                   onClick={() => router.push(`/recipes/${selectedRecipe.id}`)}
                   style={{
                     width: '100%',
-                    padding: '12px',
-                    marginBottom: '16px',
+                    padding: '8px',
+                    marginBottom: '12px',
                     border: 'none',
                     borderRadius: '8px',
                     backgroundColor: '#f0f9ff',
@@ -1233,7 +1232,7 @@ function PlannerContent() {
                   disabled={saving}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    padding: '8px',
                     border: 'none',
                     borderRadius: '8px',
                     backgroundColor: '#fef2f2',
