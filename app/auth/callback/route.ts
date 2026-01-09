@@ -42,8 +42,11 @@ export async function GET(request: NextRequest) {
     if (exchangeError) {
       console.error('[CALLBACK ROUTE] Exchange error:', exchangeError);
       // PKCE might fail due to Safari tab switching - redirect to login
-      // User metadata will be checked on manual login
-      return NextResponse.redirect(`${requestUrl.origin}/login`);
+      // Preserve invite code in URL so login page can pass it back to callback
+      const loginUrl = inviteCode
+        ? `${requestUrl.origin}/login?invite=${inviteCode}`
+        : `${requestUrl.origin}/login`;
+      return NextResponse.redirect(loginUrl);
     }
 
     // Check if user has a household
