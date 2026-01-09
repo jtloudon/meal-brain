@@ -602,8 +602,7 @@ export default function GroceriesPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '24px',
-            paddingTop: '8px'
+            marginBottom: '16px'
           }}>
             <input
               type="text"
@@ -663,13 +662,13 @@ export default function GroceriesPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: '16px',
+            marginBottom: '8px',
             position: 'sticky',
             top: 0,
             backgroundColor: 'white',
             zIndex: 20,
-            paddingTop: '8px',
-            paddingBottom: '8px',
+            paddingTop: '4px',
+            paddingBottom: '4px',
             marginLeft: '-16px',
             marginRight: '-16px',
             paddingLeft: '16px',
@@ -721,69 +720,25 @@ export default function GroceriesPage() {
           </div>
         )}
 
-        {/* Check All - positioned above action buttons with context */}
-        {items.length > 0 && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: '8px',
-            paddingBottom: '8px'
-          }}>
-            <button
-              onClick={() => {
-                const allChecked = items.every(item => item.checked);
-                const newChecked = !allChecked;
-                setItems(prev => prev.map(item => ({ ...item, checked: newChecked })));
-
-                // Update all items in database
-                items.forEach(async (item) => {
-                  await fetch(`/api/grocery/items/${item.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ checked: newChecked }),
-                  });
-                });
-              }}
-              style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '4px',
-                border: '2px solid ' + (items.every(item => item.checked) ? '#f97316' : '#d1d5db'),
-                backgroundColor: items.every(item => item.checked) ? '#f97316' : 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                flexShrink: 0
-              }}
-            >
-              {items.every(item => item.checked) && (
-                <Check size={16} style={{ color: 'white', strokeWidth: 3 }} />
-              )}
-            </button>
-            <span style={{ fontSize: '14px', color: '#6b7280', fontWeight: '500' }}>
-              Select All
-            </span>
-          </div>
-        )}
-
         {/* Pill-shaped action buttons - sticky below list name */}
         <div style={{
-          display: 'flex',
-          gap: '6px',
-          padding: '16px 0',
-          justifyContent: 'space-between',
           position: 'sticky',
-          top: '60px',
+          top: '52px',
           backgroundColor: 'white',
           zIndex: 10,
           marginLeft: '-16px',
           marginRight: '-16px',
           paddingLeft: '16px',
           paddingRight: '16px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+          paddingTop: '8px',
+          paddingBottom: '8px'
         }}>
+          <div style={{
+            display: 'flex',
+            gap: '6px',
+            justifyContent: 'space-between',
+            marginBottom: '4px'
+          }}>
           <button
             onClick={() => setShowClearCheckedConfirm(true)}
             disabled={!items.some(item => item.checked)}
@@ -854,6 +809,53 @@ export default function GroceriesPage() {
           >
             New List
           </button>
+          </div>
+
+          {/* Select All - iOS Mail style, below buttons */}
+          {items.length > 0 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              paddingTop: '2px'
+            }}>
+              <button
+                onClick={() => {
+                  const allChecked = items.every(item => item.checked);
+                  const newChecked = !allChecked;
+                  setItems(prev => prev.map(item => ({ ...item, checked: newChecked })));
+
+                  // Update all items in database
+                  items.forEach(async (item) => {
+                    await fetch(`/api/grocery/items/${item.id}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ checked: newChecked }),
+                    });
+                  });
+                }}
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  borderRadius: '3px',
+                  border: '1px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
+                  backgroundColor: items.every(item => item.checked) ? '#9ca3af' : 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                {items.every(item => item.checked) && (
+                  <Check size={10} style={{ color: 'white', strokeWidth: 3 }} />
+                )}
+              </button>
+              <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '400' }}>
+                Select All
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Inline Add Item Form */}
@@ -1032,7 +1034,7 @@ export default function GroceriesPage() {
                           {item.checked && <Check style={{ width: '14px', height: '14px', color: 'white', strokeWidth: 3 }} />}
                         </button>
 
-                        {/* Out of Stock button */}
+                        {/* Out of Stock button - thumbs down icon */}
                         <button
                           onClick={() => toggleOutOfStock(item.id, item.out_of_stock || false)}
                           style={{
@@ -1040,8 +1042,8 @@ export default function GroceriesPage() {
                             width: '20px',
                             height: '20px',
                             borderRadius: '3px',
-                            border: item.out_of_stock ? 'none' : '1px solid #d1d5db',
-                            backgroundColor: item.out_of_stock ? '#ef4444' : 'transparent',
+                            border: 'none',
+                            backgroundColor: 'transparent',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -1051,7 +1053,13 @@ export default function GroceriesPage() {
                           }}
                           aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
                         >
-                          {item.out_of_stock && <ThumbsDown style={{ width: '12px', height: '12px', color: 'white', strokeWidth: 2.5 }} />}
+                          <ThumbsDown style={{
+                            width: '16px',
+                            height: '16px',
+                            color: item.out_of_stock ? '#ef4444' : '#d1d5db',
+                            strokeWidth: 2,
+                            transition: 'color 0.2s'
+                          }} />
                         </button>
 
                         {/* Item Details */}

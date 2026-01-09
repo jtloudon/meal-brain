@@ -74,7 +74,7 @@ export default function AuthenticatedLayout({
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 bg-white z-40 flex-shrink-0">
-        <div className="flex justify-between items-center px-4 py-3">
+        <div className="flex justify-between items-center px-4 py-2">
           <div style={{ flex: 1 }}>
             {typeof title === 'string' ? (
               <h1 className="text-xl font-bold text-gray-900">{title}</h1>
