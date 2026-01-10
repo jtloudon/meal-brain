@@ -571,7 +571,7 @@ export async function updateRecipe(
     }
 
     // Fetch and return the updated recipe with ingredients
-    const { data: updatedRecipe, error: fetchError } = await supabase
+    const { data: updatedRecipe, error: refetchError } = await supabase
       .from('recipes')
       .select(
         `
@@ -604,7 +604,7 @@ export async function updateRecipe(
       .eq('id', validated.recipe_id)
       .single();
 
-    if (fetchError || !updatedRecipe) {
+    if (refetchError || !updatedRecipe) {
       return {
         success: false,
         error: {
