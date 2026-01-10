@@ -522,11 +522,17 @@ export default function RecipeDetailPage() {
         throw new Error(errorData.error || 'Failed to update serving size');
       }
 
-      // Reload the page to get fresh data with updated quantities
-      window.location.reload();
+      // Get updated recipe data from response
+      const updatedRecipe = await response.json();
+
+      // Update local state (instant visual update)
+      setRecipe(updatedRecipe);
+      setBaseServings(adjustedServings);
+      setAdjustedServings(null);
+      setShowServingSizeModal(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update serving size');
-      console.error('Set permanently error:', err);
+      console.error('Save servings error:', err);
     }
   };
 

@@ -570,11 +570,53 @@ export async function updateRecipe(
       }
     }
 
+    // Fetch and return the updated recipe with ingredients
+    const { data: updatedRecipe, error: fetchError } = await supabase
+      .from('recipes')
+      .select(
+        `
+        id,
+        title,
+        rating,
+        tags,
+        notes,
+        instructions,
+        image_url,
+        source,
+        serving_size,
+        prep_time,
+        cook_time,
+        meal_type,
+        created_at,
+        recipe_ingredients (
+          id,
+          ingredient_id,
+          display_name,
+          quantity_min,
+          quantity_max,
+          unit,
+          prep_state,
+          optional,
+          is_header
+        )
+      `
+      )
+      .eq('id', validated.recipe_id)
+      .single();
+
+    if (fetchError || !updatedRecipe) {
+      return {
+        success: false,
+        error: {
+          type: 'DATABASE_ERROR',
+          message: 'Failed to fetch updated recipe',
+        },
+      };
+    }
+
     return {
       success: true,
-      data: {
-        recipe_id: validated.recipe_id,
-      },
+      data: updatedRecipe,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
