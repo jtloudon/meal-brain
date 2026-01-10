@@ -417,7 +417,7 @@ export async function listRecipes(
 export async function updateRecipe(
   input: UpdateRecipeInput,
   context: ToolContext
-): Promise<ToolResult<{ recipe_id: string }>> {
+): Promise<ToolResult<any>> {
   try {
     // Validate input
     const validated = UpdateRecipeSchema.parse(input);
