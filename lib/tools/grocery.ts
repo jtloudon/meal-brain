@@ -670,6 +670,8 @@ export async function getList(
       prep_state: string | null;
       recipes: { id: string; title: string } | null;
       category: string;
+      notes: string | null;
+      out_of_stock: boolean;
     }>;
   }>
 > {
@@ -698,7 +700,7 @@ export async function getList(
     // Fetch all items in the list with recipe information
     const { data: items, error: itemsError } = await supabase
       .from('grocery_items')
-      .select('id, display_name, quantity, unit, checked, ingredient_id, source_recipe_id, prep_state, category, recipes:source_recipe_id(id, title)')
+      .select('id, display_name, quantity, unit, checked, ingredient_id, source_recipe_id, prep_state, category, notes, out_of_stock, recipes:source_recipe_id(id, title)')
       .eq('grocery_list_id', validated.grocery_list_id)
       .order('created_at', { ascending: true });
 

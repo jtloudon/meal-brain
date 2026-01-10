@@ -790,45 +790,43 @@ export default function GroceriesPage() {
             marginBottom: '2px'
           }}>
           {!lists.find(l => l.id === selectedListId)?.protected && (
-            <>
-              <button
-                onClick={() => setShowClearCheckedConfirm(true)}
-                disabled={!items.some(item => item.checked)}
-                style={{
-                  padding: '6px 10px',
-                  borderRadius: '16px',
-                  border: 'none',
-                  backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
-                  color: items.some(item => item.checked) ? 'white' : '#6b7280',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-                  flex: 1,
-                  minWidth: 0
-                }}
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setShowCopyToModal(true)}
-                disabled={!items.some(item => item.checked)}
-                style={{
-                  padding: '6px 10px',
-                  borderRadius: '16px',
-                  border: 'none',
-                  backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
-                  color: items.some(item => item.checked) ? 'white' : '#6b7280',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-                  flex: 1,
-                  minWidth: 0
-                }}
-              >
-                Copy to...
-              </button>
-            </>
+            <button
+              onClick={() => setShowClearCheckedConfirm(true)}
+              disabled={!items.some(item => item.checked)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '16px',
+                border: 'none',
+                backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+                color: items.some(item => item.checked) ? 'white' : '#6b7280',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+                flex: 1,
+                minWidth: 0
+              }}
+            >
+              Delete
+            </button>
           )}
+          <button
+            onClick={() => setShowCopyToModal(true)}
+            disabled={!items.some(item => item.checked)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '16px',
+              border: 'none',
+              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+              color: items.some(item => item.checked) ? 'white' : '#6b7280',
+              fontSize: '13px',
+              fontWeight: '500',
+              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+              flex: 1,
+              minWidth: 0
+            }}
+          >
+            Copy to...
+          </button>
           <button
             onClick={() => setShowInlineAddForm(!showInlineAddForm)}
             style={{
