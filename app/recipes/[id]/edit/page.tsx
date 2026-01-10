@@ -129,6 +129,7 @@ export default function EditRecipePage() {
           quantity_max: ing.quantity_max,
           unit: ing.unit,
           prep_state: ing.prep_state || undefined,
+          is_header: ing.is_header || false,
         })),
         instructions: data.instructions || undefined,
         tags: data.tags.length > 0 ? data.tags : undefined,
