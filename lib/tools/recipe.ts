@@ -199,8 +199,11 @@ export async function createRecipe(
     }
 
     // Create ingredients
-    // First, ensure canonical ingredients exist in ingredients table
+    // First, ensure canonical ingredients exist in ingredients table (skip headers)
     for (const ingredient of validated.ingredients) {
+      // Skip canonical ingredient creation for headers
+      if (ingredient.is_header) continue;
+
       // Check if ingredient exists
       const { data: existing } = await supabase
         .from('ingredients')
@@ -219,22 +222,30 @@ export async function createRecipe(
     // Now create recipe_ingredients
     const recipeIngredients = await Promise.all(
       validated.ingredients.map(async (ingredient) => {
-        // Get ingredient_id
-        const { data: canonicalIngredient } = await supabase
-          .from('ingredients')
-          .select('id')
-          .eq('canonical_name', ingredient.name.toLowerCase())
-          .single();
+        // Skip ingredient_id lookup for headers
+        const isHeader = ingredient.is_header ?? false;
+        let ingredientId = null;
+
+        if (!isHeader) {
+          // Get ingredient_id for non-headers
+          const { data: canonicalIngredient } = await supabase
+            .from('ingredients')
+            .select('id')
+            .eq('canonical_name', ingredient.name.toLowerCase())
+            .single();
+          ingredientId = canonicalIngredient?.id ?? null;
+        }
 
         return {
           recipe_id: recipe.id,
-          ingredient_id: canonicalIngredient?.id ?? null,
+          ingredient_id: ingredientId,
           display_name: ingredient.name,
           quantity_min: ingredient.quantity_min,
           quantity_max: ingredient.quantity_max ?? null,
           unit: ingredient.unit,
           prep_state: ingredient.prep_state ?? null,
           optional: false,
+          is_header: isHeader,
         };
       })
     );
@@ -494,8 +505,11 @@ export async function updateRecipe(
         };
       }
 
-      // Create canonical ingredients if they don't exist
+      // Create canonical ingredients if they don't exist (skip headers)
       for (const ingredient of validated.ingredients) {
+        // Skip canonical ingredient creation for headers
+        if (ingredient.is_header) continue;
+
         const { data: existing } = await supabase
           .from('ingredients')
           .select('id')
@@ -512,21 +526,29 @@ export async function updateRecipe(
       // Insert new ingredients
       const recipeIngredients = await Promise.all(
         validated.ingredients.map(async (ingredient) => {
-          const { data: canonicalIngredient } = await supabase
-            .from('ingredients')
-            .select('id')
-            .eq('canonical_name', ingredient.name.toLowerCase())
-            .single();
+          // Skip ingredient_id lookup for headers
+          const isHeader = ingredient.is_header ?? false;
+          let ingredientId = null;
+
+          if (!isHeader) {
+            const { data: canonicalIngredient } = await supabase
+              .from('ingredients')
+              .select('id')
+              .eq('canonical_name', ingredient.name.toLowerCase())
+              .single();
+            ingredientId = canonicalIngredient?.id ?? null;
+          }
 
           return {
             recipe_id: validated.recipe_id,
-            ingredient_id: canonicalIngredient?.id ?? null,
+            ingredient_id: ingredientId,
             display_name: ingredient.name,
             quantity_min: ingredient.quantity_min,
             quantity_max: ingredient.quantity_max ?? null,
             unit: ingredient.unit,
             prep_state: ingredient.prep_state ?? null,
             optional: false,
+            is_header: isHeader,
           };
         })
       );

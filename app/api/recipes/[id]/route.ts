@@ -82,7 +82,8 @@ export async function GET(
           quantity_max,
           unit,
           prep_state,
-          optional
+          optional,
+          is_header
         )
       `
       )

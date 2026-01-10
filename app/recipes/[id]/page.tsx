@@ -16,6 +16,7 @@ interface RecipeIngredient {
   unit: string;
   prep_state: string | null;
   optional: boolean;
+  is_header?: boolean;
 }
 
 interface Recipe {
@@ -153,9 +154,13 @@ export default function RecipeDetailPage() {
   };
 
   const handleOpenPushModal = () => {
-    // Initialize all ingredients as selected
+    // Initialize all ingredients as selected (exclude headers)
     if (recipe) {
-      const allIngredientIds = new Set(recipe.recipe_ingredients.map(ing => ing.id));
+      const allIngredientIds = new Set(
+        recipe.recipe_ingredients
+          .filter(ing => !ing.is_header) // Skip section headers
+          .map(ing => ing.id)
+      );
       setSelectedIngredients(allIngredientIds);
       // For 2-list mode: all ingredients start in List A (default list)
       setIngredientsListA(allIngredientIds);
@@ -389,12 +394,31 @@ export default function RecipeDetailPage() {
   const groupIngredientsBySection = () => {
     if (!recipe) return [];
 
-    // Return all ingredients in a single group with no section header
-    // (Section parsing removed to preserve hyphens in ingredient names like "low-sodium")
-    return [{
-      section: null,
-      ingredients: recipe.recipe_ingredients
-    }];
+    const groups: Array<{ section: string | null; ingredients: RecipeIngredient[] }> = [];
+    let currentSection: string | null = null;
+    let currentIngredients: RecipeIngredient[] = [];
+
+    for (const ingredient of recipe.recipe_ingredients) {
+      if (ingredient.is_header) {
+        // Save previous group if it has ingredients
+        if (currentIngredients.length > 0) {
+          groups.push({ section: currentSection, ingredients: currentIngredients });
+        }
+        // Start new section
+        currentSection = ingredient.display_name;
+        currentIngredients = [];
+      } else {
+        // Add ingredient to current section
+        currentIngredients.push(ingredient);
+      }
+    }
+
+    // Add final group
+    if (currentIngredients.length > 0 || groups.length === 0) {
+      groups.push({ section: currentSection, ingredients: currentIngredients });
+    }
+
+    return groups;
   };
 
   const handleOpenServingSizeModal = () => {
@@ -1183,7 +1207,7 @@ export default function RecipeDetailPage() {
                           {!secondGroceryList ? (
                             // Single-list mode: one checkbox column
                             <>
-                              {recipe.recipe_ingredients.map((ingredient) => (
+                              {recipe.recipe_ingredients.filter(ing => !ing.is_header).map((ingredient) => (
                                 <label
                                   key={ingredient.id}
                                   style={{
@@ -1229,7 +1253,7 @@ export default function RecipeDetailPage() {
                                 <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textAlign: 'center' }}>B</div>
                                 <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>Ingredient</div>
                               </div>
-                              {recipe.recipe_ingredients.map((ingredient) => (
+                              {recipe.recipe_ingredients.filter(ing => !ing.is_header).map((ingredient) => (
                                 <div
                                   key={ingredient.id}
                                   style={{
