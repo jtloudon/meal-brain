@@ -252,6 +252,9 @@ export async function createRecipe(
       })
     );
 
+    // Debug logging
+    console.log('[CREATE RECIPE] Inserting ingredients:', JSON.stringify(recipeIngredients, null, 2));
+
     const { error: ingredientsError } = await supabase
       .from('recipe_ingredients')
       .insert(recipeIngredients);
@@ -554,6 +557,9 @@ export async function updateRecipe(
           };
         })
       );
+
+      // Debug logging
+      console.log('[UPDATE RECIPE] Inserting ingredients:', JSON.stringify(recipeIngredients, null, 2));
 
       const { error: ingredientsError } = await supabase
         .from('recipe_ingredients')
