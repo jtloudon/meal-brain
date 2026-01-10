@@ -165,9 +165,9 @@ export default function RecipeFormWithTabs({
         const trimmed = line.trim();
         if (!trimmed) continue;
 
-        // Check if line starts with a number or fraction (has quantity)
-        // Allow digits (0-9) or fraction symbols (⅛¼⅓½⅔¾⅞)
-        if (!/^[\d⅛¼⅓½⅔¾⅞]/.test(trimmed)) {
+        // Check if line starts with a number, fraction, or ** (for section headers)
+        // Allow digits (0-9), fraction symbols (⅛¼⅓½⅔¾⅞), or ** prefix
+        if (!/^[\d⅛¼⅓½⅔¾⅞]/.test(trimmed) && !trimmed.startsWith('**')) {
           failedIngredients.push(trimmed);
         }
       }
@@ -603,7 +603,7 @@ export default function RecipeFormWithTabs({
               borderBottom: '1px solid #e5e7eb',
               margin: 0
             }}>
-              Enter one ingredient per line (e.g., "¼ cup flour" or "2 tbsp vanilla extract")
+              Enter one ingredient per line (e.g., "¼ cup flour" or "2 tbsp vanilla extract"). Use **Section Name for headers.
             </p>
             <textarea
               value={ingredientsText}
