@@ -181,7 +181,15 @@ export default function GroceriesPage() {
   };
 
   const toggleItem = async (itemId: string, currentlyChecked: boolean) => {
+    // Optimistic update - change UI immediately
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, checked: !currentlyChecked } : item
+      )
+    );
+
     try {
+      // Send request in background
       const res = await fetch('/api/grocery/items/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,20 +199,34 @@ export default function GroceriesPage() {
         }),
       });
 
-      if (res.ok) {
-        // Update local state
+      // Revert if request failed
+      if (!res.ok) {
         setItems((prev) =>
           prev.map((item) =>
-            item.id === itemId ? { ...item, checked: !currentlyChecked } : item
+            item.id === itemId ? { ...item, checked: currentlyChecked } : item
           )
         );
+        console.error('Failed to toggle item');
       }
     } catch (error) {
+      // Revert on error
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, checked: currentlyChecked } : item
+        )
+      );
       console.error('Error toggling item:', error);
     }
   };
 
   const toggleOutOfStock = async (itemId: string, currentlyOutOfStock: boolean) => {
+    // Optimistic update - change UI immediately
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, out_of_stock: !currentlyOutOfStock } : item
+      )
+    );
+
     try {
       const res = await fetch(`/api/grocery/items/${itemId}`, {
         method: 'PATCH',
@@ -214,15 +236,22 @@ export default function GroceriesPage() {
         }),
       });
 
-      if (res.ok) {
-        // Update local state
+      // Revert if request failed
+      if (!res.ok) {
         setItems((prev) =>
           prev.map((item) =>
-            item.id === itemId ? { ...item, out_of_stock: !currentlyOutOfStock } : item
+            item.id === itemId ? { ...item, out_of_stock: currentlyOutOfStock } : item
           )
         );
+        console.error('Failed to toggle out of stock');
       }
     } catch (error) {
+      // Revert on error
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, out_of_stock: currentlyOutOfStock } : item
+        )
+      );
       console.error('Error toggling out of stock:', error);
     }
   };
