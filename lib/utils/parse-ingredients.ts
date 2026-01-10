@@ -110,11 +110,26 @@ export interface ParsedIngredient {
   quantity_max: number | null;
   unit: string;
   prep_state?: string;
+  is_header?: boolean;
 }
 
 export function parseIngredientLine(line: string): ParsedIngredient | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
+
+  // Check for section header (** prefix)
+  if (trimmed.startsWith('**')) {
+    const headerName = trimmed.substring(2).trim();
+    if (!headerName) return null;
+
+    return {
+      name: headerName,
+      quantity_min: 0,
+      quantity_max: null,
+      unit: '',
+      is_header: true,
+    };
+  }
 
   // Pattern: [quantity] [unit] [name] [, prep_state]
   // Examples:
@@ -266,9 +281,15 @@ export function ingredientsToText(ingredients: Array<{
   quantity_max: number | null;
   unit: string;
   prep_state?: string | null;
+  is_header?: boolean;
 }>): string {
   return ingredients
     .map((ing) => {
+      // Check if this is a section header
+      if (ing.is_header || (ing.quantity_min === 0 && ing.unit === '')) {
+        return `**${ing.display_name}`;
+      }
+
       let line = '';
 
       // Helper function to format a single quantity value
