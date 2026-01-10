@@ -262,8 +262,11 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
     return null;
   }
 
+  // Strip parenthetical content like (290 g), (8 oz), etc.
+  const cleanName = name.replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim();
+
   return {
-    name,
+    name: cleanName,
     quantity_min,
     quantity_max,
     unit,

@@ -59,10 +59,38 @@ export default function RecipeDetailPage() {
 
   // Helper to format quantity (handles ranges like "1-2")
   const formatQuantity = (min: number, max: number | null): string => {
+    const formatSingleQuantity = (qty: number): string => {
+      const whole = Math.floor(qty);
+      const remainder = qty - whole;
+
+      // Map decimals to unicode fractions
+      const fractionMap: Record<string, string> = {
+        '0.125': '⅛',
+        '0.25': '¼',
+        '0.333': '⅓',
+        '0.5': '½',
+        '0.667': '⅔',
+        '0.75': '¾',
+        '0.875': '⅞',
+      };
+
+      const remainderKey = remainder.toFixed(3);
+      const fractionChar = fractionMap[remainderKey];
+
+      if (fractionChar) {
+        if (whole > 0) {
+          return `${whole} ${fractionChar}`;  // "1 ¼"
+        }
+        return fractionChar;  // "¼"
+      }
+
+      return qty.toString();  // Fallback for non-standard fractions
+    };
+
     if (max !== null && max !== min) {
-      return `${min}-${max}`;
+      return `${formatSingleQuantity(min)}-${formatSingleQuantity(max)}`;
     }
-    return min.toString();
+    return formatSingleQuantity(min);
   };
 
   useEffect(() => {
