@@ -63,28 +63,54 @@ export default function RecipeDetailPage() {
       const whole = Math.floor(qty);
       const remainder = qty - whole;
 
-      // Map decimals to unicode fractions
-      const fractionMap: Record<string, string> = {
-        '0.125': '⅛',
-        '0.25': '¼',
-        '0.333': '⅓',
-        '0.5': '½',
-        '0.667': '⅔',
-        '0.75': '¾',
-        '0.875': '⅞',
-      };
-
-      const remainderKey = remainder.toFixed(3);
-      const fractionChar = fractionMap[remainderKey];
-
-      if (fractionChar) {
-        if (whole > 0) {
-          return `${whole} ${fractionChar}`;  // "1 ¼"
-        }
-        return fractionChar;  // "¼"
+      // If no fractional part, return whole number
+      if (remainder < 0.01) {
+        return whole.toString();
       }
 
-      return qty.toString();  // Fallback for non-standard fractions
+      // Common cooking fractions (in order of preference)
+      const fractions = [
+        { decimal: 0, unicode: '', num: 0, denom: 1 },      // 0
+        { decimal: 0.125, unicode: '⅛', num: 1, denom: 8 },  // 1/8
+        { decimal: 0.167, unicode: '⅙', num: 1, denom: 6 },  // 1/6
+        { decimal: 0.25, unicode: '¼', num: 1, denom: 4 },   // 1/4
+        { decimal: 0.333, unicode: '⅓', num: 1, denom: 3 },  // 1/3
+        { decimal: 0.375, unicode: '⅜', num: 3, denom: 8 },  // 3/8
+        { decimal: 0.5, unicode: '½', num: 1, denom: 2 },    // 1/2
+        { decimal: 0.625, unicode: '⅝', num: 5, denom: 8 },  // 5/8
+        { decimal: 0.667, unicode: '⅔', num: 2, denom: 3 },  // 2/3
+        { decimal: 0.75, unicode: '¾', num: 3, denom: 4 },   // 3/4
+        { decimal: 0.833, unicode: '⅚', num: 5, denom: 6 },  // 5/6
+        { decimal: 0.875, unicode: '⅞', num: 7, denom: 8 },  // 7/8
+      ];
+
+      // Find the closest fraction
+      let closest = fractions[0];
+      let minDiff = Math.abs(remainder - closest.decimal);
+
+      for (const frac of fractions) {
+        const diff = Math.abs(remainder - frac.decimal);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = frac;
+        }
+      }
+
+      // If the closest fraction is essentially 0, just return whole number
+      if (closest.decimal === 0) {
+        return whole.toString();
+      }
+
+      // If the closest fraction is very close to 1, round up to next whole number
+      if (closest.decimal > 0.95) {
+        return (whole + 1).toString();
+      }
+
+      // Return formatted fraction
+      if (whole > 0) {
+        return `${whole} ${closest.unicode}`;  // "1 ¼"
+      }
+      return closest.unicode;  // "¼"
     };
 
     if (max !== null && max !== min) {
