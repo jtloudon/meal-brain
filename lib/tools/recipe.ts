@@ -55,10 +55,11 @@ export const CreateRecipeSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1, 'Ingredient name is required'),
-        quantity_min: z.number().positive('Quantity must be positive'),
+        quantity_min: z.number().nonnegative('Quantity cannot be negative'),
         quantity_max: z.number().positive().nullable().optional(),
         unit: z.enum(VALID_UNITS).or(z.literal('')), // Allow empty string for unitless ingredients
         prep_state: z.string().optional(),
+        is_header: z.boolean().optional(),
       })
     )
     .min(1, 'At least one ingredient is required'),
@@ -104,10 +105,11 @@ export const UpdateRecipeSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1, 'Ingredient name is required'),
-        quantity_min: z.number().positive('Quantity must be positive'),
+        quantity_min: z.number().nonnegative('Quantity cannot be negative'),
         quantity_max: z.number().positive().nullable().optional(),
         unit: z.enum(VALID_UNITS).or(z.literal('')), // Allow empty string for unitless ingredients
         prep_state: z.string().optional(),
+        is_header: z.boolean().optional(),
       })
     )
     .optional(),
