@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus, Pencil, ChevronDown, Trash2, Star, ThumbsDown, Shield } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
 // Centralized list of units - single source of truth
@@ -1115,7 +1115,7 @@ export default function GroceriesPage() {
                           {item.checked && <Check style={{ width: '14px', height: '14px', color: 'white', strokeWidth: 3 }} />}
                         </button>
 
-                        {/* Out of Stock button - thumbs down icon (hidden for protected lists) */}
+                        {/* Out of Stock button - frown icon (hidden for protected lists) */}
                         {!lists.find(l => l.id === selectedListId)?.protected && (
                           <button
                             onClick={() => toggleOutOfStock(item.id, item.out_of_stock || false)}
@@ -1136,7 +1136,7 @@ export default function GroceriesPage() {
                             }}
                             aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
                           >
-                            <ThumbsDown
+                            <Frown
                               fill={item.out_of_stock ? '#ef4444' : '#d1d5db'}
                               style={{
                                 width: '20px',
