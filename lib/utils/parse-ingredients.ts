@@ -143,12 +143,13 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
 
   // 1. Extract quantity (number, fraction, or range at start)
   // Enhanced regex to properly capture:
-  // - Mixed numbers like "1 1/4" or "2 1/2" (with space)
-  // - Mixed numbers like "1¼" or "2½" (without space, unicode fraction)
+  // - Mixed numbers like "1 1/4" or "2 1/2" (number space slash-fraction)
+  // - Mixed numbers like "1 ¼" or "2 ½" (number SPACE unicode-fraction)
+  // - Mixed numbers like "1¼" or "2½" (number+unicode, no space)
   // - Standalone fractions like "1/2" or "3/4"
   // - Simple numbers and ranges
   // - Unicode fractions
-  const quantityMatch = remaining.match(/^([\d.]+[⅛¼⅓½⅔¾⅞]|[\d.]+\s+\d+\/\d+|\d+\/\d+|[\d.]+(?:-[\d.]+)?|[⅛¼⅓½⅔¾⅞])\s*/);
+  const quantityMatch = remaining.match(/^([\d.]+\s+[⅛¼⅓½⅔¾⅞]|[\d.]+[⅛¼⅓½⅔¾⅞]|[\d.]+\s+\d+\/\d+|\d+\/\d+|[\d.]+(?:-[\d.]+)?|[⅛¼⅓½⅔¾⅞])\s*/);
   if (quantityMatch) {
     const quantityStr = quantityMatch[1].trim();
 
@@ -174,6 +175,13 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
     else if (FRACTION_MAP[quantityStr]) {
       quantity_min = FRACTION_MAP[quantityStr];
     }
+    // Check if it's a mixed number with space and unicode fraction (e.g., "1 ¼" or "2 ½")
+    else if (/^\d+\s+[⅛¼⅓½⅔¾⅞]$/.test(quantityStr)) {
+      const whole = parseFloat(quantityStr.match(/^\d+/)![0]);
+      const fractionChar = quantityStr.match(/[⅛¼⅓½⅔¾⅞]/)![0];
+      const fraction = FRACTION_MAP[fractionChar] || 0;
+      quantity_min = whole + fraction;
+    }
     // Check if it's a mixed number without space (e.g., "1¼" or "2½")
     else if (/^\d+[⅛¼⅓½⅔¾⅞]$/.test(quantityStr)) {
       const whole = parseFloat(quantityStr.match(/^\d+/)![0]);
@@ -181,7 +189,7 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
       const fraction = FRACTION_MAP[fractionChar] || 0;
       quantity_min = whole + fraction;
     }
-    // Check if it's a mixed number with space (e.g., "1 1/2" or "1 1/4")
+    // Check if it's a mixed number with space and slash-fraction (e.g., "1 1/2" or "1 1/4")
     else if (quantityStr.includes(' ')) {
       const parts = quantityStr.split(' ');
       const whole = parseFloat(parts[0]);
