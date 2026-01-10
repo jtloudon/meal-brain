@@ -572,6 +572,7 @@ export default function RecipesPage() {
               onClick={() => setShowSearch(true)}
               style={{
                 padding: '6px',
+                marginLeft: '10px',
                 border: 'none',
                 borderRadius: '6px',
                 backgroundColor: 'transparent',
@@ -585,7 +586,7 @@ export default function RecipesPage() {
               <Search size={22} style={{ color: '#f97316' }} />
             </button>
           ) : (
-            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%' }}>
+            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%', marginLeft: '10px' }}>
               <button
                 onClick={() => setShowSearch(false)}
                 style={{

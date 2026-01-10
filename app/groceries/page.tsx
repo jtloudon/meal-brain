@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus, Pencil, ChevronDown, Trash2, Star, ThumbsDown } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown, Trash2, Star, ThumbsDown, Shield } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
 // Centralized list of units - single source of truth
@@ -52,6 +52,7 @@ interface GroceryList {
   id: string;
   name: string;
   created_at: string;
+  protected: boolean;
 }
 
 export default function GroceriesPage() {
@@ -353,6 +354,33 @@ export default function GroceriesPage() {
       }
     } catch (error) {
       console.error('Error updating list name:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleProtection = async () => {
+    if (!selectedListId) return;
+
+    const currentList = lists.find(l => l.id === selectedListId);
+    if (!currentList) return;
+
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/grocery/lists/${selectedListId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ protected: !currentList.protected }),
+      });
+
+      if (res.ok) {
+        const updatedList = await res.json();
+        setLists((prev) =>
+          prev.map((list) => (list.id === selectedListId ? updatedList : list))
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling protection:', error);
     } finally {
       setSaving(false);
     }
@@ -698,6 +726,28 @@ export default function GroceriesPage() {
               <ChevronDown size={24} style={{ color: '#9ca3af' }} />
             </button>
             <button
+              onClick={toggleProtection}
+              disabled={saving}
+              style={{
+                padding: '8px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                opacity: saving ? 0.5 : 1
+              }}
+              title={lists.find(l => l.id === selectedListId)?.protected ? "Remove protection" : "Protect from bulk delete"}
+            >
+              <Shield
+                size={20}
+                style={{
+                  color: '#f97316',
+                  fill: lists.find(l => l.id === selectedListId)?.protected ? '#f97316' : 'none'
+                }}
+              />
+            </button>
+            <button
               onClick={() => {
                 const currentList = lists.find(l => l.id === selectedListId);
                 if (currentList) {
@@ -739,42 +789,46 @@ export default function GroceriesPage() {
             justifyContent: 'space-between',
             marginBottom: '2px'
           }}>
-          <button
-            onClick={() => setShowClearCheckedConfirm(true)}
-            disabled={!items.some(item => item.checked)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
-              border: 'none',
-              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
-              color: items.some(item => item.checked) ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-              flex: 1,
-              minWidth: 0
-            }}
-          >
-            Delete
-          </button>
-          <button
-            onClick={() => setShowCopyToModal(true)}
-            disabled={!items.some(item => item.checked)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
-              border: 'none',
-              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
-              color: items.some(item => item.checked) ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '500',
-              cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-              flex: 1,
-              minWidth: 0
-            }}
-          >
-            Copy to...
-          </button>
+          {!lists.find(l => l.id === selectedListId)?.protected && (
+            <>
+              <button
+                onClick={() => setShowClearCheckedConfirm(true)}
+                disabled={!items.some(item => item.checked)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '16px',
+                  border: 'none',
+                  backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+                  color: items.some(item => item.checked) ? 'white' : '#6b7280',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+                  flex: 1,
+                  minWidth: 0
+                }}
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setShowCopyToModal(true)}
+                disabled={!items.some(item => item.checked)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '16px',
+                  border: 'none',
+                  backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+                  color: items.some(item => item.checked) ? 'white' : '#6b7280',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
+                  flex: 1,
+                  minWidth: 0
+                }}
+              >
+                Copy to...
+              </button>
+            </>
+          )}
           <button
             onClick={() => setShowInlineAddForm(!showInlineAddForm)}
             style={{
@@ -812,7 +866,7 @@ export default function GroceriesPage() {
           </div>
 
           {/* Select All - iOS Mail style, below buttons */}
-          {items.length > 0 && (
+          {items.length > 0 && !lists.find(l => l.id === selectedListId)?.protected && (
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -1034,37 +1088,39 @@ export default function GroceriesPage() {
                           {item.checked && <Check style={{ width: '14px', height: '14px', color: 'white', strokeWidth: 3 }} />}
                         </button>
 
-                        {/* Out of Stock button - thumbs down icon */}
-                        <button
-                          onClick={() => toggleOutOfStock(item.id, item.out_of_stock || false)}
-                          style={{
-                            flexShrink: 0,
-                            width: '24px',
-                            height: '24px',
-                            borderRadius: '3px',
-                            border: 'none',
-                            backgroundColor: 'transparent',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            marginTop: '0px',
-                            padding: '2px'
-                          }}
-                          aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
-                        >
-                          <ThumbsDown
-                            fill={item.out_of_stock ? '#ef4444' : '#d1d5db'}
+                        {/* Out of Stock button - thumbs down icon (hidden for protected lists) */}
+                        {!lists.find(l => l.id === selectedListId)?.protected && (
+                          <button
+                            onClick={() => toggleOutOfStock(item.id, item.out_of_stock || false)}
                             style={{
-                              width: '20px',
-                              height: '20px',
-                              color: item.out_of_stock ? '#ef4444' : '#d1d5db',
-                              strokeWidth: 0,
-                              transition: 'all 0.2s'
+                              flexShrink: 0,
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '3px',
+                              border: 'none',
+                              backgroundColor: 'transparent',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              marginTop: '0px',
+                              padding: '2px'
                             }}
-                          />
-                        </button>
+                            aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
+                          >
+                            <ThumbsDown
+                              fill={item.out_of_stock ? '#ef4444' : '#d1d5db'}
+                              style={{
+                                width: '20px',
+                                height: '20px',
+                                color: item.out_of_stock ? '#ef4444' : '#d1d5db',
+                                strokeWidth: 0,
+                                transition: 'all 0.2s'
+                              }}
+                            />
+                          </button>
+                        )}
 
                         {/* Item Details */}
                         <div style={{ flex: 1, minWidth: 0 }}>

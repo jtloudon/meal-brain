@@ -77,16 +77,33 @@ export async function PATCH(
 
   // Parse request body
   const body = await request.json();
-  const { name } = body;
+  const { name, protected: isProtected } = body;
 
-  if (!name || typeof name !== 'string' || name.trim().length === 0) {
-    return NextResponse.json({ error: 'List name is required' }, { status: 400 });
+  // Build update object dynamically
+  const updateData: { name?: string; protected?: boolean } = {};
+
+  if (name !== undefined) {
+    if (typeof name !== 'string' || name.trim().length === 0) {
+      return NextResponse.json({ error: 'List name must be a non-empty string' }, { status: 400 });
+    }
+    updateData.name = name.trim();
   }
 
-  // Update list name
+  if (isProtected !== undefined) {
+    if (typeof isProtected !== 'boolean') {
+      return NextResponse.json({ error: 'Protected must be a boolean' }, { status: 400 });
+    }
+    updateData.protected = isProtected;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+  }
+
+  // Update list
   const { data, error } = await supabase
     .from('grocery_lists')
-    .update({ name: name.trim() })
+    .update(updateData)
     .eq('id', id)
     .eq('household_id', userRecord.household_id)
     .select()
