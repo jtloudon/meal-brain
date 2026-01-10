@@ -1137,12 +1137,12 @@ export default function GroceriesPage() {
                             aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
                           >
                             <Frown
-                              fill={item.out_of_stock ? '#ef4444' : '#d1d5db'}
+                              fill={item.out_of_stock ? '#f97316' : 'white'}
+                              stroke={item.out_of_stock ? 'white' : '#d1d5db'}
+                              strokeWidth={2.5}
                               style={{
                                 width: '20px',
                                 height: '20px',
-                                color: item.out_of_stock ? '#ef4444' : '#d1d5db',
-                                strokeWidth: 0,
                                 transition: 'all 0.2s'
                               }}
                             />
