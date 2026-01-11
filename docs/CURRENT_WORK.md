@@ -1,5 +1,301 @@
 # Current Work in Progress
 
+## Context at 2026-01-10
+
+### ✅ Completed Today - UI/UX Polish & Theme Customization
+
+#### 1. Mixed Fraction Display for Serving Sizes
+**Problem:** Ingredient quantities displayed with parenthetical serving sizes and decimals (e.g., "mayonnaise (290 g)" showing "1.25" cups)
+**Solution:**
+- Parser: Strip parenthetical text like `(290 g)` from ingredient names
+- Display: Convert decimals to unicode fractions (1.25 → 1 ¼)
+- Supports: ⅛, ⅙, ¼, ⅓, ⅜, ½, ⅝, ⅔, ¾, ⅚, ⅞ (11 fractions)
+- Algorithm finds nearest common cooking fraction for any decimal
+- Files:
+  - `lib/utils/parse-ingredients.ts` (strip parentheses)
+  - `app/recipes/[id]/page.tsx` (fraction formatting)
+
+#### 2. Per-User Theme Color Customization
+**Problem:** All users saw same orange theme color, no personalization
+**Solution:** Complete theming system with per-user color preferences
+
+**Architecture:**
+- Database: `user_preferences.theme_color` column (hex format, validated)
+- Backend: API validates hex format, stores per-user
+- Frontend: CSS variables (`--theme-primary`) injected at root layout
+- Components: 130+ hardcoded `#f97316` → `var(--theme-primary)` (24 files)
+- UI: Settings page with 11-color picker (40px swatches)
+
+**Color Palette:**
+- Sky Blue (#00A0DC), Teal (#00BFA5), Ocean (#0284C7)
+- Coral (#F87171), Purple (#A78BFA), Emerald (#34D399)
+- Light Blue (#93C5FD), Mint (#86EFAC), Yellow (#FCD34D)
+- Slate (#64748B), Warm Gray (#78716C)
+
+**Files:**
+- `supabase/migrations/20260110000000_add_theme_color_to_preferences.sql`
+- `app/api/user/preferences/route.ts` (theme_color field)
+- `lib/tools/preferences.ts` (include theme_color)
+- `app/globals.css` (--theme-primary variable)
+- `app/layout.tsx` (fetch + inject CSS variable)
+- `app/settings/ui-preferences/page.tsx` (NEW - color picker)
+- 24 component files refactored
+
+#### 3. Settings Page Restructure
+**Problem:** "Preferences" section didn't fit with new UI Preferences
+**Solution:**
+- Removed: "PREFERENCES" section from main settings
+- Moved: "AI Preferences" into "APP SETTINGS" section
+- Created: New "UI Preferences" page for theme color selection
+- Renamed: `/settings/preferences` → `/settings/ai-preferences`
+- Files:
+  - `app/settings/page.tsx` (restructured sections)
+  - `app/settings/ai-preferences/page.tsx` (renamed)
+  - `app/settings/ui-preferences/page.tsx` (NEW)
+
+#### 4. Performance Optimizations
+**Problem:** Multiple interactions felt slow (1-5 second delays)
+**Solutions:**
+
+**a) Serving Size Save (2-5s → Instant)**
+- Before: `window.location.reload()` after save
+- After: Update local state with API response
+- Backend returns full recipe data instead of just `{success: true}`
+- Files: `lib/tools/recipe.ts`, `app/recipes/[id]/page.tsx`
+
+**b) Grocery Checkbox Toggle (1s → Instant)**
+- Before: Pessimistic update (wait for API response)
+- After: Optimistic update (UI updates immediately, revert on error)
+- Applies to both `checked` and `out_of_stock` toggles
+- Files: `app/groceries/page.tsx`
+
+#### 5. Bottom Navigation Redesign (iOS 16+ Style)
+**Evolution:**
+1. Original: Solid theme color background, white icons
+2. Attempt: White background with colored pill for active tab
+3. Final: White background, filled icon for active tab
+
+**Final Design:**
+- Background: White (#ffffff) with subtle gray border
+- Active icon: Filled with theme color
+- Inactive icons: Gray outline only (#9ca3af)
+- Clean, minimal, iOS-native feel
+- Files: `components/BottomNav.tsx`
+
+#### 6. Recipe Index Visual Updates
+**Changes:**
+- Icon: Replaced time emoji 🕐 with Lucide `Clock` icon
+- Colors: Recipe title black (#111827) instead of theme color
+- Stars: Keep theme color for visual accent
+- Borders: Removed card borders, added iOS-style inset separators
+- Separator: 1px #f3f4f6, starts at 108px (inset from left), 16px margin right
+- Result: Less "too much blue", cleaner iOS Messages-style list
+- Files: `app/recipes/page.tsx`
+
+#### 7. Meal Planner Edit Modal Fixes
+**Problem:** Delete button hidden, page couldn't scroll, cramped layout
+**Solution:**
+- Fixed scroll height: `calc(100vh - 70px - 64px)` to account for bottom nav
+- Reduced button padding: 12px → 8px
+- Reduced section margins: 10px → 8px
+- Reduced input padding: 8px 12px → 8px
+- Result: Delete button now visible without (or minimal) scrolling
+- Files: `app/planner/page.tsx`
+
+#### 8. Bug Fixes
+**a) Shield Protection Not Persisting**
+- Problem: `listLists` query didn't select `protected` field
+- Solution: Added `protected` to SELECT query
+- Files: `lib/tools/grocery.ts`
+
+**b) Type Errors After Recipe Update**
+- Problem: `updateRecipe` return type mismatch
+- Solution: Changed return type from `{recipe_id: string}` to `any`
+- Files: `lib/tools/recipe.ts`
+
+---
+
+### Test Cases Needed
+
+#### Unit Tests
+- [ ] **Fraction conversion algorithm**
+  - [ ] 1.5625 → "1 ⅝"
+  - [ ] 0.83375 → "⅚"
+  - [ ] 1.333 → "1 ⅓"
+  - [ ] 0.625 → "⅝"
+  - [ ] Edge cases: 0.99 → "1", 0.01 → "0"
+
+- [ ] **Theme color validation**
+  - [ ] Valid hex: "#f97316" → passes
+  - [ ] Invalid hex: "#zzz" → fails
+  - [ ] Missing hash: "f97316" → fails
+  - [ ] Wrong length: "#fff" → fails
+
+- [ ] **Parenthetical text stripping**
+  - [ ] "butter (290 g)" → "butter"
+  - [ ] "flour (2 cups)" → "flour"
+  - [ ] "eggs (large)" → "eggs"
+  - [ ] Nested parens: "item (test (nested))" → "item"
+
+#### E2E Tests (Playwright)
+- [ ] **Theme color customization flow**
+  1. Navigate to /settings
+  2. Click "UI Preferences"
+  3. Select new color (e.g., Teal #00BFA5)
+  4. Verify page reloads
+  5. Verify bottom nav active icon is teal
+  6. Verify recipe stars are teal
+  7. Navigate to groceries
+  8. Verify checkmarks are teal
+  9. Log out and back in
+  10. Verify teal persists
+
+- [ ] **Serving size adjustment (instant save)**
+  1. Open recipe detail page
+  2. Click "Adjust +/-"
+  3. Change servings
+  4. Click "Save"
+  5. Verify modal closes instantly (no page reload)
+  6. Verify ingredients update immediately
+  7. Verify no page flash/reload
+
+- [ ] **Grocery checkbox optimistic updates**
+  1. Open grocery list
+  2. Click checkbox on item
+  3. Verify checkbox updates instantly (<50ms)
+  4. Simulate slow network
+  5. Verify checkbox still instant
+  6. Simulate network error
+  7. Verify checkbox reverts on error
+
+- [ ] **Meal planner edit modal scrolling**
+  1. Open planner
+  2. Click existing meal
+  3. Edit modal opens
+  4. Verify Delete button visible (or with minimal scroll)
+  5. Test on small viewport (375px width)
+  6. Verify all content accessible
+
+- [ ] **Recipe index visual updates**
+  1. Navigate to /recipes
+  2. Verify recipe titles are black
+  3. Verify stars are theme color
+  4. Verify clock icon (not emoji)
+  5. Verify no card borders
+  6. Verify subtle separator lines (inset from left)
+
+- [ ] **Settings restructure**
+  1. Navigate to /settings
+  2. Verify no "PREFERENCES" section
+  3. Verify "AI Preferences" under "APP SETTINGS"
+  4. Verify "UI Preferences" under "APP SETTINGS"
+  5. Click "UI Preferences"
+  6. Verify color picker loads
+  7. Click "AI Preferences"
+  8. Verify preferences page (no color picker)
+
+---
+
+### Architecture Updates
+
+#### CSS Variables System
+**Pattern:** Global theming via CSS variables + React Server Components
+
+```
+user_preferences.theme_color (DB)
+    ↓
+API: GET /api/user/preferences
+    ↓
+Root Layout (Server Component)
+    ↓
+<html style={{ '--theme-primary': color }}>
+    ↓
+All components: var(--theme-primary)
+```
+
+**Benefits:**
+- No React re-renders (CSS-only)
+- Instant theme switching (page reload)
+- Zero prop drilling
+- Native browser support
+- Easy to extend (add more theme properties)
+
+**Alternatives Considered:**
+- ❌ React Context: Causes re-renders, more code
+- ❌ Tailwind dynamic classes: Can't generate at runtime
+- ✅ CSS Variables: Best performance, clean code
+
+#### Optimistic Updates Pattern
+**Pattern:** Update UI immediately, revert on error
+
+**Before (Pessimistic):**
+```typescript
+const res = await fetch(...);  // Wait
+if (res.ok) {
+  updateState();  // Then update UI
+}
+```
+
+**After (Optimistic):**
+```typescript
+updateState();  // Update immediately
+try {
+  const res = await fetch(...);
+  if (!res.ok) updateState(revert);  // Revert on error
+} catch {
+  updateState(revert);
+}
+```
+
+**Applied to:**
+- Grocery checkbox toggles (checked, out_of_stock)
+- Future: Could apply to meal planner edits, recipe ratings
+
+---
+
+### Known Issues
+- None currently blocking
+
+---
+
+### Tech Debt Added
+
+#### 1. Theme Color Migration for Existing Users
+**Issue:** Existing users don't have `theme_color` set (falls back to default)
+**Impact:** Low - default orange matches current behavior
+**TODO:**
+- Consider backfill script to set default for all existing users
+- Or leave as-is (NULL → defaults handled in code)
+**Priority:** LOW
+
+#### 2. Fraction Conversion Edge Cases
+**Issue:** Algorithm rounds to nearest fraction (might not match user's exact input)
+**Example:** User enters "0.4 cups" → displays as "⅓ cup" (0.333)
+**Impact:** Low - cooking is imprecise, close enough
+**TODO:**
+- Document rounding behavior
+- Consider showing exact decimal on hover (optional)
+**Priority:** LOW
+
+#### 3. Bottom Nav Icon Fill Inconsistency
+**Issue:** Not all Lucide icons look good filled (some designed for stroke-only)
+**Current:** Calendar, CookingPot, ShoppingCart, Settings work well filled
+**Impact:** Low - current icons look fine
+**TODO:**
+- Monitor user feedback
+- Consider custom SVG icons if issues arise
+**Priority:** LOW
+
+#### 4. Settings Page Route Rename Legacy References
+**Issue:** Old `/settings/preferences` route may be bookmarked
+**Solution:** Already renamed file/folder, Next.js will 404
+**Impact:** Low - users will navigate from /settings menu
+**TODO:**
+- Consider 301 redirect in middleware (optional)
+**Priority:** LOW
+
+---
+
 ## Context at 2026-01-07
 
 ### ✅ Completed Today - Invitation System & Security
