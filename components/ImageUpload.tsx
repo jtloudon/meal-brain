@@ -183,7 +183,8 @@ export default function ImageUpload({
             borderRadius: '12px',
             textAlign: 'center',
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            boxSizing: 'border-box'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#f3f4f6';

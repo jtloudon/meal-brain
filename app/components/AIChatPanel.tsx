@@ -453,15 +453,15 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
         }}
       />
 
-      {/* Floating Chat Panel (rounded, inset from edges) */}
+      {/* Floating Chat Panel (rounded, inset from edges) - 50% height */}
       <div
         className="flex flex-col"
         style={{
           position: 'fixed',
-          top: '20px',
           left: '12px',
           right: '12px',
           bottom: `${keyboardHeight + 20}px`,
+          height: '50vh',
           backgroundColor: 'white',
           borderRadius: '20px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
