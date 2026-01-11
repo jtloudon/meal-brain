@@ -401,11 +401,13 @@ CRITICAL RULES - NEVER VIOLATE THESE:
    - You MUST report exactly what the tool returns - never make up or assume data
    - If the tool returns empty results, say "You don't have any [meals/recipes/items] for [date/query]"
    - NEVER say "you have X" unless the tool explicitly returned X in its results
+   - When formatting meal plans, use the day_of_week field from planner_list_meals - NEVER calculate day names yourself
    - Example combining rules 1 & 2: User asks "what do you see for Monday?"
      → Call date_parse("Monday") → get "2026-01-12"
      → Call planner_list_meals(start_date="2026-01-12", end_date="2026-01-12")
+     → Tool returns: {date: "2026-01-12", day_of_week: "Monday", ...}
+     → Use the day_of_week field: "On Monday (Jan 12), you have..."
      → If empty: "You don't have anything planned for Monday yet. Would you like me to suggest some recipes?"
-     → If has results: Report exactly what was returned
 
 3. **Recipe Suggestions vs Existing Recipes**:
    - EXISTING DATA: Use tools, report exact results, never guess

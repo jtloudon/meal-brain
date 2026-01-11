@@ -412,6 +412,7 @@ export async function listMeals(
       id: string;
       recipe_id: string | null;
       date: string;
+      day_of_week: string;
       meal_type: string;
       notes: string | null;
       custom_title: string | null;
@@ -464,21 +465,28 @@ export async function listMeals(
       };
     }
 
-    // Transform data to include recipe object
-    const formattedMeals = (meals ?? []).map((meal: any) => ({
-      id: meal.id,
-      recipe_id: meal.recipe_id,
-      date: meal.date,
-      meal_type: meal.meal_type,
-      notes: meal.notes ?? null,
-      custom_title: meal.custom_title ?? null,
-      custom_item_type: meal.custom_item_type ?? null,
-      recipe: meal.recipes ? {
-        title: meal.recipes.title,
-        tags: meal.recipes.tags ?? [],
-        rating: meal.recipes.rating ?? null,
-      } : null,
-    }));
+    // Transform data to include recipe object and day of week
+    const formattedMeals = (meals ?? []).map((meal: any) => {
+      // Parse date and get day of week (parse as local time, not UTC)
+      const mealDate = new Date(meal.date + 'T00:00:00');
+      const dayOfWeek = mealDate.toLocaleDateString('en-US', { weekday: 'long' });
+
+      return {
+        id: meal.id,
+        recipe_id: meal.recipe_id,
+        date: meal.date,
+        day_of_week: dayOfWeek,
+        meal_type: meal.meal_type,
+        notes: meal.notes ?? null,
+        custom_title: meal.custom_title ?? null,
+        custom_item_type: meal.custom_item_type ?? null,
+        recipe: meal.recipes ? {
+          title: meal.recipes.title,
+          tags: meal.recipes.tags ?? [],
+          rating: meal.recipes.rating ?? null,
+        } : null,
+      };
+    });
 
     return {
       success: true,
