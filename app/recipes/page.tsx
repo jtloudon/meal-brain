@@ -815,7 +815,7 @@ export default function RecipesPage() {
 
         {/* Recipe List */}
         {!loading && !error && recipes.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}
@@ -825,11 +825,9 @@ export default function RecipesPage() {
                   alignItems: 'center',
                   gap: '12px',
                   backgroundColor: 'white',
-                  borderRadius: '8px',
-                  border: '1px solid #e5e7eb',
-                  overflow: 'hidden',
                   cursor: 'pointer',
-                  padding: '12px'
+                  padding: '12px 16px',
+                  position: 'relative'
                 }}
               >
                 {/* Recipe Image - Square thumbnail on left */}
@@ -919,6 +917,16 @@ export default function RecipesPage() {
                     </div>
                   )}
                 </div>
+
+                {/* iOS-style separator - inset from left */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: '108px',
+                  right: '16px',
+                  height: '1px',
+                  backgroundColor: '#f3f4f6'
+                }} />
               </div>
             ))}
           </div>
