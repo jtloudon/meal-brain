@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Plus, Search, Star } from 'lucide-react';
+import { Plus, Search, Star, Clock } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
 interface Recipe {
@@ -871,7 +871,7 @@ export default function RecipesPage() {
                   <h3 style={{
                     fontSize: '17px',
                     fontWeight: '600',
-                    color: 'var(--theme-primary)',
+                    color: '#111827',
                     marginBottom: '4px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -888,9 +888,10 @@ export default function RecipesPage() {
                         color: '#6b7280',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '2px'
+                        gap: '4px'
                       }}>
-                        🕐 {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null)}
+                        <Clock size={14} strokeWidth={2} />
+                        {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null)}
                       </span>
                     )}
                   </div>
