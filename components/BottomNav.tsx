@@ -58,6 +58,7 @@ export default function BottomNav() {
                 size={26}
                 strokeWidth={2}
                 fill={isActive ? 'var(--theme-primary)' : 'none'}
+                stroke={isActive ? '#ffffff' : '#9ca3af'}
               />
             </Link>
           );
