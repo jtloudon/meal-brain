@@ -832,8 +832,8 @@ export default function RecipesPage() {
               >
                 {/* Recipe Image - Square thumbnail on left */}
                 <div style={{
-                  width: '80px',
-                  height: '80px',
+                  width: '72px',
+                  height: '72px',
                   flexShrink: 0,
                   borderRadius: '6px',
                   overflow: 'hidden',
@@ -922,7 +922,7 @@ export default function RecipesPage() {
                 <div style={{
                   position: 'absolute',
                   bottom: 0,
-                  left: '108px',
+                  left: '100px',
                   right: '16px',
                   height: '1px',
                   backgroundColor: '#f3f4f6'
