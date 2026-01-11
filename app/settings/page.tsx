@@ -51,16 +51,6 @@ export default function SettingsPage() {
 
   const settingsSections = [
     {
-      title: 'Preferences',
-      items: [
-        {
-          label: 'AI Preferences',
-          description: 'Household context, dietary constraints, AI style',
-          href: '/settings/preferences',
-        },
-      ],
-    },
-    {
       title: 'Household',
       items: [
         {
@@ -73,6 +63,16 @@ export default function SettingsPage() {
     {
       title: 'App Settings',
       items: [
+        {
+          label: 'AI Preferences',
+          description: 'Household context, dietary constraints, AI style',
+          href: '/settings/ai-preferences',
+        },
+        {
+          label: 'UI Preferences',
+          description: 'Customize app appearance and theme color',
+          href: '/settings/ui-preferences',
+        },
         {
           label: 'Set Password',
           description: 'Enable password login for standalone app',

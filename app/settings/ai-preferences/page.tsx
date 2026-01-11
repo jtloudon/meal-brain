@@ -13,7 +13,6 @@ interface UserPreferences {
   ai_style: AIStyle;
   planning_preferences: string[];
   ai_learning_enabled: boolean;
-  theme_color?: string;
 }
 
 export default function AIPreferencesPage() {
@@ -416,52 +415,6 @@ export default function AIPreferencesPage() {
                 Don't learn from my behavior
               </div>
             </button>
-          </div>
-        </div>
-
-        {/* Theme Color */}
-        <div style={{ marginBottom: '32px' }}>
-          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '8px' }}>
-            Theme Color
-          </h4>
-          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>
-            Customize your app's accent color
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-            {[
-              { name: 'Orange', hex: '#f97316' },
-              { name: 'Red', hex: '#ef4444' },
-              { name: 'Pink', hex: '#ec4899' },
-              { name: 'Purple', hex: '#a855f7' },
-              { name: 'Indigo', hex: '#6366f1' },
-              { name: 'Blue', hex: '#3b82f6' },
-              { name: 'Teal', hex: '#14b8a6' },
-              { name: 'Green', hex: '#22c55e' },
-              { name: 'Amber', hex: '#f59e0b' },
-              { name: 'Rose', hex: '#f43f5e' },
-            ].map((color) => (
-              <button
-                key={color.hex}
-                onClick={async () => {
-                  const updated = { ...preferences, theme_color: color.hex };
-                  setPreferences(updated);
-                  await savePreferences(updated);
-                  // Reload page to apply new theme color
-                  window.location.reload();
-                }}
-                style={{
-                  width: '100%',
-                  aspectRatio: '1',
-                  borderRadius: '8px',
-                  backgroundColor: color.hex,
-                  border: (preferences.theme_color || '#f97316') === color.hex ? '3px solid #111827' : '1px solid #e5e7eb',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-                aria-label={color.name}
-                title={color.name}
-              />
-            ))}
           </div>
         </div>
       </div>
