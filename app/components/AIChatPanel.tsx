@@ -546,7 +546,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           }}
         >
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center text-gray-500" style={{ minHeight: '200px', paddingTop: '60px' }}>
+            <div className="flex flex-col items-center text-center text-gray-500" style={{ paddingTop: '40px' }}>
               <svg
                 width="60"
                 height="60"

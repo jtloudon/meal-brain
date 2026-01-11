@@ -175,20 +175,37 @@ export default function ImageUpload({
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="w-full h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-colors"
+          style={{
+            width: '100%',
+            padding: '48px 20px',
+            backgroundColor: '#f9fafb',
+            border: '1px solid #d1d5db',
+            borderRadius: '12px',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f3f4f6';
+            e.currentTarget.style.borderColor = '#9ca3af';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#f9fafb';
+            e.currentTarget.style.borderColor = '#d1d5db';
+          }}
         >
           {uploading ? (
-            <div className="text-center">
-              <Upload className="mx-auto h-8 w-8 text-gray-400 animate-pulse" />
-              <p className="mt-2 text-sm text-gray-600">Uploading...</p>
+            <div style={{ textAlign: 'center' }}>
+              <Upload style={{ margin: '0 auto', width: '32px', height: '32px', color: '#9ca3af' }} className="animate-pulse" />
+              <p style={{ marginTop: '8px', fontSize: '14px', color: '#6b7280' }}>Uploading...</p>
             </div>
           ) : (
-            <div className="text-center">
-              <Camera className="mx-auto h-8 w-8 text-gray-400" />
-              <p className="mt-2 text-sm text-gray-600">
+            <div style={{ textAlign: 'center' }}>
+              <Camera style={{ margin: '0 auto', width: '32px', height: '32px', color: '#9ca3af' }} />
+              <p style={{ marginTop: '8px', fontSize: '14px', color: '#6b7280' }}>
                 Click to upload image
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
                 JPEG, PNG, WebP, or HEIC (max 5MB)
               </p>
             </div>
