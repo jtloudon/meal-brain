@@ -29,9 +29,12 @@ export default function BottomNav() {
       <div style={{
         display: 'flex',
         justifyContent: 'space-around',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         height: '58px',
-        padding: '6px 8px',
+        paddingTop: '8px',
+        paddingLeft: '8px',
+        paddingRight: '8px',
+        paddingBottom: '6px',
         gap: '4px'
       }}>
         {tabs.map((tab) => {
