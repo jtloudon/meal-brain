@@ -10,8 +10,7 @@
   /* Theme colors - adjust these to change the entire app's color scheme */
   --primary: #4A90E2;        /* Blue - active states, primary buttons */
   --primary-hover: #3A7BC8;  /* Darker blue for hover states */
-  --accent: #FFA500;          /* Orange - call-to-action, ratings */
-  --accent-hover: #FF8C00;    /* Darker orange for hover */
+  --theme-primary: #f97316;   /* User-customizable theme color (overridden by layout.tsx) */
   --secondary: #333333;       /* Dark gray - text */
   --surface: #F9F9F9;         /* Light gray - card backgrounds */
   --border: #F0F0F0;          /* Very light gray - dividers */
