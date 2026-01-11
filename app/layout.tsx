@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import SplashScreen from './components/SplashScreen';
+import PullToRefresh from '@/components/PullToRefresh';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { supabase } from '@/lib/db/supabase';
@@ -78,7 +79,9 @@ export default async function RootLayout({
     <html lang="en" style={{ '--theme-primary': themeColor } as React.CSSProperties}>
       <body className="antialiased">
         <SplashScreen />
-        {children}
+        <PullToRefresh>
+          {children}
+        </PullToRefresh>
         <script
           dangerouslySetInnerHTML={{
             __html: `
