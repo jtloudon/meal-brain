@@ -21,8 +21,8 @@ export default function BottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'var(--theme-primary)',
-        borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #e5e7eb',
         zIndex: 50,
       }}
     >
@@ -30,9 +30,9 @@ export default function BottomNav() {
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        height: '58px',
-        paddingTop: '6px',
-        paddingBottom: '6px'
+        height: '64px',
+        padding: '8px',
+        gap: '4px'
       }}>
         {tabs.map((tab) => {
           // Check if current path matches this tab (including sub-paths)
@@ -45,19 +45,28 @@ export default function BottomNav() {
               href={tab.href}
               style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flex: 1,
-                height: '100%',
-                color: 'white',
-                backgroundColor: isActive ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                borderRadius: '8px',
-                transition: 'background-color 0.2s',
-                margin: '0 4px'
+                gap: '4px',
+                padding: '8px 12px',
+                color: isActive ? '#ffffff' : '#9ca3af',
+                backgroundColor: isActive ? 'var(--theme-primary)' : 'transparent',
+                borderRadius: '12px',
+                transition: 'all 0.2s ease',
+                textDecoration: 'none'
               }}
               aria-label={tab.name}
             >
-              <Icon size={28} strokeWidth={1.5} />
+              <Icon size={24} strokeWidth={2} />
+              <span style={{
+                fontSize: '11px',
+                fontWeight: isActive ? '600' : '500',
+                lineHeight: '1'
+              }}>
+                {tab.name}
+              </span>
             </Link>
           );
         })}
