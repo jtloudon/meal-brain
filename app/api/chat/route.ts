@@ -7,6 +7,7 @@ import { listRecipes } from '@/lib/tools/recipe';
 import { listMeals, addMeal } from '@/lib/tools/planner';
 import { listLists, getList, pushIngredients } from '@/lib/tools/grocery';
 import { getUserPreferences } from '@/lib/tools/preferences';
+import { parseDate } from '@/lib/tools/dates';
 import { supabase } from '@/lib/db/supabase';
 
 const anthropic = new Anthropic({
@@ -99,6 +100,20 @@ const tools: Anthropic.Tool[] = [
     input_schema: {
       type: 'object',
       properties: {},
+    },
+  },
+  {
+    name: 'date_parse',
+    description: 'REQUIRED before planner_list_meals or planner_add_meal. Parses natural language dates (like "Monday", "tomorrow", "next week") into ISO date strings (YYYY-MM-DD). Always use this tool to convert user date expressions into actual dates - NEVER calculate dates yourself.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        date_expression: {
+          type: 'string',
+          description: 'Natural language date like "Monday", "tomorrow", "next week", "this Friday", "Jan 15"',
+        },
+      },
+      required: ['date_expression'],
     },
   },
   {
@@ -258,6 +273,14 @@ async function executeTool(toolName: string, toolInput: any, householdId: string
         data: recipe,
       };
 
+    case 'date_parse':
+      return await parseDate(
+        {
+          date_expression: toolInput.date_expression,
+        },
+        context
+      );
+
     case 'planner_list_meals':
       return await listMeals(
         {
@@ -355,9 +378,6 @@ export async function POST(request: NextRequest) {
 CURRENT DATE CONTEXT:
 - Today is: ${dayOfWeek}, ${todayStr}
 - This week: ${weekStartStr} to ${weekEndStr} (Sunday to Saturday)
-- When user says "this week", use dates in this range
-- When user says "next week", add 7 days to these dates
-- When user says "tomorrow", use ${new Date(today.getTime() + 86400000).toISOString().split('T')[0]}
 
 Your role:
 - Help users plan meals, find recipes, and manage grocery lists
@@ -365,15 +385,39 @@ Your role:
 - Use the available tools to read data when needed
 - Explain your reasoning clearly but briefly
 
-Important rules:
-- EXISTING DATA: Always use tools to check the user's existing recipes, meals, and grocery lists - never guess
-- NEW RECIPE IDEAS: When users ask for recipe suggestions or new ideas, you CAN and SHOULD suggest recipes from your knowledge base
-  - Example: "I have chicken and tomatoes, what should I make?" → Suggest 2-3 specific recipes from your training data
-  - Include brief descriptions and why they fit the criteria (kid-friendly, weeknight, etc.)
-  - Offer to create any suggested recipe using recipe_create tool
-- Check user preferences (preferences_get) to understand dietary constraints, household context, and AI style preferences
-- When suggesting meal plans with existing recipes, be specific and use tools to verify recipes exist
-- Keep responses concise and mobile-friendly (2-3 sentences max unless asked for details)
+CRITICAL RULES - NEVER VIOLATE THESE:
+
+1. **NEVER CALCULATE DATES YOURSELF** - Always use the date_parse tool:
+   - When user mentions any date expression ("Monday", "tomorrow", "next week", "Jan 15"), you MUST call date_parse first
+   - Use the ISO date string (YYYY-MM-DD) returned by date_parse in subsequent tool calls
+   - NEVER try to calculate what date "Monday" is - let date_parse do it
+   - Example: User asks "what's for Monday?"
+     → Call date_parse with date_expression="Monday"
+     → Get back {date: "2026-01-12", day_of_week: "Monday"}
+     → Call planner_list_meals with start_date="2026-01-12", end_date="2026-01-12"
+
+2. **NEVER FABRICATE DATA** - When asked about existing recipes, meals, or grocery lists:
+   - You MUST call the appropriate tool first (recipe_list, planner_list_meals, grocery_get_list)
+   - You MUST report exactly what the tool returns - never make up or assume data
+   - If the tool returns empty results, say "You don't have any [meals/recipes/items] for [date/query]"
+   - NEVER say "you have X" unless the tool explicitly returned X in its results
+   - Example combining rules 1 & 2: User asks "what do you see for Monday?"
+     → Call date_parse("Monday") → get "2026-01-12"
+     → Call planner_list_meals(start_date="2026-01-12", end_date="2026-01-12")
+     → If empty: "You don't have anything planned for Monday yet. Would you like me to suggest some recipes?"
+     → If has results: Report exactly what was returned
+
+3. **Recipe Suggestions vs Existing Recipes**:
+   - EXISTING DATA: Use tools, report exact results, never guess
+   - NEW RECIPE IDEAS: When users ask for suggestions or new ideas, you CAN suggest recipes from your knowledge base
+     - Example: "I have chicken and tomatoes, what should I make?" → Suggest 2-3 specific recipes from your training data
+     - Include brief descriptions and why they fit the criteria (kid-friendly, weeknight, etc.)
+     - Offer to create any suggested recipe using recipe_create tool
+
+4. **Other Guidelines**:
+   - Check user preferences (preferences_get) to understand dietary constraints, household context, and AI style preferences
+   - When suggesting meal plans with existing recipes, be specific and use tools to verify recipes exist
+   - Keep responses concise and mobile-friendly (2-3 sentences max unless asked for details)
 
 Write Operations (REQUIRES USER APPROVAL):
 You CAN now add meals to the planner and push ingredients to grocery lists! Here's how:
@@ -383,13 +427,13 @@ You CAN now add meals to the planner and push ingredients to grocery lists! Here
    - The UI will show approval buttons automatically
 
 2. **Adding Meals to Planner** - Use planner_add_meal tool
-   - CRITICAL: You MUST use recipe_list first to find the recipe and get its real ID
-   - NEVER guess or make up recipe IDs - they must come from recipe_list results
-   - Requires: recipe_id (from recipe_list), date (YYYY-MM-DD), meal_type (breakfast/lunch/dinner/snack)
+   - CRITICAL: You MUST use date_parse AND recipe_list before adding meals
+   - NEVER guess dates or recipe IDs - they must come from tool results
+   - Requires: recipe_id (from recipe_list), date (YYYY-MM-DD from date_parse), meal_type (breakfast/lunch/dinner/snack)
    - Example flow: User says "add chicken curry to Monday dinner"
-     1. Call recipe_list with search="chicken curry"
-     2. Get the actual recipe_id from the results
-     3. Call planner_add_meal with that recipe_id, date, and meal_type="dinner"
+     1. Call date_parse with date_expression="Monday" → get "2026-01-12"
+     2. Call recipe_list with search="chicken curry" → get recipe_id
+     3. Call planner_add_meal with that recipe_id, date="2026-01-12", meal_type="dinner"
    - The UI will show approval buttons automatically
 
 3. **Pushing Ingredients to Grocery List** - Use grocery_push_ingredients tool
