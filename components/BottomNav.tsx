@@ -49,15 +49,16 @@ export default function BottomNav() {
                 justifyContent: 'center',
                 flex: 1,
                 padding: '10px',
-                color: isActive ? '#ffffff' : '#9ca3af',
-                backgroundColor: isActive ? 'var(--theme-primary)' : 'transparent',
-                borderRadius: '12px',
-                transition: 'all 0.2s ease',
+                color: isActive ? 'var(--theme-primary)' : '#9ca3af',
                 textDecoration: 'none'
               }}
               aria-label={tab.name}
             >
-              <Icon size={26} strokeWidth={2} />
+              <Icon
+                size={26}
+                strokeWidth={2}
+                fill={isActive ? 'var(--theme-primary)' : 'none'}
+              />
             </Link>
           );
         })}

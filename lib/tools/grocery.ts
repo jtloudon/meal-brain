@@ -591,7 +591,7 @@ export async function checkItem(
 export async function listLists(
   input: ListListsInput,
   context: ToolContext
-): Promise<ToolResult<{ lists: Array<{ id: string; name: string; created_at: string }> }>> {
+): Promise<ToolResult<{ lists: Array<{ id: string; name: string; created_at: string; protected?: boolean }> }>> {
   try {
     // Validate input
     ListListsSchema.parse(input);
@@ -599,7 +599,7 @@ export async function listLists(
     // Fetch all lists for household
     const { data: lists, error } = await supabase
       .from('grocery_lists')
-      .select('id, name, created_at')
+      .select('id, name, created_at, protected')
       .eq('household_id', context.householdId)
       .order('created_at', { ascending: false });
 
