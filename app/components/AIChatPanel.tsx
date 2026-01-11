@@ -542,7 +542,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           style={{
             scrollbarWidth: 'auto',
             scrollbarColor: '#d1d5db #f9fafb',
-            paddingBottom: '20px', // Minimal space, input is fixed
+            paddingBottom: '100px', // Extra space so messages aren't hidden behind fixed input
           }}
         >
           {messages.length === 0 ? (
