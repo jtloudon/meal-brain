@@ -30,8 +30,8 @@ export default function BottomNav() {
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        height: '64px',
-        padding: '8px',
+        height: '58px',
+        padding: '6px 8px',
         gap: '4px'
       }}>
         {tabs.map((tab) => {
@@ -45,12 +45,10 @@ export default function BottomNav() {
               href={tab.href}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flex: 1,
-                gap: '4px',
-                padding: '8px 12px',
+                padding: '10px',
                 color: isActive ? '#ffffff' : '#9ca3af',
                 backgroundColor: isActive ? 'var(--theme-primary)' : 'transparent',
                 borderRadius: '12px',
@@ -59,14 +57,7 @@ export default function BottomNav() {
               }}
               aria-label={tab.name}
             >
-              <Icon size={24} strokeWidth={2} />
-              <span style={{
-                fontSize: '11px',
-                fontWeight: isActive ? '600' : '500',
-                lineHeight: '1'
-              }}>
-                {tab.name}
-              </span>
+              <Icon size={26} strokeWidth={2} />
             </Link>
           );
         })}
