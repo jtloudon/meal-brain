@@ -24,7 +24,7 @@ export default function FloatingAIButton() {
         width: '60px',
         height: '60px',
         borderRadius: '50%',
-        backgroundColor: '#f97316',
+        backgroundColor: 'var(--theme-primary)',
         border: 'none',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         cursor: 'pointer',

@@ -451,7 +451,7 @@ function PlannerContent() {
               borderRadius: '6px',
               backgroundColor: 'transparent',
               cursor: 'pointer',
-              color: '#f97316'
+              color: 'var(--theme-primary)'
             }}
           >
             <ChevronLeft size={24} />
@@ -465,10 +465,10 @@ function PlannerContent() {
               onClick={goToToday}
               style={{
                 padding: '4px 12px',
-                border: '1px solid #f97316',
+                border: '1px solid var(--theme-primary)',
                 borderRadius: '6px',
                 backgroundColor: 'white',
-                color: '#f97316',
+                color: 'var(--theme-primary)',
                 fontSize: '14px',
                 fontWeight: '500',
                 cursor: 'pointer'
@@ -486,7 +486,7 @@ function PlannerContent() {
               borderRadius: '6px',
               backgroundColor: 'transparent',
               cursor: 'pointer',
-              color: '#f97316'
+              color: 'var(--theme-primary)'
             }}
           >
             <ChevronRight size={24} />
@@ -509,7 +509,7 @@ function PlannerContent() {
               padding: '6px 16px',
               border: 'none',
               borderRadius: '6px',
-              backgroundColor: viewMode === 'monthly' ? '#f97316' : 'transparent',
+              backgroundColor: viewMode === 'monthly' ? 'var(--theme-primary)' : 'transparent',
               color: viewMode === 'monthly' ? 'white' : '#6b7280',
               fontSize: '14px',
               fontWeight: '500',
@@ -525,7 +525,7 @@ function PlannerContent() {
               padding: '6px 16px',
               border: 'none',
               borderRadius: '6px',
-              backgroundColor: viewMode === 'weekly' ? '#f97316' : 'transparent',
+              backgroundColor: viewMode === 'weekly' ? 'var(--theme-primary)' : 'transparent',
               color: viewMode === 'weekly' ? 'white' : '#6b7280',
               fontSize: '14px',
               fontWeight: '500',
@@ -642,7 +642,7 @@ function PlannerContent() {
               onClick={() => openAddModal(selectedDate)}
               style={{
                 padding: '6px 12px',
-                backgroundColor: '#f97316',
+                backgroundColor: 'var(--theme-primary)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
@@ -773,7 +773,7 @@ function PlannerContent() {
                     key={idx}
                     style={{
                       marginBottom: '20px',
-                      border: isTodayDate ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      border: isTodayDate ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                       borderRadius: '12px',
                       backgroundColor: 'white',
                       overflow: 'hidden'
@@ -800,7 +800,7 @@ function PlannerContent() {
                         onClick={() => openAddModal(date)}
                         style={{
                           padding: '6px 12px',
-                          backgroundColor: '#f97316',
+                          backgroundColor: 'var(--theme-primary)',
                           color: 'white',
                           border: 'none',
                           borderRadius: '6px',
@@ -935,7 +935,7 @@ function PlannerContent() {
                 }}
                 disabled={saving}
                 style={{
-                  color: '#f97316',
+                  color: 'var(--theme-primary)',
                   fontWeight: 500,
                   background: 'none',
                   border: 'none',
@@ -952,7 +952,7 @@ function PlannerContent() {
                 onClick={handleSaveMeal}
                 disabled={saving || (editMode === 'recipe' ? !editRecipeId : !editCustomTitle.trim())}
                 style={{
-                  color: (saving || (editMode === 'recipe' ? !editRecipeId : !editCustomTitle.trim())) ? '#d1d5db' : '#f97316',
+                  color: (saving || (editMode === 'recipe' ? !editRecipeId : !editCustomTitle.trim())) ? '#d1d5db' : 'var(--theme-primary)',
                   fontWeight: 500,
                   background: 'none',
                   border: 'none',
@@ -1037,13 +1037,13 @@ function PlannerContent() {
                     style={{
                       flex: 1,
                       padding: '12px',
-                      border: editMode === 'recipe' ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      border: editMode === 'recipe' ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                       borderRadius: '8px',
                       backgroundColor: editMode === 'recipe' ? '#fff7ed' : 'white',
                       cursor: 'pointer',
                       fontSize: '16px',
                       fontWeight: editMode === 'recipe' ? '600' : 'normal',
-                      color: editMode === 'recipe' ? '#f97316' : '#6b7280'
+                      color: editMode === 'recipe' ? 'var(--theme-primary)' : '#6b7280'
                     }}
                   >
                     Recipe
@@ -1053,13 +1053,13 @@ function PlannerContent() {
                     style={{
                       flex: 1,
                       padding: '12px',
-                      border: editMode === 'custom' ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      border: editMode === 'custom' ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                       borderRadius: '8px',
                       backgroundColor: editMode === 'custom' ? '#fff7ed' : 'white',
                       cursor: 'pointer',
                       fontSize: '16px',
                       fontWeight: editMode === 'custom' ? '600' : 'normal',
-                      color: editMode === 'custom' ? '#f97316' : '#6b7280'
+                      color: editMode === 'custom' ? 'var(--theme-primary)' : '#6b7280'
                     }}
                   >
                     Custom Item

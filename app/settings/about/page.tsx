@@ -33,7 +33,7 @@ export default function AboutPage() {
             justifyContent: 'center'
           }}
         >
-          <ArrowLeft size={22} style={{ color: '#f97316' }} />
+          <ArrowLeft size={22} style={{ color: 'var(--theme-primary)' }} />
         </button>
         <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827' }}>
           About

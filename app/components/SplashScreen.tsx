@@ -29,7 +29,7 @@ export default function SplashScreen() {
 
   return (
     <div
-      className={`fixed inset-0 h-screen w-screen z-50 flex flex-col items-center justify-center bg-[#f97316] transition-opacity duration-500 ${
+      className={`fixed inset-0 h-screen w-screen z-50 flex flex-col items-center justify-center bg-[var(--theme-primary)] transition-opacity duration-500 ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
       style={{

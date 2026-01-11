@@ -221,8 +221,8 @@ export default function RecipeFormWithTabs({
           >
             <Star
               size={22}
-              fill={rating && star <= rating ? '#f97316' : 'none'}
-              stroke={rating && star <= rating ? '#f97316' : '#d1d5db'}
+              fill={rating && star <= rating ? 'var(--theme-primary)' : 'none'}
+              stroke={rating && star <= rating ? 'var(--theme-primary)' : '#d1d5db'}
               strokeWidth={1}
             />
           </button>
@@ -260,7 +260,7 @@ export default function RecipeFormWithTabs({
           onClick={handleCancel}
           disabled={loading}
           style={{
-            color: '#f97316',
+            color: 'var(--theme-primary)',
             fontSize: '17px',
             fontWeight: '400',
             background: 'none',
@@ -284,7 +284,7 @@ export default function RecipeFormWithTabs({
           onClick={handleSave}
           disabled={loading || !title.trim()}
           style={{
-            color: '#f97316',
+            color: 'var(--theme-primary)',
             fontSize: '17px',
             fontWeight: '400',
             background: 'none',
@@ -344,7 +344,7 @@ export default function RecipeFormWithTabs({
               style={{
                 width: '100%',
                 padding: '12px 16px',
-                backgroundColor: '#f97316',
+                backgroundColor: 'var(--theme-primary)',
                 color: 'white',
                 fontSize: '16px',
                 fontWeight: '500',
@@ -376,7 +376,7 @@ export default function RecipeFormWithTabs({
               fontSize: '14px',
               fontWeight: '400',
               color: activeTab === tab.id ? 'white' : '#111827',
-              backgroundColor: activeTab === tab.id ? '#f97316' : 'transparent',
+              backgroundColor: activeTab === tab.id ? 'var(--theme-primary)' : 'transparent',
               border: 'none',
               borderRadius: activeTab === tab.id ? '8px 8px 0 0' : '0',
               cursor: 'pointer',

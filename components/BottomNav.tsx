@@ -21,7 +21,7 @@ export default function BottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#f97316',
+        backgroundColor: 'var(--theme-primary)',
         borderTop: '1px solid rgba(0, 0, 0, 0.1)',
         zIndex: 50,
       }}

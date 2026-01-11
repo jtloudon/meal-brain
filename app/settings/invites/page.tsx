@@ -90,7 +90,7 @@ export default function InvitesPage() {
             justifyContent: 'center'
           }}
         >
-          <ArrowLeft size={22} style={{ color: '#f97316' }} />
+          <ArrowLeft size={22} style={{ color: 'var(--theme-primary)' }} />
         </button>
         <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827' }}>
           Household Invites
@@ -112,7 +112,7 @@ export default function InvitesPage() {
               alignItems: 'center',
               gap: '8px',
               padding: '12px 16px',
-              backgroundColor: '#f97316',
+              backgroundColor: 'var(--theme-primary)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -167,7 +167,7 @@ export default function InvitesPage() {
                         fontSize: '16px',
                         fontWeight: '600',
                         fontFamily: 'monospace',
-                        color: isExpired || isUsed ? '#9ca3af' : '#f97316',
+                        color: isExpired || isUsed ? '#9ca3af' : 'var(--theme-primary)',
                         marginBottom: '8px',
                       }}>
                         Code: {invite.invite_code}

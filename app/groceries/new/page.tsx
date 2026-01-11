@@ -43,7 +43,7 @@ export default function NewGroceryListPage() {
           onClick={() => router.push('/groceries')}
           disabled={saving}
           style={{
-            color: '#f97316',
+            color: 'var(--theme-primary)',
             fontWeight: 500,
             background: 'none',
             border: 'none',
@@ -60,7 +60,7 @@ export default function NewGroceryListPage() {
           onClick={handleCreate}
           disabled={saving || !listName.trim()}
           style={{
-            color: saving || !listName.trim() ? '#d1d5db' : '#f97316',
+            color: saving || !listName.trim() ? '#d1d5db' : 'var(--theme-primary)',
             fontWeight: 500,
             background: 'none',
             border: 'none',

@@ -163,7 +163,7 @@ export default function SettingsPage() {
             <h2 style={{
               fontSize: '14px',
               fontWeight: '600',
-              color: '#f97316',
+              color: 'var(--theme-primary)',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               marginBottom: '12px'

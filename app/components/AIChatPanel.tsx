@@ -468,7 +468,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
             height="24"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#f97316"
+            stroke="var(--theme-primary)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -493,7 +493,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                 background: 'transparent',
                 padding: '4px 8px',
                 cursor: 'pointer',
-                color: '#f97316',
+                color: 'var(--theme-primary)',
                 fontSize: '13px',
                 fontWeight: '500',
               }}
@@ -533,7 +533,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                 height="60"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#f97316"
+                stroke="var(--theme-primary)"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -562,7 +562,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                     maxWidth: '80%',
                     borderRadius: '16px',
                     padding: '12px 16px',
-                    backgroundColor: message.role === 'user' ? '#f97316' : '#ffffff',
+                    backgroundColor: message.role === 'user' ? 'var(--theme-primary)' : '#ffffff',
                     color: message.role === 'user' ? '#ffffff' : '#111827',
                     boxShadow: message.role === 'user' ? 'none' : '0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
                   }}
@@ -575,7 +575,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                               key={i}
                               onClick={() => handleRecipeClick(part.recipeId!)}
                               className="font-bold underline cursor-pointer"
-                              style={{ color: '#f97316' }}
+                              style={{ color: 'var(--theme-primary)' }}
                             >
                               {part.text.replace(/^\*\*|\*\*$|^"|"$/g, '')}
                             </span>
@@ -616,7 +616,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                             padding: '8px 16px',
                             borderRadius: '20px',
                             border: 'none',
-                            backgroundColor: '#f97316',
+                            backgroundColor: 'var(--theme-primary)',
                             color: 'white',
                             fontSize: '14px',
                             fontWeight: '500',
@@ -733,7 +733,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
               aria-label="Send message"
               onMouseEnter={(e) => {
                 if (input.trim() && !isLoading) {
-                  e.currentTarget.style.color = '#f97316';
+                  e.currentTarget.style.color = 'var(--theme-primary)';
                 }
               }}
               onMouseLeave={(e) => {

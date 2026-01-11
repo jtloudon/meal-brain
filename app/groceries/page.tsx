@@ -675,7 +675,7 @@ export default function GroceriesPage() {
                 fontSize: '24px',
                 fontWeight: '600',
                 padding: '8px 12px',
-                border: '2px solid #f97316',
+                border: '2px solid var(--theme-primary)',
                 borderRadius: '8px',
                 outline: 'none'
               }}
@@ -685,7 +685,7 @@ export default function GroceriesPage() {
               disabled={!editListName.trim() || saving}
               style={{
                 padding: '8px 16px',
-                backgroundColor: '#f97316',
+                backgroundColor: 'var(--theme-primary)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -746,7 +746,7 @@ export default function GroceriesPage() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {selectedListId === defaultListId && (
-                  <Star size={20} style={{ color: '#f97316', fill: '#f97316' }} />
+                  <Star size={20} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)' }} />
                 )}
                 <span style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
                   {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
@@ -771,8 +771,8 @@ export default function GroceriesPage() {
               <Shield
                 size={20}
                 style={{
-                  color: '#f97316',
-                  fill: lists.find(l => l.id === selectedListId)?.protected ? '#f97316' : 'none'
+                  color: 'var(--theme-primary)',
+                  fill: lists.find(l => l.id === selectedListId)?.protected ? 'var(--theme-primary)' : 'none'
                 }}
               />
             </button>
@@ -794,7 +794,7 @@ export default function GroceriesPage() {
               }}
               title="Rename list"
             >
-              <Pencil size={20} style={{ color: '#f97316' }} />
+              <Pencil size={20} style={{ color: 'var(--theme-primary)' }} />
             </button>
           </div>
         )}
@@ -826,7 +826,7 @@ export default function GroceriesPage() {
                 padding: '6px 10px',
                 borderRadius: '16px',
                 border: 'none',
-                backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+                backgroundColor: items.some(item => item.checked) ? 'var(--theme-primary)' : '#f3f4f6',
                 color: items.some(item => item.checked) ? 'white' : '#6b7280',
                 fontSize: '13px',
                 fontWeight: '500',
@@ -845,7 +845,7 @@ export default function GroceriesPage() {
               padding: '6px 10px',
               borderRadius: '16px',
               border: 'none',
-              backgroundColor: items.some(item => item.checked) ? '#f97316' : '#f3f4f6',
+              backgroundColor: items.some(item => item.checked) ? 'var(--theme-primary)' : '#f3f4f6',
               color: items.some(item => item.checked) ? 'white' : '#6b7280',
               fontSize: '13px',
               fontWeight: '500',
@@ -862,7 +862,7 @@ export default function GroceriesPage() {
               padding: '6px 10px',
               borderRadius: '16px',
               border: 'none',
-              backgroundColor: showInlineAddForm ? '#f97316' : '#f3f4f6',
+              backgroundColor: showInlineAddForm ? 'var(--theme-primary)' : '#f3f4f6',
               color: showInlineAddForm ? 'white' : '#6b7280',
               fontSize: '13px',
               fontWeight: '500',
@@ -1035,7 +1035,7 @@ export default function GroceriesPage() {
                 style={{
                   flex: 1,
                   padding: '10px 16px',
-                  backgroundColor: (saving || !newItemName.trim()) ? '#e5e7eb' : '#f97316',
+                  backgroundColor: (saving || !newItemName.trim()) ? '#e5e7eb' : 'var(--theme-primary)',
                   color: (saving || !newItemName.trim()) ? '#9ca3af' : 'white',
                   fontSize: '14px',
                   fontWeight: 500,
@@ -1076,7 +1076,7 @@ export default function GroceriesPage() {
               return Object.entries(grouped).map(([category, categoryItems], index) => (
                 <div key={category} className={index > 0 ? 'mt-6' : ''}>
                   {/* Category Header */}
-                  <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#f97316', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {category}
                   </h3>
 
@@ -1102,7 +1102,7 @@ export default function GroceriesPage() {
                             height: '20px',
                             borderRadius: '3px',
                             border: item.checked ? 'none' : '1px solid #d1d5db',
-                            backgroundColor: item.checked ? '#f97316' : 'transparent',
+                            backgroundColor: item.checked ? 'var(--theme-primary)' : 'transparent',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -1137,7 +1137,7 @@ export default function GroceriesPage() {
                             aria-label={`${item.out_of_stock ? 'Mark in stock' : 'Mark out of stock'} ${item.display_name}`}
                           >
                             <Frown
-                              fill={item.out_of_stock ? '#f97316' : 'white'}
+                              fill={item.out_of_stock ? 'var(--theme-primary)' : 'white'}
                               stroke={item.out_of_stock ? 'white' : '#d1d5db'}
                               strokeWidth={2.5}
                               style={{
@@ -1178,13 +1178,13 @@ export default function GroceriesPage() {
                                 <a
                                   href={`/recipes/${item.recipes.id}`}
                                   style={{
-                                    color: '#f97316',
+                                    color: 'var(--theme-primary)',
                                     textDecoration: 'none',
                                     flexShrink: 0
                                   }}
                                   onClick={(e) => e.stopPropagation()}
                                   onMouseEnter={(e) => e.currentTarget.style.color = '#d97316'}
-                                  onMouseLeave={(e) => e.currentTarget.style.color = '#f97316'}
+                                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--theme-primary)'}
                                 >
                                   {item.recipes.title}
                                 </a>
@@ -1311,7 +1311,7 @@ export default function GroceriesPage() {
                       }}
                     >
                       {list.id === defaultListId && (
-                        <Star size={16} style={{ color: '#f97316', fill: '#f97316', flexShrink: 0 }} />
+                        <Star size={16} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)', flexShrink: 0 }} />
                       )}
                       <span style={{ flex: 1 }}>{list.name}</span>
                     </button>
@@ -1351,8 +1351,8 @@ export default function GroceriesPage() {
                       <Star
                         size={18}
                         style={{
-                          color: '#f97316',
-                          fill: list.id === defaultListId ? '#f97316' : 'transparent'
+                          color: 'var(--theme-primary)',
+                          fill: list.id === defaultListId ? 'var(--theme-primary)' : 'transparent'
                         }}
                       />
                     </button>
@@ -1513,7 +1513,7 @@ export default function GroceriesPage() {
                 onClick={() => setCurrentView('list')}
                 disabled={saving}
                 style={{
-                  color: '#f97316',
+                  color: 'var(--theme-primary)',
                   fontWeight: 500,
                   background: 'none',
                   border: 'none',
@@ -1530,7 +1530,7 @@ export default function GroceriesPage() {
                 onClick={handleUpdateItem}
                 disabled={saving || !editName.trim()}
                 style={{
-                  color: saving || !editName.trim() ? '#d1d5db' : '#f97316',
+                  color: saving || !editName.trim() ? '#d1d5db' : 'var(--theme-primary)',
                   fontWeight: 500,
                   background: 'none',
                   border: 'none',
@@ -2034,7 +2034,7 @@ export default function GroceriesPage() {
                         gap: '8px'
                       }}>
                         {list.id === defaultListId && (
-                          <Star size={16} style={{ color: '#f97316', fill: '#f97316' }} />
+                          <Star size={16} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)' }} />
                         )}
                         <span style={{ fontWeight: '500' }}>{list.name}</span>
                       </div>

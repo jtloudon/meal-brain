@@ -397,8 +397,8 @@ export default function RecipeDetailPage() {
           <Star
             key={star}
             size={16}
-            fill={star <= displayRating ? '#f97316' : 'none'}
-            stroke={star <= displayRating ? '#f97316' : '#d1d5db'}
+            fill={star <= displayRating ? 'var(--theme-primary)' : 'none'}
+            stroke={star <= displayRating ? 'var(--theme-primary)' : '#d1d5db'}
             strokeWidth={2}
           />
         ))}
@@ -780,7 +780,7 @@ export default function RecipeDetailPage() {
         {/* Ingredients Section */}
         <div className="py-6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', margin: 0 }}>Ingredients</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--theme-primary)', margin: 0 }}>Ingredients</h2>
             {recipe.source && (recipe.source.startsWith('http://') || recipe.source.startsWith('https://')) && (
               <a
                 href={recipe.source}
@@ -788,7 +788,7 @@ export default function RecipeDetailPage() {
                 rel="noopener noreferrer"
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: '#f97316',
+                  backgroundColor: 'var(--theme-primary)',
                   color: 'white',
                   fontSize: '13px',
                   fontWeight: '500',
@@ -862,7 +862,7 @@ export default function RecipeDetailPage() {
         {/* Directions Section */}
         {recipe.instructions && (
           <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', marginBottom: '16px' }}>Directions</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--theme-primary)', marginBottom: '16px' }}>Directions</h2>
             <div style={{ color: '#111827', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
               {decodeHTML(recipe.instructions)}
             </div>
@@ -872,7 +872,7 @@ export default function RecipeDetailPage() {
         {/* Notes Section (if any) */}
         {recipe.notes && (
           <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#f97316', marginBottom: '16px' }}>Notes</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--theme-primary)', marginBottom: '16px' }}>Notes</h2>
             <div style={{ color: '#6b7280', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontStyle: 'italic' }}>
               {decodeHTML(recipe.notes)}
             </div>
@@ -1067,7 +1067,7 @@ export default function RecipeDetailPage() {
                     }}
                     style={{
                       padding: '8px 16px',
-                      backgroundColor: '#f97316',
+                      backgroundColor: 'var(--theme-primary)',
                       color: 'white',
                       fontSize: '14px',
                       fontWeight: '500',
@@ -1142,9 +1142,9 @@ export default function RecipeDetailPage() {
                               style={{
                                 padding: '6px 12px',
                                 fontSize: '13px',
-                                color: '#f97316',
+                                color: 'var(--theme-primary)',
                                 backgroundColor: 'transparent',
-                                border: '1px solid #f97316',
+                                border: '1px solid var(--theme-primary)',
                                 borderRadius: '6px',
                                 cursor: 'pointer'
                               }}
@@ -1399,7 +1399,7 @@ export default function RecipeDetailPage() {
                           secondGroceryList
                             ? (ingredientsListA.size === 0 && ingredientsListB.size === 0)
                             : selectedIngredients.size === 0
-                        )) ? '#e5e7eb' : '#f97316',
+                        )) ? '#e5e7eb' : 'var(--theme-primary)',
                         color: (pushing || groceryLists.length === 0 || (
                           secondGroceryList
                             ? (ingredientsListA.size === 0 && ingredientsListB.size === 0)

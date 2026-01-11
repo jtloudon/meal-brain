@@ -93,7 +93,7 @@ function SignupContent() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[#f97316]" style={{ color: 'white' }}>
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--theme-primary)]" style={{ color: 'white' }}>
       <div className="flex flex-col items-center">
         {/* Chef's Hat Icon - matches login exactly */}
         <svg
@@ -266,7 +266,7 @@ function SignupContent() {
 export default function SignupPage() {
   return (
     <Suspense fallback={
-      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[#f97316]">
+      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--theme-primary)]">
         <div className="text-center" style={{ color: 'white' }}>
           <div className="text-lg">Loading...</div>
         </div>

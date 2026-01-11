@@ -507,8 +507,8 @@ export default function RecipesPage() {
           <Star
             key={star}
             size={14}
-            fill={star <= displayRating ? '#f97316' : 'none'}
-            stroke={star <= displayRating ? '#f97316' : '#d1d5db'}
+            fill={star <= displayRating ? 'var(--theme-primary)' : 'none'}
+            stroke={star <= displayRating ? 'var(--theme-primary)' : '#d1d5db'}
             strokeWidth={2}
           />
         ))}
@@ -583,7 +583,7 @@ export default function RecipesPage() {
                 flexShrink: 0
               }}
             >
-              <Search size={22} style={{ color: '#f97316' }} />
+              <Search size={22} style={{ color: 'var(--theme-primary)' }} />
             </button>
           ) : (
             <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%', marginLeft: '10px' }}>
@@ -601,7 +601,7 @@ export default function RecipesPage() {
                   flexShrink: 0
                 }}
               >
-                <Search size={22} style={{ color: '#f97316' }} />
+                <Search size={22} style={{ color: 'var(--theme-primary)' }} />
               </button>
               <input
                 type="text"
@@ -638,7 +638,7 @@ export default function RecipesPage() {
               backgroundColor: 'transparent',
               cursor: 'pointer',
               fontSize: '15px',
-              color: '#f97316',
+              color: 'var(--theme-primary)',
               fontWeight: '500',
               flexShrink: 0
             }}
@@ -659,7 +659,7 @@ export default function RecipesPage() {
               flexShrink: 0
             }}
           >
-            <Plus size={24} style={{ color: '#f97316' }} />
+            <Plus size={24} style={{ color: 'var(--theme-primary)' }} />
           </button>
         </div>
       }
@@ -683,7 +683,7 @@ export default function RecipesPage() {
                 padding: '6px 14px',
                 borderRadius: '16px',
                 border: 'none',
-                backgroundColor: selectedCategory === category ? '#f97316' : '#f3f4f6',
+                backgroundColor: selectedCategory === category ? 'var(--theme-primary)' : '#f3f4f6',
                 color: selectedCategory === category ? 'white' : '#6b7280',
                 fontSize: '13px',
                 fontWeight: '500',
@@ -711,7 +711,7 @@ export default function RecipesPage() {
                 padding: '6px 10px',
                 borderRadius: '16px',
                 border: 'none',
-                backgroundColor: minRating === rating ? '#f97316' : '#f3f4f6',
+                backgroundColor: minRating === rating ? 'var(--theme-primary)' : '#f3f4f6',
                 color: minRating === rating ? 'white' : '#6b7280',
                 fontSize: '13px',
                 fontWeight: '500',
@@ -723,7 +723,7 @@ export default function RecipesPage() {
             >
               {rating ? (
                 <>
-                  <Star size={14} fill={minRating === rating ? 'white' : '#f97316'} stroke={minRating === rating ? 'white' : '#f97316'} strokeWidth={2} />
+                  <Star size={14} fill={minRating === rating ? 'white' : 'var(--theme-primary)'} stroke={minRating === rating ? 'white' : 'var(--theme-primary)'} strokeWidth={2} />
                   <span>{rating}+</span>
                 </>
               ) : (
@@ -748,7 +748,7 @@ export default function RecipesPage() {
                 padding: '6px 10px',
                 borderRadius: '16px',
                 border: 'none',
-                backgroundColor: maxTime === time ? '#f97316' : '#f3f4f6',
+                backgroundColor: maxTime === time ? 'var(--theme-primary)' : '#f3f4f6',
                 color: maxTime === time ? 'white' : '#6b7280',
                 fontSize: '13px',
                 fontWeight: '500',
@@ -871,7 +871,7 @@ export default function RecipesPage() {
                   <h3 style={{
                     fontSize: '17px',
                     fontWeight: '600',
-                    color: '#f97316',
+                    color: 'var(--theme-primary)',
                     marginBottom: '4px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -1069,7 +1069,7 @@ export default function RecipesPage() {
                 style={{
                   flex: 1,
                   padding: '10px 16px',
-                  backgroundColor: (importing || (!importUrl.trim() && !importFile)) ? '#e5e7eb' : '#f97316',
+                  backgroundColor: (importing || (!importUrl.trim() && !importFile)) ? '#e5e7eb' : 'var(--theme-primary)',
                   color: (importing || (!importUrl.trim() && !importFile)) ? '#9ca3af' : 'white',
                   fontSize: '14px',
                   fontWeight: 500,

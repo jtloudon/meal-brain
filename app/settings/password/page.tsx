@@ -57,7 +57,7 @@ export default function PasswordSettingsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header - Orange bar */}
-      <header className="sticky top-0 bg-[#f97316] z-10">
+      <header className="sticky top-0 bg-[var(--theme-primary)] z-10">
         <div className="flex items-center px-4 py-3">
           <button
             onClick={() => router.back()}
@@ -93,7 +93,7 @@ export default function PasswordSettingsPage() {
               required
               minLength={8}
               disabled={loading}
-              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent disabled:opacity-50"
+              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
               placeholder="At least 8 characters"
               style={{ borderRadius: '9999px' }}
             />
@@ -111,7 +111,7 @@ export default function PasswordSettingsPage() {
               required
               minLength={8}
               disabled={loading}
-              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent disabled:opacity-50"
+              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
               placeholder="Re-enter password"
               style={{ borderRadius: '9999px' }}
             />
@@ -132,7 +132,7 @@ export default function PasswordSettingsPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#f97316] text-white py-3 font-medium hover:bg-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[var(--theme-primary)] text-white py-3 font-medium hover:bg-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ borderRadius: '9999px' }}
           >
             {loading ? 'Setting Password...' : 'Set Password'}

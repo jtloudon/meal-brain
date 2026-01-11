@@ -148,7 +148,7 @@ export default function OnboardingPreferencesPage() {
     <div style={{ minHeight: '100vh', backgroundColor: 'white', display: 'flex', flexDirection: 'column' }}>
       {/* Header with Progress */}
       <div style={{
-        backgroundColor: '#f97316',
+        backgroundColor: 'var(--theme-primary)',
         color: 'white',
         padding: '20px 16px',
         borderBottomLeftRadius: '24px',
@@ -200,7 +200,7 @@ export default function OnboardingPreferencesPage() {
                   style={{
                     padding: '16px',
                     backgroundColor: preferences.household_context === context ? '#fff7ed' : 'white',
-                    border: preferences.household_context === context ? '2px solid #f97316' : '1px solid #e5e7eb',
+                    border: preferences.household_context === context ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                     borderRadius: '12px',
                     fontSize: '16px',
                     color: '#111827',
@@ -234,7 +234,7 @@ export default function OnboardingPreferencesPage() {
                   onClick={() => toggleDietaryConstraint(constraint)}
                   style={{
                     padding: '10px 18px',
-                    backgroundColor: preferences.dietary_constraints.includes(constraint) ? '#f97316' : 'white',
+                    backgroundColor: preferences.dietary_constraints.includes(constraint) ? 'var(--theme-primary)' : 'white',
                     color: preferences.dietary_constraints.includes(constraint) ? 'white' : '#374151',
                     border: '1px solid #e5e7eb',
                     borderRadius: '24px',
@@ -255,7 +255,7 @@ export default function OnboardingPreferencesPage() {
                     onClick={() => toggleDietaryConstraint(constraint)}
                     style={{
                       padding: '10px 18px',
-                      backgroundColor: '#f97316',
+                      backgroundColor: 'var(--theme-primary)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '24px',
@@ -291,7 +291,7 @@ export default function OnboardingPreferencesPage() {
                   onClick={addCustomConstraint}
                   style={{
                     padding: '10px 20px',
-                    backgroundColor: '#f97316',
+                    backgroundColor: 'var(--theme-primary)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
@@ -308,8 +308,8 @@ export default function OnboardingPreferencesPage() {
                 style={{
                   padding: '10px 18px',
                   backgroundColor: 'white',
-                  color: '#f97316',
-                  border: '1px solid #f97316',
+                  color: 'var(--theme-primary)',
+                  border: '1px solid var(--theme-primary)',
                   borderRadius: '8px',
                   fontSize: '14px',
                   cursor: 'pointer'
@@ -348,7 +348,7 @@ export default function OnboardingPreferencesPage() {
                   style={{
                     padding: '16px',
                     backgroundColor: preferences.ai_style === style.value ? '#fff7ed' : 'white',
-                    border: preferences.ai_style === style.value ? '2px solid #f97316' : '1px solid #e5e7eb',
+                    border: preferences.ai_style === style.value ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                     borderRadius: '12px',
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -382,7 +382,7 @@ export default function OnboardingPreferencesPage() {
                   onClick={() => togglePlanningPreference(pref)}
                   style={{
                     padding: '10px 18px',
-                    backgroundColor: preferences.planning_preferences.includes(pref) ? '#f97316' : 'white',
+                    backgroundColor: preferences.planning_preferences.includes(pref) ? 'var(--theme-primary)' : 'white',
                     color: preferences.planning_preferences.includes(pref) ? 'white' : '#374151',
                     border: '1px solid #e5e7eb',
                     borderRadius: '24px',
@@ -413,7 +413,7 @@ export default function OnboardingPreferencesPage() {
                 style={{
                   padding: '16px',
                   backgroundColor: preferences.ai_learning_enabled ? '#fff7ed' : 'white',
-                  border: preferences.ai_learning_enabled ? '2px solid #f97316' : '1px solid #e5e7eb',
+                  border: preferences.ai_learning_enabled ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                   borderRadius: '12px',
                   cursor: 'pointer',
                   textAlign: 'left',
@@ -432,7 +432,7 @@ export default function OnboardingPreferencesPage() {
                 style={{
                   padding: '16px',
                   backgroundColor: !preferences.ai_learning_enabled ? '#fff7ed' : 'white',
-                  border: !preferences.ai_learning_enabled ? '2px solid #f97316' : '1px solid #e5e7eb',
+                  border: !preferences.ai_learning_enabled ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                   borderRadius: '12px',
                   cursor: 'pointer',
                   textAlign: 'left',
@@ -464,7 +464,7 @@ export default function OnboardingPreferencesPage() {
                 <h3 style={{
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#f97316',
+                  color: 'var(--theme-primary)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   marginBottom: '4px'
@@ -482,7 +482,7 @@ export default function OnboardingPreferencesPage() {
                 <h3 style={{
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#f97316',
+                  color: 'var(--theme-primary)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   marginBottom: '4px'
@@ -500,7 +500,7 @@ export default function OnboardingPreferencesPage() {
                 <h3 style={{
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#f97316',
+                  color: 'var(--theme-primary)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   marginBottom: '4px'
@@ -517,7 +517,7 @@ export default function OnboardingPreferencesPage() {
                 <h3 style={{
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#f97316',
+                  color: 'var(--theme-primary)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   marginBottom: '4px'
@@ -535,7 +535,7 @@ export default function OnboardingPreferencesPage() {
                 <h3 style={{
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#f97316',
+                  color: 'var(--theme-primary)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   marginBottom: '4px'
@@ -590,8 +590,8 @@ export default function OnboardingPreferencesPage() {
               style={{
                 padding: '12px 16px',
                 backgroundColor: 'white',
-                color: '#f97316',
-                border: '1px solid #f97316',
+                color: 'var(--theme-primary)',
+                border: '1px solid var(--theme-primary)',
                 borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: '500',
@@ -613,7 +613,7 @@ export default function OnboardingPreferencesPage() {
               disabled={!canProceed() || saving}
               style={{
                 padding: '12px 20px',
-                backgroundColor: canProceed() && !saving ? '#f97316' : '#d1d5db',
+                backgroundColor: canProceed() && !saving ? 'var(--theme-primary)' : '#d1d5db',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -634,7 +634,7 @@ export default function OnboardingPreferencesPage() {
               disabled={saving}
               style={{
                 padding: '12px 24px',
-                backgroundColor: saving ? '#d1d5db' : '#f97316',
+                backgroundColor: saving ? '#d1d5db' : 'var(--theme-primary)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',

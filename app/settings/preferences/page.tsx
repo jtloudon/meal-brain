@@ -13,6 +13,7 @@ interface UserPreferences {
   ai_style: AIStyle;
   planning_preferences: string[];
   ai_learning_enabled: boolean;
+  theme_color?: string;
 }
 
 export default function AIPreferencesPage() {
@@ -135,7 +136,7 @@ export default function AIPreferencesPage() {
             justifyContent: 'center'
           }}
         >
-          <ArrowLeft size={22} style={{ color: '#f97316' }} />
+          <ArrowLeft size={22} style={{ color: 'var(--theme-primary)' }} />
         </button>
         <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
           AI Preferences
@@ -175,7 +176,7 @@ export default function AIPreferencesPage() {
                 style={{
                   padding: '12px 16px',
                   backgroundColor: preferences.household_context === context ? '#fff7ed' : 'white',
-                  border: preferences.household_context === context ? '2px solid #f97316' : '1px solid #e5e7eb',
+                  border: preferences.household_context === context ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                   borderRadius: '8px',
                   fontSize: '15px',
                   color: '#111827',
@@ -207,7 +208,7 @@ export default function AIPreferencesPage() {
                 onClick={() => toggleDietaryConstraint(constraint)}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: preferences.dietary_constraints.includes(constraint) ? '#f97316' : 'white',
+                  backgroundColor: preferences.dietary_constraints.includes(constraint) ? 'var(--theme-primary)' : 'white',
                   color: preferences.dietary_constraints.includes(constraint) ? 'white' : '#374151',
                   border: '1px solid #e5e7eb',
                   borderRadius: '20px',
@@ -227,7 +228,7 @@ export default function AIPreferencesPage() {
                   onClick={() => toggleDietaryConstraint(constraint)}
                   style={{
                     padding: '8px 16px',
-                    backgroundColor: '#f97316',
+                    backgroundColor: 'var(--theme-primary)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '20px',
@@ -263,7 +264,7 @@ export default function AIPreferencesPage() {
                 onClick={addCustomConstraint}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: '#f97316',
+                  backgroundColor: 'var(--theme-primary)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -280,8 +281,8 @@ export default function AIPreferencesPage() {
               style={{
                 padding: '8px 16px',
                 backgroundColor: 'white',
-                color: '#f97316',
-                border: '1px solid #f97316',
+                color: 'var(--theme-primary)',
+                border: '1px solid var(--theme-primary)',
                 borderRadius: '8px',
                 fontSize: '14px',
                 cursor: 'pointer'
@@ -315,7 +316,7 @@ export default function AIPreferencesPage() {
                 style={{
                   padding: '12px 16px',
                   backgroundColor: preferences.ai_style === style.value ? '#fff7ed' : 'white',
-                  border: preferences.ai_style === style.value ? '2px solid #f97316' : '1px solid #e5e7eb',
+                  border: preferences.ai_style === style.value ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   textAlign: 'left'
@@ -347,7 +348,7 @@ export default function AIPreferencesPage() {
                 onClick={() => togglePlanningPreference(pref)}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: preferences.planning_preferences.includes(pref) ? '#f97316' : 'white',
+                  backgroundColor: preferences.planning_preferences.includes(pref) ? 'var(--theme-primary)' : 'white',
                   color: preferences.planning_preferences.includes(pref) ? 'white' : '#374151',
                   border: '1px solid #e5e7eb',
                   borderRadius: '20px',
@@ -380,7 +381,7 @@ export default function AIPreferencesPage() {
               style={{
                 padding: '12px 16px',
                 backgroundColor: preferences.ai_learning_enabled ? '#fff7ed' : 'white',
-                border: preferences.ai_learning_enabled ? '2px solid #f97316' : '1px solid #e5e7eb',
+                border: preferences.ai_learning_enabled ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                 borderRadius: '8px',
                 cursor: 'pointer',
                 textAlign: 'left'
@@ -402,7 +403,7 @@ export default function AIPreferencesPage() {
               style={{
                 padding: '12px 16px',
                 backgroundColor: !preferences.ai_learning_enabled ? '#fff7ed' : 'white',
-                border: !preferences.ai_learning_enabled ? '2px solid #f97316' : '1px solid #e5e7eb',
+                border: !preferences.ai_learning_enabled ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                 borderRadius: '8px',
                 cursor: 'pointer',
                 textAlign: 'left'
@@ -415,6 +416,52 @@ export default function AIPreferencesPage() {
                 Don't learn from my behavior
               </div>
             </button>
+          </div>
+        </div>
+
+        {/* Theme Color */}
+        <div style={{ marginBottom: '32px' }}>
+          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '8px' }}>
+            Theme Color
+          </h4>
+          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>
+            Customize your app's accent color
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+            {[
+              { name: 'Orange', hex: '#f97316' },
+              { name: 'Red', hex: '#ef4444' },
+              { name: 'Pink', hex: '#ec4899' },
+              { name: 'Purple', hex: '#a855f7' },
+              { name: 'Indigo', hex: '#6366f1' },
+              { name: 'Blue', hex: '#3b82f6' },
+              { name: 'Teal', hex: '#14b8a6' },
+              { name: 'Green', hex: '#22c55e' },
+              { name: 'Amber', hex: '#f59e0b' },
+              { name: 'Rose', hex: '#f43f5e' },
+            ].map((color) => (
+              <button
+                key={color.hex}
+                onClick={async () => {
+                  const updated = { ...preferences, theme_color: color.hex };
+                  setPreferences(updated);
+                  await savePreferences(updated);
+                  // Reload page to apply new theme color
+                  window.location.reload();
+                }}
+                style={{
+                  width: '100%',
+                  aspectRatio: '1',
+                  borderRadius: '8px',
+                  backgroundColor: color.hex,
+                  border: (preferences.theme_color || '#f97316') === color.hex ? '3px solid #111827' : '1px solid #e5e7eb',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                aria-label={color.name}
+                title={color.name}
+              />
+            ))}
           </div>
         </div>
       </div>

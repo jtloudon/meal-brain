@@ -141,7 +141,7 @@ function AddMealContent() {
           }}
           style={{
             padding: '8px',
-            color: '#f97316',
+            color: 'var(--theme-primary)',
             background: 'none',
             border: 'none',
             cursor: 'pointer'
@@ -262,7 +262,7 @@ function AddMealContent() {
                     }}
                     style={{
                       padding: '12px',
-                      border: mealType === type ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      border: mealType === type ? '2px solid var(--theme-primary)' : '1px solid #e5e7eb',
                       borderRadius: '8px',
                       backgroundColor: mealType === type ? '#fff7ed' : 'white',
                       cursor: 'pointer',
@@ -326,7 +326,7 @@ function AddMealContent() {
               style={{
                 width: '100%',
                 padding: '12px 16px',
-                backgroundColor: saving ? '#d1d5db' : '#f97316',
+                backgroundColor: saving ? '#d1d5db' : 'var(--theme-primary)',
                 color: 'white',
                 fontSize: '16px',
                 fontWeight: '600',

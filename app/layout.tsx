@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#f97316',
+  themeColor: 'var(--theme-primary)',
 };
 
 export default async function RootLayout({
@@ -31,7 +31,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   // Fetch user's theme color
-  let themeColor = '#f97316'; // default
+  let themeColor = 'var(--theme-primary)'; // default
 
   try {
     const cookieStore = await cookies();

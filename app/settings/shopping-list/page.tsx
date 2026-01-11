@@ -154,7 +154,7 @@ export default function ShoppingListSettingsPage() {
             justifyContent: 'center'
           }}
         >
-          <ArrowLeft size={22} style={{ color: '#f97316' }} />
+          <ArrowLeft size={22} style={{ color: 'var(--theme-primary)' }} />
         </button>
         <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
           Shopping list
@@ -169,7 +169,7 @@ export default function ShoppingListSettingsPage() {
           <div>
           {/* Default Grocery List Section */}
           <div style={{ marginBottom: '32px' }}>
-            <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#f97316', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <h4 style={{ fontSize: '12px', fontWeight: '600', color: 'var(--theme-primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Default Grocery List
             </h4>
             <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>
@@ -201,7 +201,7 @@ export default function ShoppingListSettingsPage() {
           </div>
 
           {/* Categories Section */}
-          <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#f97316', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <h4 style={{ fontSize: '12px', fontWeight: '600', color: 'var(--theme-primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Edit/reorder shopping list categories
           </h4>
 

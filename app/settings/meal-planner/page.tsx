@@ -126,7 +126,7 @@ export default function MealPlannerSettingsPage() {
             justifyContent: 'center'
           }}
         >
-          <ArrowLeft size={22} style={{ color: '#f97316' }} />
+          <ArrowLeft size={22} style={{ color: 'var(--theme-primary)' }} />
         </button>
         <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827', flex: 1 }}>
           Meal planner
@@ -145,7 +145,7 @@ export default function MealPlannerSettingsPage() {
           <h4 style={{
             fontSize: '12px',
             fontWeight: '600',
-            color: '#f97316',
+            color: 'var(--theme-primary)',
             marginBottom: '8px',
             textTransform: 'uppercase',
             letterSpacing: '0.05em'
@@ -267,7 +267,7 @@ export default function MealPlannerSettingsPage() {
                   style={{
                     flex: 1,
                     padding: '10px 16px',
-                    backgroundColor: !newMealName.trim() ? '#e5e7eb' : '#f97316',
+                    backgroundColor: !newMealName.trim() ? '#e5e7eb' : 'var(--theme-primary)',
                     color: !newMealName.trim() ? '#9ca3af' : 'white',
                     fontSize: '16px',
                     fontWeight: 500,
