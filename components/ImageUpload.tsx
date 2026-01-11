@@ -120,14 +120,15 @@ export default function ImageUpload({
       {uploading && (
         <div style={{
           padding: '12px',
-          backgroundColor: '#dbeafe',
-          border: '2px solid #3b82f6',
+          backgroundColor: 'color-mix(in srgb, var(--theme-primary) 15%, white)',
           borderRadius: '8px',
           marginBottom: '12px',
           fontSize: '14px',
-          textAlign: 'center'
+          fontWeight: '500',
+          textAlign: 'center',
+          color: 'color-mix(in srgb, var(--theme-primary) 80%, black)'
         }}>
-          📤 Uploading photo... Please wait before saving!
+          Uploading photo... Please wait before saving!
         </div>
       )}
 
