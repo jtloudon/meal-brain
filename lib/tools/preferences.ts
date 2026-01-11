@@ -16,6 +16,7 @@ export async function getUserPreferences(
   shopping_categories: any;
   meal_courses: any;
   default_grocery_list_id: string | null;
+  theme_color: string;
 }> {
   const { householdId } = context;
 
@@ -72,6 +73,7 @@ export async function getUserPreferences(
         { id: 'snack', name: 'Snack', time: '15:00', color: '#a855f7' },
       ],
       default_grocery_list_id: null,
+      theme_color: '#f97316',
     };
   }
 
@@ -84,5 +86,6 @@ export async function getUserPreferences(
     shopping_categories: preferences.shopping_categories,
     meal_courses: preferences.meal_courses,
     default_grocery_list_id: preferences.default_grocery_list_id || null,
+    theme_color: preferences.theme_color || '#f97316',
   };
 }

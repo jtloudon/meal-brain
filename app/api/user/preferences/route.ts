@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         planning_preferences: [],
         ai_learning_enabled: true,
         default_grocery_list_id: null,
+        theme_color: '#f97316',
       });
     }
 
@@ -108,6 +109,14 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
 
+    // Validate theme_color if provided
+    if (body.theme_color && !/^#[0-9A-Fa-f]{6}$/.test(body.theme_color)) {
+      return NextResponse.json(
+        { error: 'Invalid theme_color format. Must be a valid hex color (e.g., #f97316)' },
+        { status: 400 }
+      );
+    }
+
     // Upsert preferences
     const { data, error } = await supabase
       .from('user_preferences')
@@ -120,6 +129,7 @@ export async function PUT(request: NextRequest) {
           planning_preferences: body.planning_preferences,
           ai_learning_enabled: body.ai_learning_enabled,
           default_grocery_list_id: body.default_grocery_list_id,
+          theme_color: body.theme_color,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
