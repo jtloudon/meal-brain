@@ -777,6 +777,16 @@ export default function RecipeDetailPage() {
           </div>
         )}
 
+        {/* Notes Section (if any) */}
+        {recipe.notes && (
+          <div style={{ paddingTop: '24px', paddingBottom: '16px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--theme-primary)', marginBottom: '12px' }}>Notes</h2>
+            <div style={{ color: '#6b7280', whiteSpace: 'pre-wrap', lineHeight: '1.5', fontStyle: 'italic', fontSize: '14px' }}>
+              {decodeHTML(recipe.notes)}
+            </div>
+          </div>
+        )}
+
         {/* Ingredients Section */}
         <div className="py-6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -801,17 +811,6 @@ export default function RecipeDetailPage() {
               </a>
             )}
           </div>
-          {recipe.source && (recipe.source.startsWith('http://') || recipe.source.startsWith('https://')) && (
-            <p style={{
-              fontSize: '13px',
-              color: '#6b7280',
-              marginTop: 0,
-              marginBottom: '16px',
-              fontStyle: 'italic'
-            }}>
-              Tip: View original recipe for ingredient groupings and detailed instructions
-            </p>
-          )}
           {groupIngredientsBySection().map((group, groupIndex) => (
             <div key={groupIndex} style={{ marginBottom: group.section ? '24px' : '0' }}>
               {group.section && (
@@ -865,16 +864,6 @@ export default function RecipeDetailPage() {
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--theme-primary)', marginBottom: '16px' }}>Directions</h2>
             <div style={{ color: '#111827', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
               {decodeHTML(recipe.instructions)}
-            </div>
-          </div>
-        )}
-
-        {/* Notes Section (if any) */}
-        {recipe.notes && (
-          <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--theme-primary)', marginBottom: '16px' }}>Notes</h2>
-            <div style={{ color: '#6b7280', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontStyle: 'italic' }}>
-              {decodeHTML(recipe.notes)}
             </div>
           </div>
         )}
