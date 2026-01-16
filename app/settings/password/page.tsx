@@ -85,69 +85,71 @@ export default function PasswordSettingsPage() {
       </div>
 
       {/* Content */}
-      <div style={{ padding: '16px 16px 80px 16px' }}>
-        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
-          Set a password to login directly without using magic links.
-        </p>
+      <div style={{ padding: '16px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '100%', maxWidth: '500px' }}>
+          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+            Set a password to login directly without using magic links.
+          </p>
 
-        <form onSubmit={handleSetPassword} className="space-y-4">
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              New Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              disabled={loading}
-              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
-              placeholder="At least 8 characters"
-              style={{ borderRadius: '9999px' }}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-              disabled={loading}
-              className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
-              placeholder="Re-enter password"
-              style={{ borderRadius: '9999px' }}
-            />
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              {error}
+          <form onSubmit={handleSetPassword} className="space-y-4">
+            <div>
+              <label htmlFor="password" className="block text-xs font-medium text-gray-700 mb-1">
+                New Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                disabled={loading}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
+                placeholder="At least 8 characters"
+                style={{ borderRadius: '9999px', fontSize: '18px' }}
+              />
             </div>
-          )}
 
-          {message && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-              {message}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-xs font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+                disabled={loading}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
+                placeholder="Re-enter password"
+                style={{ borderRadius: '9999px', fontSize: '18px' }}
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[var(--theme-primary)] text-white py-3 font-medium hover:bg-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ borderRadius: '9999px' }}
-          >
-            {loading ? 'Setting Password...' : 'Set Password'}
-          </button>
-        </form>
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            {message && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+                {message}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[var(--theme-primary)] text-white py-3 text-xl hover:bg-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ borderRadius: '9999px', boxShadow: 'none' }}
+            >
+              {loading ? 'Setting Password...' : 'Set Password'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

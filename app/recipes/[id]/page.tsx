@@ -779,7 +779,7 @@ export default function RecipeDetailPage() {
 
         {/* Notes Section (if any) */}
         {recipe.notes && (
-          <div style={{ paddingTop: '12px', paddingBottom: '16px' }}>
+          <div style={{ paddingTop: '6px', paddingBottom: '16px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--theme-primary)', marginBottom: '12px' }}>Notes</h2>
             <div style={{ color: '#6b7280', whiteSpace: 'pre-wrap', lineHeight: '1.5', fontStyle: 'italic', fontSize: '14px' }}>
               {decodeHTML(recipe.notes)}
