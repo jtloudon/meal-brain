@@ -435,6 +435,14 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           .ai-chat-messages::-webkit-scrollbar-thumb:hover {
             background: #9ca3af;
           }
+          @keyframes bounce-dot {
+            0%, 60%, 100% {
+              transform: translateY(0);
+            }
+            30% {
+              transform: translateY(-10px);
+            }
+          }
         `
       }} />
       {/* Backdrop - with blur effect */}
@@ -581,9 +589,9 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                     maxWidth: '80%',
                     borderRadius: '16px',
                     padding: '12px 16px',
-                    backgroundColor: message.role === 'user' ? 'var(--theme-primary)' : '#ffffff',
+                    backgroundColor: message.role === 'user' ? 'var(--theme-primary)' : '#f3f4f6',
                     color: message.role === 'user' ? '#ffffff' : '#111827',
-                    boxShadow: message.role === 'user' ? 'none' : '0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+                    boxShadow: 'none',
                   }}
                 >
                   <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap', margin: 0 }}>
@@ -670,15 +678,14 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
           {isLoading && (
             <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px', paddingLeft: '16px', paddingRight: '16px' }}>
               <div style={{
-                backgroundColor: '#ffffff',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+                backgroundColor: '#f3f4f6',
                 borderRadius: '16px',
                 padding: '12px 16px',
               }}>
                 <div style={{ display: 'flex', gap: '4px' }}>
-                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce 1s infinite', animationDelay: '0ms' }} />
-                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce 1s infinite', animationDelay: '150ms' }} />
-                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce 1s infinite', animationDelay: '300ms' }} />
+                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce-dot 1s infinite', animationDelay: '0ms' }} />
+                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce-dot 1s infinite', animationDelay: '150ms' }} />
+                  <div style={{ width: '8px', height: '8px', backgroundColor: '#9ca3af', borderRadius: '50%', animation: 'bounce-dot 1s infinite', animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>

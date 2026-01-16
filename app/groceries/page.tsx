@@ -7,17 +7,16 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
-// Centralized list of units - single source of truth
+// Practical shopping units - suggestions, not restrictions
 const GROCERY_UNITS = [
   'whole',
   'lb',
   'oz',
   'cup',
-  'tbsp',
-  'tsp',
-  'g',
+  'pint',
+  'quart',
+  'gallon',
   'kg',
-  'ml',
   'l',
   'can',
   'package',
@@ -965,9 +964,11 @@ export default function GroceriesPage() {
                   outline: 'none'
                 }}
               />
-              <select
+              <input
+                list="unit-suggestions"
                 value={newItemUnit}
                 onChange={(e) => setNewItemUnit(e.target.value)}
+                placeholder="Unit"
                 style={{
                   flex: 1,
                   padding: '10px 12px',
@@ -976,11 +977,12 @@ export default function GroceriesPage() {
                   fontSize: '14px',
                   outline: 'none'
                 }}
-              >
+              />
+              <datalist id="unit-suggestions">
                 {GROCERY_UNITS.map((unit) => (
-                  <option key={unit} value={unit}>{unit}</option>
+                  <option key={unit} value={unit} />
                 ))}
-              </select>
+              </datalist>
             </div>
 
             {/* Item Name - Second Row */}
@@ -1462,15 +1464,18 @@ export default function GroceriesPage() {
                     step="0.01"
                     className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <select
+                  <input
+                    list="unit-suggestions-modal"
                     value={newItemUnit}
                     onChange={(e) => setNewItemUnit(e.target.value)}
+                    placeholder="Unit"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  />
+                  <datalist id="unit-suggestions-modal">
                     {GROCERY_UNITS.map((unit) => (
-                      <option key={unit} value={unit}>{unit}</option>
+                      <option key={unit} value={unit} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -1591,9 +1596,11 @@ export default function GroceriesPage() {
                   <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '8px' }}>
                     Unit
                   </label>
-                  <select
+                  <input
+                    list="unit-suggestions-edit"
                     value={editUnit}
                     onChange={(e) => setEditUnit(e.target.value)}
+                    placeholder="Unit (e.g., lb, can, some)"
                     style={{
                       width: '100%',
                       fontSize: '16px',
@@ -1602,12 +1609,12 @@ export default function GroceriesPage() {
                       borderRadius: '6px',
                       outline: 'none'
                     }}
-                  >
-                    <option value="">(none)</option>
+                  />
+                  <datalist id="unit-suggestions-edit">
                     {GROCERY_UNITS.map((unit) => (
-                      <option key={unit} value={unit}>{unit}</option>
+                      <option key={unit} value={unit} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
               </div>
 

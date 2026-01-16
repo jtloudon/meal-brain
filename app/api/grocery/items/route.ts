@@ -104,6 +104,15 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Log what we're about to send for debugging
+  console.log('[Add Item] Attempting to add:', {
+    name: display_name,
+    quantity,
+    unit: unit || '',
+    unitType: typeof unit,
+    unitRaw: unit,
+  });
+
   // Use the add_item tool (expects 'name' not 'display_name')
   const result = await grocery.add_item.execute(
     {
@@ -120,6 +129,9 @@ export async function POST(request: NextRequest) {
 
   if (!result.success) {
     console.error('Error adding item:', result.error);
+    if (result.error.field === 'unit') {
+      console.error('[Add Item] Unit validation failed for unit:', unit, 'typeof:', typeof unit);
+    }
     return NextResponse.json({ error: result.error.message }, { status: 500 });
   }
 

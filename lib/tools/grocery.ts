@@ -110,7 +110,7 @@ export const AddItemSchema = z.object({
   grocery_list_id: z.string().uuid('Invalid grocery list ID format'),
   name: z.string().min(1, 'Name is required'),
   quantity: z.number().positive('Quantity must be positive'),
-  unit: z.enum(VALID_UNITS).or(z.literal('')), // Allow empty string for unitless items
+  unit: z.string(), // Allow any string - grocery shopping is flexible
   ingredient_id: z.string().optional(),
 });
 
