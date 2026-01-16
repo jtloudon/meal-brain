@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/auth/supabase-client';
+import { ArrowLeft } from 'lucide-react';
 
 export default function PasswordSettingsPage() {
   const router = useRouter();
@@ -55,30 +56,39 @@ export default function PasswordSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header - Orange bar */}
-      <header className="sticky top-0 bg-[var(--theme-primary)] z-10">
-        <div className="flex items-center px-4 py-3">
-          <button
-            onClick={() => router.back()}
-            className="text-white hover:text-white/80"
-            style={{ fontSize: '14px', fontWeight: '500' }}
-          >
-            ← Back
-          </button>
-          <h1 className="flex-1 text-center text-lg font-semibold text-white">Set Password</h1>
-          <div style={{ width: '60px' }} /> {/* Spacer for centering */}
-        </div>
-      </header>
+    <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '16px',
+        borderBottom: '1px solid #e5e7eb',
+        gap: '12px'
+      }}>
+        <button
+          onClick={() => router.push('/settings')}
+          style={{
+            padding: '8px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <ArrowLeft size={22} style={{ color: 'var(--theme-primary)' }} />
+        </button>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
+          Set Password
+        </h3>
+      </div>
 
       {/* Content */}
-      <div className="p-6 max-w-md mx-auto">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2 text-gray-900">Enable Password Login</h2>
-          <p className="text-gray-600 text-sm">
-            Set a password to login directly without using magic links.
-          </p>
-        </div>
+      <div style={{ padding: '16px 16px 80px 16px' }}>
+        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+          Set a password to login directly without using magic links.
+        </p>
 
         <form onSubmit={handleSetPassword} className="space-y-4">
           <div>
@@ -138,16 +148,6 @@ export default function PasswordSettingsPage() {
             {loading ? 'Setting Password...' : 'Set Password'}
           </button>
         </form>
-
-        <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-          <h3 className="font-semibold text-sm mb-2 text-gray-900">How to use password login:</h3>
-          <ol className="text-sm text-gray-700 space-y-1 list-decimal list-inside">
-            <li>Set your password here</li>
-            <li>On the login page, click "Sign in with password"</li>
-            <li>Enter your email and password</li>
-            <li>Works great for the app!</li>
-          </ol>
-        </div>
       </div>
     </div>
   );

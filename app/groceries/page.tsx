@@ -68,7 +68,7 @@ export default function GroceriesPage() {
   const [newListName, setNewListName] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState('1');
-  const [newItemUnit, setNewItemUnit] = useState('whole');
+  const [newItemUnit, setNewItemUnit] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Edit view state
@@ -585,7 +585,7 @@ export default function GroceriesPage() {
         setItems((prev) => [...prev, data.item]);
         setNewItemName('');
         setNewItemQuantity('1');
-        setNewItemUnit('whole');
+        setNewItemUnit('');
         setShowAddItemModal(false);
       }
     } catch (error) {
@@ -1010,7 +1010,7 @@ export default function GroceriesPage() {
                   setShowInlineAddForm(false);
                   setNewItemName('');
                   setNewItemQuantity('1');
-                  setNewItemUnit('whole');
+                  setNewItemUnit('');
                 }}
                 disabled={saving}
                 style={{
@@ -1484,7 +1484,7 @@ export default function GroceriesPage() {
                     setShowAddItemModal(false);
                     setNewItemName('');
                     setNewItemQuantity('1');
-                    setNewItemUnit('whole');
+                    setNewItemUnit('');
                   }}
                   disabled={saving}
                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
