@@ -918,7 +918,7 @@ export default function GroceriesPage() {
                   width: '18px',
                   height: '18px',
                   borderRadius: '4px',
-                  border: '2px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
+                  border: '1px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
                   backgroundColor: items.every(item => item.checked) ? '#9ca3af' : 'white',
                   display: 'flex',
                   alignItems: 'center',
@@ -1141,7 +1141,7 @@ export default function GroceriesPage() {
                             <Frown
                               fill={item.out_of_stock ? 'var(--theme-primary)' : 'white'}
                               stroke={item.out_of_stock ? 'white' : '#d1d5db'}
-                              strokeWidth={2.5}
+                              strokeWidth={1.5}
                               style={{
                                 width: '20px',
                                 height: '20px',
