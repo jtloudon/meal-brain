@@ -93,7 +93,7 @@ export default function PasswordSettingsPage() {
 
           <form onSubmit={handleSetPassword} className="space-y-4">
             <div>
-              <label htmlFor="password" className="block font-medium text-gray-700 mb-1" style={{ fontSize: '12px' }}>
+              <label htmlFor="password" className="block font-medium text-gray-700 mb-1" style={{ fontSize: '14px' }}>
                 New Password
               </label>
               <input
@@ -106,12 +106,12 @@ export default function PasswordSettingsPage() {
                 disabled={loading}
                 className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
                 placeholder="At least 8 characters"
-                style={{ borderRadius: '9999px', fontSize: '12px' }}
+                style={{ borderRadius: '9999px', fontSize: '14px' }}
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block font-medium text-gray-700 mb-1" style={{ fontSize: '12px' }}>
+              <label htmlFor="confirmPassword" className="block font-medium text-gray-700 mb-1" style={{ fontSize: '14px' }}>
                 Confirm Password
               </label>
               <input
@@ -124,7 +124,7 @@ export default function PasswordSettingsPage() {
                 disabled={loading}
                 className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
                 placeholder="Re-enter password"
-                style={{ borderRadius: '9999px', fontSize: '12px' }}
+                style={{ borderRadius: '9999px', fontSize: '14px' }}
               />
             </div>
 
@@ -144,7 +144,7 @@ export default function PasswordSettingsPage() {
               type="submit"
               disabled={loading}
               className="w-full bg-[var(--theme-primary)] text-white py-3 hover:bg-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ borderRadius: '9999px', boxShadow: 'none', border: 'none', fontSize: '12px' }}
+              style={{ borderRadius: '9999px', boxShadow: 'none', border: 'none', fontSize: '14px' }}
             >
               {loading ? 'Setting Password...' : 'Set Password'}
             </button>
