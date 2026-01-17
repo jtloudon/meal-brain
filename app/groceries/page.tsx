@@ -968,7 +968,7 @@ export default function GroceriesPage() {
                 list="unit-suggestions"
                 value={newItemUnit}
                 onChange={(e) => setNewItemUnit(e.target.value)}
-                placeholder="Unit"
+                placeholder="Unit (e.g., bag, bottle, pint)"
                 style={{
                   flex: 1,
                   padding: '10px 12px',
@@ -1468,7 +1468,7 @@ export default function GroceriesPage() {
                     list="unit-suggestions-modal"
                     value={newItemUnit}
                     onChange={(e) => setNewItemUnit(e.target.value)}
-                    placeholder="Unit"
+                    placeholder="Unit (e.g., bag, bottle, pint)"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <datalist id="unit-suggestions-modal">
