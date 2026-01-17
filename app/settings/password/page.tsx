@@ -86,13 +86,13 @@ export default function PasswordSettingsPage() {
 
       {/* Content */}
       <div style={{ padding: '16px', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: '100%', maxWidth: '500px' }}>
-          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+        <div style={{ width: '100%', maxWidth: '400px', padding: '0 8px' }}>
+          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px' }}>
             Set a password to login directly without using magic links.
           </p>
 
-          <form onSubmit={handleSetPassword} className="space-y-4">
-            <div>
+          <form onSubmit={handleSetPassword}>
+            <div style={{ marginBottom: '24px' }}>
               <label htmlFor="password" className="block font-medium text-gray-700 mb-1" style={{ fontSize: '14px' }}>
                 New Password
               </label>
@@ -104,13 +104,19 @@ export default function PasswordSettingsPage() {
                 required
                 minLength={8}
                 disabled={loading}
-                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
+                className="w-full focus:outline-none disabled:opacity-50"
                 placeholder="At least 8 characters"
-                style={{ borderRadius: '9999px', fontSize: '14px' }}
+                style={{
+                  fontSize: '14px',
+                  padding: '8px 0',
+                  border: 'none',
+                  borderBottom: '1px solid #d1d5db',
+                  backgroundColor: 'transparent'
+                }}
               />
             </div>
 
-            <div>
+            <div style={{ marginBottom: '32px' }}>
               <label htmlFor="confirmPassword" className="block font-medium text-gray-700 mb-1" style={{ fontSize: '14px' }}>
                 Confirm Password
               </label>
@@ -122,20 +128,26 @@ export default function PasswordSettingsPage() {
                 required
                 minLength={8}
                 disabled={loading}
-                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent disabled:opacity-50"
+                className="w-full focus:outline-none disabled:opacity-50"
                 placeholder="Re-enter password"
-                style={{ borderRadius: '9999px', fontSize: '14px' }}
+                style={{
+                  fontSize: '14px',
+                  padding: '8px 0',
+                  border: 'none',
+                  borderBottom: '1px solid #d1d5db',
+                  backgroundColor: 'transparent'
+                }}
               />
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm" style={{ marginBottom: '16px' }}>
                 {error}
               </div>
             )}
 
             {message && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm" style={{ marginBottom: '16px' }}>
                 {message}
               </div>
             )}
@@ -144,7 +156,7 @@ export default function PasswordSettingsPage() {
               type="submit"
               disabled={loading}
               className="w-full bg-[var(--theme-primary)] text-white py-3 hover:bg-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ borderRadius: '9999px', boxShadow: 'none', border: 'none', fontSize: '14px' }}
+              style={{ borderRadius: '9999px', boxShadow: 'none', border: 'none', fontSize: '14px', marginTop: '8px' }}
             >
               {loading ? 'Setting Password...' : 'Set Password'}
             </button>
