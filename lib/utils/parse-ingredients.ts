@@ -248,13 +248,52 @@ export function parseIngredientLine(line: string): ParsedIngredient | null {
   // If no unit found, remaining is just the ingredient name (unit will be empty string)
 
   // 3. Split name and prep_state by comma
+  // Handle modifiers that should stay with ingredient name (e.g., "boneless, skinless chicken")
   let name = remaining;
   let prep_state: string | undefined = undefined;
 
   if (remaining.includes(',')) {
-    const parts = remaining.split(',');
-    name = parts[0].trim();
-    prep_state = parts.slice(1).join(',').trim();
+    const parts = remaining.split(',').map(p => p.trim());
+
+    // Common modifiers that should be part of the ingredient name, not prep state
+    const modifierWords = [
+      'boneless', 'skinless', 'bone-in', 'skin-on',
+      'fresh', 'frozen', 'dried', 'canned',
+      'raw', 'cooked', 'smoked', 'salted', 'unsalted',
+      'whole', 'ground', 'shredded', 'sliced', 'diced', 'chopped',
+      'extra virgin', 'extra-virgin',
+      'low-fat', 'non-fat', 'full-fat',
+      'organic', 'kosher', 'free-range'
+    ];
+
+    // Find where the actual prep instructions start
+    // Keep including parts that are modifiers or contain main ingredient words
+    let nameEndIndex = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i].toLowerCase();
+
+      // Check if this part is a modifier
+      const isModifier = modifierWords.some(mod => part.includes(mod));
+
+      // Check if this part contains a main ingredient word (chicken, beef, pork, etc.)
+      const hasMainIngredient = /\b(chicken|beef|pork|turkey|lamb|fish|salmon|tuna|shrimp|tofu|cheese|milk|butter|flour|sugar|rice|pasta)\b/i.test(part);
+
+      // If it's a modifier OR contains a main ingredient, include it in the name
+      if (isModifier || hasMainIngredient || i === 0) {
+        nameEndIndex = i;
+      } else {
+        // This looks like prep instructions, stop here
+        break;
+      }
+    }
+
+    // Combine the name parts
+    name = parts.slice(0, nameEndIndex + 1).join(', ');
+
+    // Everything after is prep state
+    if (nameEndIndex + 1 < parts.length) {
+      prep_state = parts.slice(nameEndIndex + 1).join(', ');
+    }
   }
 
   if (!name) {
