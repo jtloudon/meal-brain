@@ -127,7 +127,7 @@ export const faqData: FAQItem[] = [
   },
   {
     question: 'What are the AI preferences?',
-    answer: 'Go to Settings → AI Preferences to control how the Sous Chef behaves. Choose between different models (Haiku is fast, Sonnet is thoughtful), adjust response tone, and customize suggestion behavior. These settings let you tune the AI to match your cooking style.',
+    answer: 'Go to Settings → AI Preferences to customize how the Sous Chef works with you. Set your household context (just me, couple, family), dietary constraints, AI collaboration style (coach vs collaborator), planning preferences, and whether the AI should learn from your choices. These settings personalize suggestions to match your cooking style.',
     category: 'Tips & Tricks',
   },
   {

@@ -88,8 +88,8 @@ export default function HelpPage() {
         </p>
 
         {/* Search Input */}
-        <div style={{ position: 'relative', marginBottom: '24px' }}>
-          <div style={{ position: 'relative' }}>
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ position: 'relative', width: '100%' }}>
             <Search
               size={18}
               style={{
@@ -108,6 +108,7 @@ export default function HelpPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
                 width: '100%',
+                boxSizing: 'border-box',
                 padding: '12px 40px 12px 40px',
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
@@ -156,9 +157,9 @@ export default function HelpPage() {
             >
               <h4
                 style={{
-                  fontSize: '16px',
+                  fontSize: '17px',
                   fontWeight: 600,
-                  color: '#111827',
+                  color: 'var(--theme-primary)',
                   marginBottom: '16px',
                 }}
               >

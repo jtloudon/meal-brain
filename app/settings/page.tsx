@@ -85,7 +85,7 @@ export default function SettingsPage() {
         },
         {
           label: 'Meal Planner',
-          description: 'Week start day and meal settings',
+          description: 'Add or remove meal type tags (e.g. dinner, breakfast, snack)',
           href: '/settings/meal-planner',
         },
       ],
