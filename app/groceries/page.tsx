@@ -1362,9 +1362,9 @@ export default function GroceriesPage() {
                           body: JSON.stringify({ name: newListNameInModal.trim() }),
                         });
                         if (res.ok) {
-                          const newList = await res.json();
-                          setLists(prev => [...prev, newList]);
-                          setSelectedListId(newList.id);
+                          const data = await res.json();
+                          setLists(prev => [...prev, data.list]);
+                          setSelectedListId(data.list.id);
                           setCreatingNewListInModal(false);
                           setNewListNameInModal('');
                           setShowListSelector(false);

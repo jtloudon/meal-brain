@@ -611,8 +611,7 @@ export default function RecipesPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 autoFocus
                 style={{
-                  flex: 1,
-                  minWidth: 0,
+                  width: '180px',
                   paddingLeft: '16px',
                   paddingRight: '16px',
                   paddingTop: '8px',
