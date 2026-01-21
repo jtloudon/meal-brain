@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield, Copy, CheckSquare, Square } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield, Copy, CheckSquare, Square, X } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
 // Practical shopping units - suggestions, not restrictions
@@ -732,8 +732,8 @@ export default function GroceriesPage() {
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                border: 'none',
-                backgroundColor: '#f3f4f6',
+                border: '2px solid var(--theme-primary)',
+                backgroundColor: 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -755,11 +755,8 @@ export default function GroceriesPage() {
               width: '36px',
               height: '36px',
               borderRadius: '50%',
-              border: 'none',
-              backgroundColor: showInlineAddForm ? 'var(--theme-primary)' : '#f3f4f6',
-              color: showInlineAddForm ? 'white' : 'var(--theme-primary)',
-              fontSize: '20px',
-              fontWeight: '400',
+              border: showInlineAddForm ? 'none' : '2px solid var(--theme-primary)',
+              backgroundColor: showInlineAddForm ? 'var(--theme-primary)' : 'white',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -768,7 +765,7 @@ export default function GroceriesPage() {
             }}
             title="Add Item"
           >
-            +
+            <Plus size={20} style={{ color: showInlineAddForm ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
           <button
             onClick={() => setShowCopyToModal(true)}
@@ -777,18 +774,18 @@ export default function GroceriesPage() {
               width: '36px',
               height: '36px',
               borderRadius: '50%',
-              border: 'none',
-              backgroundColor: '#f3f4f6',
+              border: items.some(item => item.checked) ? '2px solid var(--theme-primary)' : '2px solid #e5e7eb',
+              backgroundColor: 'white',
               cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              opacity: items.some(item => item.checked) ? 1 : 0.4
+              opacity: items.some(item => item.checked) ? 1 : 0.5
             }}
             title="Copy to..."
           >
-            <Copy size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+            <Copy size={16} style={{ color: items.some(item => item.checked) ? 'var(--theme-primary)' : '#9ca3af', strokeWidth: 2 }} />
           </button>
           {!lists.find(l => l.id === selectedListId)?.protected && (
             <button
@@ -798,18 +795,18 @@ export default function GroceriesPage() {
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                border: 'none',
-                backgroundColor: '#f3f4f6',
+                border: items.some(item => item.checked) ? '2px solid var(--theme-primary)' : '2px solid #e5e7eb',
+                backgroundColor: 'white',
                 cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                opacity: items.some(item => item.checked) ? 1 : 0.4
+                opacity: items.some(item => item.checked) ? 1 : 0.5
               }}
               title="Delete Checked"
             >
-              <Trash2 size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+              <Trash2 size={16} style={{ color: items.some(item => item.checked) ? 'var(--theme-primary)' : '#9ca3af', strokeWidth: 2 }} />
             </button>
           )}
           </div>
