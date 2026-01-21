@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield, Copy, CheckSquare, Square } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
 // Practical shopping units - suggestions, not restrictions
@@ -693,7 +693,7 @@ export default function GroceriesPage() {
             </button>
           </div>
 
-        {/* Pill-shaped action buttons - sticky below list name */}
+        {/* Circular icon action buttons - sticky below list name */}
         <div style={{
           position: 'sticky',
           top: '48px',
@@ -704,31 +704,69 @@ export default function GroceriesPage() {
           paddingLeft: '16px',
           paddingRight: '16px',
           paddingTop: '4px',
-          paddingBottom: '4px'
+          paddingBottom: '8px'
         }}>
           <div style={{
             display: 'flex',
-            gap: '6px',
-            justifyContent: 'space-between',
-            marginBottom: '2px'
+            gap: '8px',
+            alignItems: 'center'
           }}>
+          {/* Select All - now on same row */}
+          {items.length > 0 && !lists.find(l => l.id === selectedListId)?.protected && (
+            <button
+              onClick={() => {
+                const allChecked = items.every(item => item.checked);
+                const newChecked = !allChecked;
+                setItems(prev => prev.map(item => ({ ...item, checked: newChecked })));
+
+                // Update all items in database
+                items.forEach(async (item) => {
+                  await fetch(`/api/grocery/items/${item.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ checked: newChecked }),
+                  });
+                });
+              }}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+              title="Select All"
+            >
+              {items.every(item => item.checked) ? (
+                <CheckSquare size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+              ) : (
+                <Square size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+              )}
+            </button>
+          )}
           <button
             onClick={() => setShowInlineAddForm(!showInlineAddForm)}
             style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
               border: 'none',
               backgroundColor: showInlineAddForm ? 'var(--theme-primary)' : '#f3f4f6',
-              color: showInlineAddForm ? 'white' : '#6b7280',
-              fontSize: '16px',
-              fontWeight: '500',
+              color: showInlineAddForm ? 'white' : 'var(--theme-primary)',
+              fontSize: '20px',
+              fontWeight: '400',
               cursor: 'pointer',
-              flex: 1,
-              minWidth: 0,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}
+            title="Add Item"
           >
             +
           </button>
@@ -736,87 +774,45 @@ export default function GroceriesPage() {
             onClick={() => setShowCopyToModal(true)}
             disabled={!items.some(item => item.checked)}
             style={{
-              padding: '6px 10px',
-              borderRadius: '16px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
               border: 'none',
-              backgroundColor: items.some(item => item.checked) ? 'var(--theme-primary)' : '#f3f4f6',
-              color: items.some(item => item.checked) ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '500',
+              backgroundColor: '#f3f4f6',
               cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-              flex: 1,
-              minWidth: 0
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              opacity: items.some(item => item.checked) ? 1 : 0.4
             }}
+            title="Copy to..."
           >
-            Copy to...
+            <Copy size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
           {!lists.find(l => l.id === selectedListId)?.protected && (
             <button
               onClick={() => setShowClearCheckedConfirm(true)}
               disabled={!items.some(item => item.checked)}
               style={{
-                padding: '6px 10px',
-                borderRadius: '16px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
                 border: 'none',
-                backgroundColor: items.some(item => item.checked) ? 'var(--theme-primary)' : '#f3f4f6',
-                color: items.some(item => item.checked) ? 'white' : '#6b7280',
-                fontSize: '13px',
-                fontWeight: '500',
+                backgroundColor: '#f3f4f6',
                 cursor: items.some(item => item.checked) ? 'pointer' : 'not-allowed',
-                flex: 1,
-                minWidth: 0
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                opacity: items.some(item => item.checked) ? 1 : 0.4
               }}
+              title="Delete Checked"
             >
-              Delete
+              <Trash2 size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
             </button>
           )}
           </div>
-
-          {/* Select All - iOS Mail style, below buttons */}
-          {items.length > 0 && !lists.find(l => l.id === selectedListId)?.protected && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              paddingTop: '2px'
-            }}>
-              <button
-                onClick={() => {
-                  const allChecked = items.every(item => item.checked);
-                  const newChecked = !allChecked;
-                  setItems(prev => prev.map(item => ({ ...item, checked: newChecked })));
-
-                  // Update all items in database
-                  items.forEach(async (item) => {
-                    await fetch(`/api/grocery/items/${item.id}`, {
-                      method: 'PATCH',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ checked: newChecked }),
-                    });
-                  });
-                }}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '4px',
-                  border: '1px solid ' + (items.every(item => item.checked) ? '#9ca3af' : '#d1d5db'),
-                  backgroundColor: items.every(item => item.checked) ? '#9ca3af' : 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  flexShrink: 0
-                }}
-              >
-                {items.every(item => item.checked) && (
-                  <Check size={14} style={{ color: 'white', strokeWidth: 3.5 }} />
-                )}
-              </button>
-              <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '400' }}>
-                Select All
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Inline Add Item Form */}
@@ -1409,8 +1405,46 @@ export default function GroceriesPage() {
                         fontWeight: '400'
                       }}
                     />
-                    <div style={{ width: '42px' }} />
-                    <div style={{ width: '42px' }} />
+                    <button
+                      disabled
+                      style={{
+                        padding: '12px',
+                        backgroundColor: '#f3f4f6',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        cursor: 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0.4
+                      }}
+                      title="Set as default (save list first)"
+                    >
+                      <Star
+                        size={18}
+                        style={{
+                          color: '#9ca3af',
+                          fill: 'transparent'
+                        }}
+                      />
+                    </button>
+                    <button
+                      disabled
+                      style={{
+                        padding: '12px',
+                        backgroundColor: '#f3f4f6',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        cursor: 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0.4
+                      }}
+                      title="Delete (save list first)"
+                    >
+                      <Trash2 size={18} style={{ color: '#9ca3af' }} />
+                    </button>
                   </div>
                 )}
               </div>
@@ -1442,7 +1476,13 @@ export default function GroceriesPage() {
                 </button>
               )}
               <button
-                onClick={() => setShowListSelector(false)}
+                onClick={() => {
+                  setCreatingNewListInModal(false);
+                  setNewListNameInModal('');
+                  setEditingListIdInModal(null);
+                  setEditingListNameInModal('');
+                  setShowListSelector(false);
+                }}
                 style={{
                   width: '100%',
                   padding: '10px 16px',
