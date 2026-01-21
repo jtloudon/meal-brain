@@ -566,7 +566,7 @@ export default function RecipesPage() {
   return (
     <AuthenticatedLayout
       title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, paddingLeft: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, paddingLeft: '16px', minWidth: 0 }}>
           {!showSearch ? (
             <button
               onClick={() => setShowSearch(true)}
@@ -586,7 +586,7 @@ export default function RecipesPage() {
               <Search size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
             </button>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: 'calc(100% - 150px)' }}>
+            <>
               <button
                 onClick={() => setShowSearch(false)}
                 style={{
@@ -624,12 +624,12 @@ export default function RecipesPage() {
                   outline: 'none'
                 }}
               />
-            </div>
+            </>
           )}
         </div>
       }
       action={
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', paddingRight: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', paddingRight: '16px', flexShrink: 0 }}>
           <button
             onClick={() => setShowImportModal(true)}
             style={{
