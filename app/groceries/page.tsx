@@ -83,12 +83,14 @@ export default function GroceriesPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showClearCheckedConfirm, setShowClearCheckedConfirm] = useState(false);
   const [shoppingCategories, setShoppingCategories] = useState<string[]>([]);
-  const [editingListName, setEditingListName] = useState(false);
-  const [editListName, setEditListName] = useState('');
   const [showDeleteListConfirm, setShowDeleteListConfirm] = useState(false);
   const [listToDelete, setListToDelete] = useState<string | null>(null);
   const [showCopyToModal, setShowCopyToModal] = useState(false);
   const [copySuccessMessage, setCopySuccessMessage] = useState('');
+  const [editingListIdInModal, setEditingListIdInModal] = useState<string | null>(null);
+  const [editingListNameInModal, setEditingListNameInModal] = useState('');
+  const [creatingNewListInModal, setCreatingNewListInModal] = useState(false);
+  const [newListNameInModal, setNewListNameInModal] = useState('');
 
   // Fetch shopping categories on mount
   useEffect(() => {
@@ -362,31 +364,6 @@ export default function GroceriesPage() {
     }
   };
 
-  const handleSaveListName = async () => {
-    if (!selectedListId || !editListName.trim()) return;
-
-    try {
-      setSaving(true);
-      const res = await fetch(`/api/grocery/lists/${selectedListId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editListName.trim() }),
-      });
-
-      if (res.ok) {
-        const updatedList = await res.json();
-        setLists((prev) =>
-          prev.map((list) => (list.id === selectedListId ? updatedList : list))
-        );
-        setEditingListName(false);
-      }
-    } catch (error) {
-      console.error('Error updating list name:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const toggleProtection = async () => {
     if (!selectedListId) return;
 
@@ -652,69 +629,8 @@ export default function GroceriesPage() {
       title=""
     >
       <div style={{ padding: '0 16px 80px 16px' }}>
-        {/* List Selector - Clickable name with arrow + Edit button */}
-        {editingListName ? (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: '16px'
-          }}>
-            <input
-              type="text"
-              value={editListName}
-              onChange={(e) => setEditListName(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') handleSaveListName();
-                if (e.key === 'Escape') setEditingListName(false);
-              }}
-              autoFocus
-              style={{
-                flex: 1,
-                fontSize: '24px',
-                fontWeight: '600',
-                padding: '8px 12px',
-                border: '2px solid var(--theme-primary)',
-                borderRadius: '8px',
-                outline: 'none'
-              }}
-            />
-            <button
-              onClick={handleSaveListName}
-              disabled={!editListName.trim() || saving}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--theme-primary)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                opacity: (!editListName.trim() || saving) ? 0.5 : 1
-              }}
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setEditingListName(false)}
-              disabled={saving}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'white',
-                color: '#6b7280',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <div style={{
+        {/* List Selector - Clickable name with arrow + Shield button */}
+        <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
@@ -775,28 +691,7 @@ export default function GroceriesPage() {
                 }}
               />
             </button>
-            <button
-              onClick={() => {
-                const currentList = lists.find(l => l.id === selectedListId);
-                if (currentList) {
-                  setEditListName(currentList.name);
-                  setEditingListName(true);
-                }
-              }}
-              style={{
-                padding: '8px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-              title="Rename list"
-            >
-              <Pencil size={20} style={{ color: 'var(--theme-primary)' }} />
-            </button>
           </div>
-        )}
 
         {/* Pill-shaped action buttons - sticky below list name */}
         <div style={{
@@ -1277,32 +1172,119 @@ export default function GroceriesPage() {
                       marginBottom: '8px'
                     }}
                   >
-                    <button
-                      onClick={() => {
-                        setSelectedListId(list.id);
-                        setShowListSelector(false);
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: '12px 16px',
-                        backgroundColor: list.id === selectedListId ? '#f0f9ff' : 'white',
-                        border: list.id === selectedListId ? '2px solid #4A90E2' : '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        color: '#111827',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        fontWeight: list.id === selectedListId ? '600' : '400',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                    >
-                      {list.id === defaultListId && (
-                        <Star size={16} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)', flexShrink: 0 }} />
-                      )}
-                      <span style={{ flex: 1 }}>{list.name}</span>
-                    </button>
+                    {editingListIdInModal === list.id ? (
+                      <input
+                        type="text"
+                        value={editingListNameInModal}
+                        onChange={(e) => setEditingListNameInModal(e.target.value)}
+                        onKeyPress={async (e) => {
+                          if (e.key === 'Enter' && editingListNameInModal.trim()) {
+                            try {
+                              setSaving(true);
+                              const res = await fetch(`/api/grocery/lists/${list.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ name: editingListNameInModal.trim() }),
+                              });
+                              if (res.ok) {
+                                setLists(prev => prev.map(l => l.id === list.id ? { ...l, name: editingListNameInModal.trim() } : l));
+                                setEditingListIdInModal(null);
+                                setEditingListNameInModal('');
+                              }
+                            } catch (error) {
+                              console.error('Error renaming list:', error);
+                            } finally {
+                              setSaving(false);
+                            }
+                          }
+                          if (e.key === 'Escape') {
+                            setEditingListIdInModal(null);
+                            setEditingListNameInModal('');
+                          }
+                        }}
+                        onBlur={async () => {
+                          if (editingListNameInModal.trim() && editingListNameInModal !== list.name) {
+                            try {
+                              setSaving(true);
+                              const res = await fetch(`/api/grocery/lists/${list.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ name: editingListNameInModal.trim() }),
+                              });
+                              if (res.ok) {
+                                setLists(prev => prev.map(l => l.id === list.id ? { ...l, name: editingListNameInModal.trim() } : l));
+                              }
+                            } catch (error) {
+                              console.error('Error renaming list:', error);
+                            } finally {
+                              setSaving(false);
+                            }
+                          }
+                          setEditingListIdInModal(null);
+                          setEditingListNameInModal('');
+                        }}
+                        autoFocus
+                        style={{
+                          flex: 1,
+                          padding: '12px 16px',
+                          backgroundColor: 'white',
+                          border: '2px solid var(--theme-primary)',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          color: '#111827',
+                          outline: 'none',
+                          fontWeight: '400'
+                        }}
+                      />
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setSelectedListId(list.id);
+                          setShowListSelector(false);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '12px 16px',
+                          backgroundColor: list.id === selectedListId ? '#f0f9ff' : 'white',
+                          border: list.id === selectedListId ? '2px solid #4A90E2' : '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          color: '#111827',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          fontWeight: list.id === selectedListId ? '600' : '400',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          position: 'relative'
+                        }}
+                      >
+                        {list.id === defaultListId && (
+                          <Star size={16} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)', flexShrink: 0 }} />
+                        )}
+                        <span style={{ flex: 1 }}>{list.name}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingListIdInModal(list.id);
+                            setEditingListNameInModal(list.name);
+                          }}
+                          style={{
+                            padding: '4px',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: '#9ca3af',
+                            marginLeft: 'auto'
+                          }}
+                          title="Rename list"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                      </button>
+                    )}
                     <button
                       onClick={async (e) => {
                         e.stopPropagation();
@@ -1366,32 +1348,99 @@ export default function GroceriesPage() {
                     </button>
                   </div>
                 ))}
+                {creatingNewListInModal && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <input
+                      type="text"
+                      value={newListNameInModal}
+                      onChange={(e) => setNewListNameInModal(e.target.value)}
+                      onKeyPress={async (e) => {
+                        if (e.key === 'Enter' && newListNameInModal.trim()) {
+                          try {
+                            setSaving(true);
+                            const res = await fetch('/api/grocery/lists', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ name: newListNameInModal.trim() }),
+                            });
+                            if (res.ok) {
+                              const newList = await res.json();
+                              setLists(prev => [...prev, newList]);
+                              setSelectedListId(newList.id);
+                              setCreatingNewListInModal(false);
+                              setNewListNameInModal('');
+                              setShowListSelector(false);
+                            }
+                          } catch (error) {
+                            console.error('Error creating list:', error);
+                          } finally {
+                            setSaving(false);
+                          }
+                        }
+                        if (e.key === 'Escape') {
+                          setCreatingNewListInModal(false);
+                          setNewListNameInModal('');
+                        }
+                      }}
+                      onBlur={() => {
+                        if (!newListNameInModal.trim()) {
+                          setCreatingNewListInModal(false);
+                          setNewListNameInModal('');
+                        }
+                      }}
+                      placeholder="List name"
+                      autoFocus
+                      style={{
+                        flex: 1,
+                        padding: '12px 16px',
+                        backgroundColor: 'white',
+                        border: '2px solid var(--theme-primary)',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        color: '#111827',
+                        outline: 'none',
+                        fontWeight: '400'
+                      }}
+                    />
+                    <div style={{ width: '42px' }} />
+                    <div style={{ width: '42px' }} />
+                  </div>
+                )}
               </div>
-              <button
-                onClick={() => {
-                  setShowListSelector(false);
-                  setShowNewListModal(true);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  backgroundColor: 'var(--theme-primary)',
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  marginBottom: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Plus size={16} />
-                New List
-              </button>
+              {!creatingNewListInModal && (
+                <button
+                  onClick={() => {
+                    setCreatingNewListInModal(true);
+                    setNewListNameInModal('');
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 16px',
+                    backgroundColor: 'var(--theme-primary)',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Plus size={16} />
+                  New List
+                </button>
+              )}
               <button
                 onClick={() => setShowListSelector(false)}
                 style={{
