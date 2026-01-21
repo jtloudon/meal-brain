@@ -35,36 +35,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch user preferences
-    const { data: preferences, error } = await supabase
-      .from('user_preferences')
+    // Get user's household_id
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('household_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userData?.household_id) {
+      console.error('[API GET /user/preferences] User error:', userError);
+      return NextResponse.json({ error: 'Failed to fetch user household' }, { status: 500 });
+    }
+
+    // Fetch household preferences (shared settings)
+    const { data: householdPrefs, error: householdError } = await supabase
+      .from('household_preferences')
       .select('*')
+      .eq('household_id', userData.household_id)
+      .single();
+
+    if (householdError && householdError.code !== 'PGRST116') {
+      console.error('[API GET /user/preferences] Household prefs error:', householdError);
+      return NextResponse.json({ error: 'Failed to fetch household preferences' }, { status: 500 });
+    }
+
+    // Fetch user preferences (personal settings like theme_color)
+    const { data: userPrefs, error: userPrefsError } = await supabase
+      .from('user_preferences')
+      .select('theme_color, default_grocery_list_id')
       .eq('user_id', user.id)
       .single();
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 is "no rows returned", which is fine
-      console.error('[API GET /user/preferences] Error:', error);
-      return NextResponse.json({ error: 'Failed to fetch preferences' }, { status: 500 });
+    if (userPrefsError && userPrefsError.code !== 'PGRST116') {
+      console.error('[API GET /user/preferences] User prefs error:', userPrefsError);
+      return NextResponse.json({ error: 'Failed to fetch user preferences' }, { status: 500 });
     }
 
-    // If no preferences exist yet, return defaults
-    if (!preferences) {
-      return NextResponse.json({
-        user_id: user.id,
-        household_context: null,
-        dietary_constraints: [],
-        ai_style: null,
-        planning_preferences: [],
-        ai_learning_enabled: true,
-        default_grocery_list_id: null,
-        theme_color: '#f97316',
-      });
-    }
-
+    // Merge household and user preferences, with defaults
     return NextResponse.json({
-      ...preferences,
       user_id: user.id,
+      household_context: householdPrefs?.household_context || null,
+      dietary_constraints: householdPrefs?.dietary_constraints || [],
+      ai_style: householdPrefs?.ai_style || null,
+      planning_preferences: householdPrefs?.planning_preferences || [],
+      ai_learning_enabled: householdPrefs?.ai_learning_enabled ?? true,
+      default_grocery_list_id: userPrefs?.default_grocery_list_id || null,
+      theme_color: userPrefs?.theme_color || '#f97316',
     });
   } catch (error) {
     console.error('[API GET /user/preferences] Error:', error);
@@ -107,6 +123,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get user's household_id
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('household_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userData?.household_id) {
+      console.error('[API PUT /user/preferences] User error:', userError);
+      return NextResponse.json({ error: 'Failed to fetch user household' }, { status: 500 });
+    }
+
     const body = await request.json();
 
     // Validate theme_color if provided
@@ -117,32 +145,56 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Upsert preferences
-    const { data, error } = await supabase
-      .from('user_preferences')
+    // Upsert household preferences (shared settings)
+    const { error: householdError } = await supabase
+      .from('household_preferences')
       .upsert(
         {
-          user_id: user.id,
+          household_id: userData.household_id,
           household_context: body.household_context,
           dietary_constraints: body.dietary_constraints,
           ai_style: body.ai_style,
           planning_preferences: body.planning_preferences,
           ai_learning_enabled: body.ai_learning_enabled,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'household_id' }
+      );
+
+    if (householdError) {
+      console.error('[API PUT /user/preferences] Household error:', householdError);
+      return NextResponse.json({ error: 'Failed to save household preferences' }, { status: 500 });
+    }
+
+    // Upsert user preferences (personal settings)
+    const { error: userPrefsError } = await supabase
+      .from('user_preferences')
+      .upsert(
+        {
+          user_id: user.id,
           default_grocery_list_id: body.default_grocery_list_id,
           theme_color: body.theme_color,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
-      )
-      .select()
-      .single();
+      );
 
-    if (error) {
-      console.error('[API PUT /user/preferences] Error:', error);
-      return NextResponse.json({ error: 'Failed to save preferences' }, { status: 500 });
+    if (userPrefsError) {
+      console.error('[API PUT /user/preferences] User prefs error:', userPrefsError);
+      return NextResponse.json({ error: 'Failed to save user preferences' }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    // Return the combined preferences
+    return NextResponse.json({
+      user_id: user.id,
+      household_context: body.household_context,
+      dietary_constraints: body.dietary_constraints,
+      ai_style: body.ai_style,
+      planning_preferences: body.planning_preferences,
+      ai_learning_enabled: body.ai_learning_enabled,
+      default_grocery_list_id: body.default_grocery_list_id,
+      theme_color: body.theme_color,
+    });
   } catch (error) {
     console.error('[API PUT /user/preferences] Error:', error);
     return NextResponse.json(

@@ -35,11 +35,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch user preferences to get shopping categories
+    // Get user's household_id
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('household_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userData?.household_id) {
+      console.error('[API GET /settings/shopping-categories] User error:', userError);
+      return NextResponse.json({ error: 'Failed to fetch user household' }, { status: 500 });
+    }
+
+    // Fetch household preferences to get shopping categories
     const { data: preferences, error } = await supabase
-      .from('user_preferences')
+      .from('household_preferences')
       .select('shopping_categories')
-      .eq('user_id', user.id)
+      .eq('household_id', userData.household_id)
       .single();
 
     if (error && error.code !== 'PGRST116') {
@@ -91,18 +103,30 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get user's household_id
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('household_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userData?.household_id) {
+      console.error('[API PUT /settings/shopping-categories] User error:', userError);
+      return NextResponse.json({ error: 'Failed to fetch user household' }, { status: 500 });
+    }
+
     const body = await request.json();
 
-    // Upsert shopping categories in user preferences
+    // Upsert shopping categories in household preferences
     const { data, error } = await supabase
-      .from('user_preferences')
+      .from('household_preferences')
       .upsert(
         {
-          user_id: user.id,
+          household_id: userData.household_id,
           shopping_categories: body.categories,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: 'user_id' }
+        { onConflict: 'household_id' }
       )
       .select()
       .single();
