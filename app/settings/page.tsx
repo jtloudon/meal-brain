@@ -11,6 +11,11 @@ export default function SettingsPage() {
   const [householdName, setHouseholdName] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
 
+  // Get version info from environment (set by Vercel at build time)
+  const version = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0';
+  const commitSha = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.substring(0, 7) || 'dev';
+  const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME || 'unknown';
+
   useEffect(() => {
     const fetchHouseholdInfo = async () => {
       const supabase = createClient();
@@ -107,11 +112,6 @@ export default function SettingsPage() {
           label: 'Help',
           description: 'Learn more about MealBrain',
           href: '/settings/help',
-        },
-        {
-          label: 'About',
-          description: 'App version and information',
-          href: '/settings/about',
         },
       ],
     },
@@ -246,6 +246,65 @@ export default function SettingsPage() {
             <LogOut size={20} />
             Sign Out
           </button>
+        </div>
+
+        {/* App Information */}
+        <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: '12px',
+            paddingBottom: '12px',
+            borderBottom: '1px solid #f3f4f6'
+          }}>
+            <span style={{ fontSize: '14px', color: '#6b7280' }}>Version</span>
+            <span style={{ fontSize: '14px', color: '#111827' }}>{version}</span>
+          </div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: '12px',
+            paddingBottom: '12px',
+            borderBottom: '1px solid #f3f4f6'
+          }}>
+            <span style={{ fontSize: '14px', color: '#6b7280' }}>Build</span>
+            <span style={{ fontSize: '12px', color: '#9ca3af', fontFamily: 'monospace' }}>{commitSha}</span>
+          </div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: '12px',
+            paddingBottom: '12px',
+            borderBottom: '1px solid #f3f4f6'
+          }}>
+            <span style={{ fontSize: '14px', color: '#6b7280' }}>Contact</span>
+            <a
+              href="mailto:jtloudon@users.noreply.github.com"
+              style={{
+                fontSize: '14px',
+                color: 'var(--theme-primary)',
+                textDecoration: 'none'
+              }}
+            >
+              jtloudon@users.noreply.github.com
+            </a>
+          </div>
+          <div style={{
+            paddingTop: '16px',
+            paddingBottom: '16px'
+          }}>
+            <p style={{
+              fontSize: '12px',
+              color: '#9ca3af',
+              textAlign: 'center',
+              margin: 0
+            }}>
+              © 2025 Jesse Loudon
+            </p>
+          </div>
         </div>
       </div>
     </AuthenticatedLayout>

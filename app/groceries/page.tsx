@@ -1421,6 +1421,29 @@ export default function GroceriesPage() {
                       }}
                     />
                     <button
+                      type="submit"
+                      disabled={!newListNameInModal.trim() || saving}
+                      style={{
+                        padding: '12px',
+                        backgroundColor: newListNameInModal.trim() && !saving ? 'var(--theme-primary)' : '#f3f4f6',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        cursor: newListNameInModal.trim() && !saving ? 'pointer' : 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: newListNameInModal.trim() && !saving ? 1 : 0.4
+                      }}
+                      title="Save list"
+                    >
+                      <Check
+                        size={18}
+                        style={{
+                          color: newListNameInModal.trim() && !saving ? 'white' : '#9ca3af'
+                        }}
+                      />
+                    </button>
+                    <button
                       disabled
                       style={{
                         padding: '12px',
@@ -1444,6 +1467,7 @@ export default function GroceriesPage() {
                       />
                     </button>
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setCreatingNewListInModal(false);

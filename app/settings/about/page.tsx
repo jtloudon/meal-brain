@@ -22,18 +22,35 @@ export default function AboutPage() {
         gap: '12px'
       }}>
         <button
+
           onClick={() => router.push('/settings')}
+
           style={{
-            padding: '8px',
-            background: 'none',
-            border: 'none',
+
+            width: '36px',
+
+            height: '36px',
+
+            borderRadius: '50%',
+
+            border: '2px solid var(--theme-primary)',
+
+            backgroundColor: 'white',
+
             cursor: 'pointer',
+
             display: 'flex',
+
             alignItems: 'center',
+
             justifyContent: 'center'
+
           }}
+
         >
-          <ArrowLeft size={22} style={{ color: 'var(--theme-primary)' }} />
+
+          <ArrowLeft size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+
         </button>
         <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827' }}>
           About

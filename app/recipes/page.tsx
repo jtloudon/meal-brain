@@ -571,11 +571,12 @@ export default function RecipesPage() {
             <button
               onClick={() => setShowSearch(true)}
               style={{
-                padding: '6px',
+                width: '36px',
+                height: '36px',
                 marginLeft: '10px',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: 'transparent',
+                border: '2px solid var(--theme-primary)',
+                borderRadius: '50%',
+                backgroundColor: 'white',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -583,7 +584,7 @@ export default function RecipesPage() {
                 flexShrink: 0
               }}
             >
-              <Search size={22} style={{ color: 'var(--theme-primary)' }} />
+              <Search size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
             </button>
           ) : (
             <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%', marginLeft: '10px' }}>
@@ -632,14 +633,14 @@ export default function RecipesPage() {
           <button
             onClick={() => setShowImportModal(true)}
             style={{
-              padding: '8px 12px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: 'transparent',
+              padding: '8px 16px',
+              border: '2px solid var(--theme-primary)',
+              borderRadius: '20px',
+              backgroundColor: 'white',
               cursor: 'pointer',
-              fontSize: '15px',
+              fontSize: '14px',
               color: 'var(--theme-primary)',
-              fontWeight: '500',
+              fontWeight: '600',
               flexShrink: 0
             }}
           >
@@ -648,10 +649,11 @@ export default function RecipesPage() {
           <button
             onClick={() => router.push('/recipes/new')}
             style={{
-              padding: '8px 12px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: 'transparent',
+              width: '36px',
+              height: '36px',
+              border: '2px solid var(--theme-primary)',
+              borderRadius: '50%',
+              backgroundColor: 'white',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -659,7 +661,7 @@ export default function RecipesPage() {
               flexShrink: 0
             }}
           >
-            <Plus size={24} style={{ color: 'var(--theme-primary)' }} />
+            <Plus size={20} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
         </div>
       }
