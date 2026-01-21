@@ -129,7 +129,7 @@ export default function AIPreferencesPage() {
             width: '36px',
             height: '36px',
             borderRadius: '50%',
-            border: '2px solid var(--theme-primary)',
+            border: '1px solid var(--theme-primary)',
             backgroundColor: 'white',
             cursor: 'pointer',
             display: 'flex',

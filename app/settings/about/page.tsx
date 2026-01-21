@@ -33,7 +33,7 @@ export default function AboutPage() {
 
             borderRadius: '50%',
 
-            border: '2px solid var(--theme-primary)',
+            border: '1px solid var(--theme-primary)',
 
             backgroundColor: 'white',
 

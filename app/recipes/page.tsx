@@ -566,15 +566,14 @@ export default function RecipesPage() {
   return (
     <AuthenticatedLayout
       title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, paddingLeft: '16px' }}>
           {!showSearch ? (
             <button
               onClick={() => setShowSearch(true)}
               style={{
                 width: '36px',
                 height: '36px',
-                marginLeft: '10px',
-                border: '2px solid var(--theme-primary)',
+                border: '1px solid var(--theme-primary)',
                 borderRadius: '50%',
                 backgroundColor: 'white',
                 cursor: 'pointer',
@@ -587,7 +586,7 @@ export default function RecipesPage() {
               <Search size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
             </button>
           ) : (
-            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%', marginLeft: '10px' }}>
+            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%' }}>
               <button
                 onClick={() => setShowSearch(false)}
                 style={{
@@ -629,12 +628,12 @@ export default function RecipesPage() {
         </div>
       }
       action={
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', paddingRight: '16px' }}>
           <button
             onClick={() => setShowImportModal(true)}
             style={{
               padding: '8px 16px',
-              border: '2px solid var(--theme-primary)',
+              border: '1px solid var(--theme-primary)',
               borderRadius: '20px',
               backgroundColor: 'white',
               cursor: 'pointer',
@@ -651,7 +650,7 @@ export default function RecipesPage() {
             style={{
               width: '36px',
               height: '36px',
-              border: '2px solid var(--theme-primary)',
+              border: '1px solid var(--theme-primary)',
               borderRadius: '50%',
               backgroundColor: 'white',
               cursor: 'pointer',
