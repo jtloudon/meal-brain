@@ -1170,27 +1170,31 @@ export default function GroceriesPage() {
                         type="text"
                         value={editingListNameInModal}
                         onChange={(e) => setEditingListNameInModal(e.target.value)}
-                        onKeyPress={async (e) => {
-                          if (e.key === 'Enter' && editingListNameInModal.trim()) {
-                            try {
-                              setSaving(true);
-                              const res = await fetch(`/api/grocery/lists/${list.id}`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ name: editingListNameInModal.trim() }),
-                              });
-                              if (res.ok) {
-                                setLists(prev => prev.map(l => l.id === list.id ? { ...l, name: editingListNameInModal.trim() } : l));
-                                setEditingListIdInModal(null);
-                                setEditingListNameInModal('');
+                        onKeyDown={async (e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (editingListNameInModal.trim()) {
+                              try {
+                                setSaving(true);
+                                const res = await fetch(`/api/grocery/lists/${list.id}`, {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ name: editingListNameInModal.trim() }),
+                                });
+                                if (res.ok) {
+                                  setLists(prev => prev.map(l => l.id === list.id ? { ...l, name: editingListNameInModal.trim() } : l));
+                                  setEditingListIdInModal(null);
+                                  setEditingListNameInModal('');
+                                }
+                              } catch (error) {
+                                console.error('Error renaming list:', error);
+                              } finally {
+                                setSaving(false);
                               }
-                            } catch (error) {
-                              console.error('Error renaming list:', error);
-                            } finally {
-                              setSaving(false);
                             }
                           }
                           if (e.key === 'Escape') {
+                            e.preventDefault();
                             setEditingListIdInModal(null);
                             setEditingListNameInModal('');
                           }
@@ -1342,7 +1346,35 @@ export default function GroceriesPage() {
                   </div>
                 ))}
                 {creatingNewListInModal && (
-                  <div
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!newListNameInModal.trim()) {
+                        setCreatingNewListInModal(false);
+                        setNewListNameInModal('');
+                        return;
+                      }
+                      try {
+                        setSaving(true);
+                        const res = await fetch('/api/grocery/lists', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ name: newListNameInModal.trim() }),
+                        });
+                        if (res.ok) {
+                          const newList = await res.json();
+                          setLists(prev => [...prev, newList]);
+                          setSelectedListId(newList.id);
+                          setCreatingNewListInModal(false);
+                          setNewListNameInModal('');
+                          setShowListSelector(false);
+                        }
+                      } catch (error) {
+                        console.error('Error creating list:', error);
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1354,65 +1386,27 @@ export default function GroceriesPage() {
                       type="text"
                       value={newListNameInModal}
                       onChange={(e) => setNewListNameInModal(e.target.value)}
-                      onKeyPress={async (e) => {
-                        if (e.key === 'Enter' && newListNameInModal.trim()) {
-                          try {
-                            setSaving(true);
-                            const res = await fetch('/api/grocery/lists', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ name: newListNameInModal.trim() }),
-                            });
-                            if (res.ok) {
-                              const newList = await res.json();
-                              setLists(prev => [...prev, newList]);
-                              setSelectedListId(newList.id);
-                              setCreatingNewListInModal(false);
-                              setNewListNameInModal('');
-                              setShowListSelector(false);
-                            }
-                          } catch (error) {
-                            console.error('Error creating list:', error);
-                          } finally {
-                            setSaving(false);
-                          }
-                        }
+                      onKeyDown={(e) => {
                         if (e.key === 'Escape') {
+                          e.preventDefault();
                           setCreatingNewListInModal(false);
                           setNewListNameInModal('');
                         }
                       }}
-                      onBlur={async (e) => {
-                        // Don't save on blur if clicking the cancel button
+                      onBlur={(e) => {
+                        // Don't do anything on blur if clicking the cancel button
                         const relatedTarget = e.relatedTarget as HTMLElement;
                         if (relatedTarget?.getAttribute('data-cancel-new-list') === 'true') {
                           return;
                         }
 
-                        // Auto-save on blur if name is provided
-                        if (newListNameInModal.trim()) {
-                          try {
-                            setSaving(true);
-                            const res = await fetch('/api/grocery/lists', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ name: newListNameInModal.trim() }),
-                            });
-                            if (res.ok) {
-                              const newList = await res.json();
-                              setLists(prev => [...prev, newList]);
-                              setSelectedListId(newList.id);
-                              setCreatingNewListInModal(false);
-                              setNewListNameInModal('');
-                            }
-                          } catch (error) {
-                            console.error('Error creating list:', error);
-                          } finally {
-                            setSaving(false);
-                          }
+                        // Cancel if no name provided
+                        if (!newListNameInModal.trim()) {
+                          setCreatingNewListInModal(false);
+                          setNewListNameInModal('');
                         }
                       }}
-                      placeholder="List name (press Enter to save)"
+                      placeholder="Type name and tap checkmark"
                       autoFocus
                       style={{
                         flex: 1,
@@ -1470,7 +1464,7 @@ export default function GroceriesPage() {
                     >
                       <X size={18} style={{ color: '#ef4444' }} />
                     </button>
-                  </div>
+                  </form>
                 )}
               </div>
               {!creatingNewListInModal && (
