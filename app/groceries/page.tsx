@@ -755,7 +755,7 @@ export default function GroceriesPage() {
               width: '36px',
               height: '36px',
               borderRadius: '50%',
-              border: showInlineAddForm ? 'none' : '2px solid var(--theme-primary)',
+              border: showInlineAddForm ? 'none' : '1px solid var(--theme-primary)',
               backgroundColor: showInlineAddForm ? 'var(--theme-primary)' : 'white',
               cursor: 'pointer',
               display: 'flex',

@@ -586,14 +586,15 @@ export default function RecipesPage() {
               <Search size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
             </button>
           ) : (
-            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: 'calc(100% - 150px)' }}>
               <button
                 onClick={() => setShowSearch(false)}
                 style={{
-                  padding: '6px',
-                  border: 'none',
-                  borderRadius: '6px',
-                  backgroundColor: 'transparent',
+                  width: '36px',
+                  height: '36px',
+                  border: '1px solid var(--theme-primary)',
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -601,7 +602,7 @@ export default function RecipesPage() {
                   flexShrink: 0
                 }}
               >
-                <Search size={22} style={{ color: 'var(--theme-primary)' }} />
+                <Search size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
               </button>
               <input
                 type="text"
