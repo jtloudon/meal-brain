@@ -7,26 +7,26 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield, Copy, CheckSquare, Square, X } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
-// Practical shopping units - suggestions, not restrictions
+// Practical shopping units - sorted alphabetically
 const GROCERY_UNITS = [
-  'whole',
-  'lb',
-  'oz',
-  'cup',
-  'pint',
-  'quart',
-  'gallon',
-  'kg',
-  'l',
-  'can',
-  'package',
-  'jar',
-  'bottle',
   'bag',
+  'bottle',
   'box',
   'bunch',
-  'tub',
+  'can',
+  'cup',
   'dozen',
+  'gallon',
+  'jar',
+  'kg',
+  'l',
+  'lb',
+  'oz',
+  'package',
+  'pint',
+  'quart',
+  'tub',
+  'whole',
 ] as const;
 
 interface GroceryItem {
@@ -838,25 +838,25 @@ export default function GroceriesPage() {
                   outline: 'none'
                 }}
               />
-              <input
-                list="unit-suggestions"
+              <select
                 value={newItemUnit}
                 onChange={(e) => setNewItemUnit(e.target.value)}
-                placeholder="Unit (e.g., bag, bottle, pint)"
                 style={{
                   flex: 1,
                   padding: '10px 12px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
-                  outline: 'none'
+                  outline: 'none',
+                  backgroundColor: 'white',
+                  cursor: 'pointer'
                 }}
-              />
-              <datalist id="unit-suggestions">
+              >
+                <option value="">Select unit...</option>
                 {GROCERY_UNITS.map((unit) => (
-                  <option key={unit} value={unit} />
+                  <option key={unit} value={unit}>{unit}</option>
                 ))}
-              </datalist>
+              </select>
             </div>
 
             {/* Item Name - Second Row */}
@@ -1382,13 +1382,37 @@ export default function GroceriesPage() {
                           setNewListNameInModal('');
                         }
                       }}
-                      onBlur={() => {
-                        if (!newListNameInModal.trim()) {
-                          setCreatingNewListInModal(false);
-                          setNewListNameInModal('');
+                      onBlur={async (e) => {
+                        // Don't save on blur if clicking the cancel button
+                        const relatedTarget = e.relatedTarget as HTMLElement;
+                        if (relatedTarget?.getAttribute('data-cancel-new-list') === 'true') {
+                          return;
+                        }
+
+                        // Auto-save on blur if name is provided
+                        if (newListNameInModal.trim()) {
+                          try {
+                            setSaving(true);
+                            const res = await fetch('/api/grocery/lists', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ name: newListNameInModal.trim() }),
+                            });
+                            if (res.ok) {
+                              const newList = await res.json();
+                              setLists(prev => [...prev, newList]);
+                              setSelectedListId(newList.id);
+                              setCreatingNewListInModal(false);
+                              setNewListNameInModal('');
+                            }
+                          } catch (error) {
+                            console.error('Error creating list:', error);
+                          } finally {
+                            setSaving(false);
+                          }
                         }
                       }}
-                      placeholder="List name"
+                      placeholder="List name (press Enter to save)"
                       autoFocus
                       style={{
                         flex: 1,
@@ -1426,21 +1450,25 @@ export default function GroceriesPage() {
                       />
                     </button>
                     <button
-                      disabled
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCreatingNewListInModal(false);
+                        setNewListNameInModal('');
+                      }}
+                      data-cancel-new-list="true"
                       style={{
                         padding: '12px',
-                        backgroundColor: '#f3f4f6',
+                        backgroundColor: 'white',
                         border: '1px solid #e5e7eb',
                         borderRadius: '8px',
-                        cursor: 'not-allowed',
+                        cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0.4
+                        justifyContent: 'center'
                       }}
-                      title="Delete (save list first)"
+                      title="Cancel"
                     >
-                      <Trash2 size={18} style={{ color: '#9ca3af' }} />
+                      <X size={18} style={{ color: '#ef4444' }} />
                     </button>
                   </div>
                 )}
@@ -1561,18 +1589,16 @@ export default function GroceriesPage() {
                     step="0.01"
                     className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <input
-                    list="unit-suggestions-modal"
+                  <select
                     value={newItemUnit}
                     onChange={(e) => setNewItemUnit(e.target.value)}
-                    placeholder="Unit (e.g., bag, bottle, pint)"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <datalist id="unit-suggestions-modal">
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                  >
+                    <option value="">Select unit...</option>
                     {GROCERY_UNITS.map((unit) => (
-                      <option key={unit} value={unit} />
+                      <option key={unit} value={unit}>{unit}</option>
                     ))}
-                  </datalist>
+                  </select>
                 </div>
               </div>
               <div className="flex gap-3">
