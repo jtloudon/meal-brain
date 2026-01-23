@@ -571,7 +571,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="mb-4 opacity-50"
+                className="mb-4"
               >
                 <defs>
                   <linearGradient id="aiGradientEmpty" x1="0%" y1="0%" x2="100%" y2="100%">
