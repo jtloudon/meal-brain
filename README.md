@@ -1,6 +1,6 @@
 # MealBrain
 
-**A meal planning app with an embedded AI sous chef**
+*Stop juggling recipes (websites, Pinterest, magazines), non-centralized grocery lists, and meal plans on paper. MealBrain is one place for everything, with an AI sous chef that actually knows your recipes, lists, plans, and dietary limitations. Helpful, never bossy.*
 
 <p align="center">
   <img src=".github/assets/meal-brain-recipes.PNG" alt="Recipes" width="200">
@@ -46,10 +46,10 @@ The AI **suggests but never surprises**. All write operations (adding meals, mod
 
 ## Features
 
-- **Recipes** - Create, import from URLs, tag, rate, and organize
+- **Recipes** - Create, import from URLs, import with camera pictures,tag, rate, and organize
 - **Meal Planner** - Calendar-style week view, drag meals around
-- **Grocery Lists** - Auto-categorized by aisle, tracks which recipe needs what
-- **Mobile-First** - PWA installable on any device, optimized for one-handed use
+- **Grocery Lists** - Auto-categorized by aisle (leverage Claude for undefined mappings), tracks which recipe needs what
+- **Mobile-First** - Cloud deployed, PWA installable on any device, optimized for one-handed use
 
 ---
 
