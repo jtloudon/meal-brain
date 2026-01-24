@@ -168,8 +168,8 @@ household_invite_uses (
 
 2. **Call Claude API** (if cache miss)
    - Uses Claude Haiku (fast, cheap model)
-   - Provides user's actual shopping categories
-   - Single-shot prompt: categorize item
+   - Unconstrained categorization: suggests ideal category (e.g., "Household", "Auto", "Pet Supplies")
+   - Not limited to user's categories - allows suggestions for categories user doesn't have yet
    - Cost: ~$0.001 per item
 
 3. **Save to Cache**
@@ -221,9 +221,11 @@ household_invite_uses (
 ### User Control
 
 - User manages categories via Settings → Shopping Categories
-- Claude learns ONLY from user's actual categories
-- Unknown suggestions → noted on item, user decides whether to add category
-- Categories fetched from `/api/settings/shopping-categories` (single source of truth)
+- Cache stores ideal/universal categories (shared across all users)
+- Items route validates against user's actual categories:
+  - If category exists → item uses it
+  - If category doesn't exist → item set to "Other" + note: "AI suggested: 'X' (add via Settings)"
+- User decides whether to add suggested categories to their list
 
 ### Benefits
 

@@ -35,48 +35,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Step 2: Get shopping categories from settings API (same source as UI)
-    // This ensures perfect consistency with user's dropdown
-    let categories: string[] = [];
-
-    try {
-      const categoriesResponse = await fetch(
-        `${request.nextUrl.origin}/api/settings/shopping-categories`,
-        {
-          method: 'GET',
-          headers: {
-            'Cookie': request.headers.get('cookie') || '',
-          },
-        }
-      );
-
-      if (categoriesResponse.ok) {
-        const { categories: userCategories } = await categoriesResponse.json();
-        categories = userCategories || [];
-      }
-    } catch (error) {
-      console.error('[Categorize] Failed to fetch categories:', error);
-    }
-
-    // Fallback if API fails
-    if (categories.length === 0) {
-      categories = [
-        'Produce',
-        'Meat & Seafood',
-        'Dairy & Eggs',
-        'Bakery',
-        'Frozen',
-        'Canned Goods',
-        'Condiments & Sauces',
-        'Beverages',
-        'Snacks & Treats',
-        'Pantry',
-        'Household',
-        'Other'
-      ];
-    }
-
-    // Step 3: Call Claude API for categorization
+    // Step 2: Call Claude API for unconstrained categorization
+    // Claude suggests the IDEAL category - the items route handles user's actual categories
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error('[Categorize] No Claude API key configured');
       return NextResponse.json({
@@ -89,15 +49,15 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    const prompt = `Categorize this grocery item: "${itemName}"
+    const prompt = `What grocery store category does this item belong in: "${itemName}"
 
-Available categories:
-${categories.map((c: string, i: number) => `${i + 1}. ${c}`).join('\n')}
+Common categories include: Produce, Meat & Seafood, Dairy & Eggs, Bakery, Frozen, Canned Goods, Condiments & Sauces, Beverages, Snacks & Treats, Pantry, Household, Auto, Outdoor, Pet Supplies, Baby, Health & Beauty, etc.
 
 Instructions:
-- Choose the SINGLE most appropriate category from the list above
+- Return the SINGLE most appropriate category name
+- Use short, standard grocery category names (1-3 words)
 - Respond with ONLY the category name, nothing else
-- If uncertain, choose "Other"
+- If truly uncategorizable, respond with "Other"
 
 Category:`;
 
@@ -115,12 +75,15 @@ Category:`;
       ? message.content[0].text.trim()
       : 'Other';
 
-    // Validate that Claude returned a valid category
-    const category = categories.includes(categoryText) ? categoryText : 'Other';
+    // Basic validation: ensure it's a reasonable category name (not empty, not a sentence)
+    const isValidCategory = categoryText.length > 0 &&
+                            categoryText.length <= 30 &&
+                            !categoryText.includes('.');
+    const category = isValidCategory ? categoryText : 'Other';
 
     console.log('[Categorize] Claude suggested:', category);
 
-    // Step 4: Save to cache for future use
+    // Step 3: Save to cache for future use
     const { error: saveError } = await supabase
       .rpc('save_category_mapping', {
         item_name: itemName,
