@@ -2,6 +2,10 @@
 
 **A meal planning app with an embedded AI sous chef**
 
+<p align="center">
+  <img src=".github/assets/meal-brain-hero.png" alt="MealBrain Screenshot" width="400">
+</p>
+
 ---
 
 ## Why I Built This
