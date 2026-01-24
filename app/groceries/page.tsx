@@ -834,7 +834,7 @@ export default function GroceriesPage() {
                   padding: '10px 12px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   outline: 'none'
                 }}
               />
@@ -846,7 +846,7 @@ export default function GroceriesPage() {
                   padding: '10px 12px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   outline: 'none',
                   backgroundColor: 'white',
                   cursor: 'pointer'
@@ -871,7 +871,7 @@ export default function GroceriesPage() {
                   padding: '10px 12px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   outline: 'none'
                 }}
               />
