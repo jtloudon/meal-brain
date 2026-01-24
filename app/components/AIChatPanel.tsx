@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { X, Send } from 'lucide-react';
+import { X, Send, Copy, Check } from 'lucide-react';
 
 // Helper to get keyboard height from visual viewport
 const useKeyboardHeight = () => {
@@ -75,6 +75,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   const [mounted, setMounted] = useState(false);
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
   const [recipes, setRecipes] = useState<Array<{ id: string; title: string }>>([]);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -244,6 +245,16 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     sessionStorage.removeItem('ai-chat-history');
     // Clear messages state
     setMessages([]);
+  };
+
+  const handleCopyMessage = async (messageId: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   const handleBatchApproval = async (messageId: string, approved: boolean) => {
@@ -606,9 +617,33 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
                     backgroundColor: message.role === 'user' ? 'var(--theme-primary)' : '#f3f4f6',
                     color: message.role === 'user' ? '#ffffff' : '#111827',
                     boxShadow: 'none',
+                    position: 'relative',
                   }}
                 >
-                  <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap', margin: 0 }}>
+                  <button
+                    onClick={() => handleCopyMessage(message.id, message.content)}
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
+                      padding: '4px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      color: message.role === 'user' ? 'rgba(255,255,255,0.5)' : '#d1d5db',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    aria-label="Copy message"
+                  >
+                    {copiedMessageId === message.id ? (
+                      <Check style={{ width: '14px', height: '14px' }} />
+                    ) : (
+                      <Copy style={{ width: '14px', height: '14px' }} />
+                    )}
+                  </button>
+                  <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap', margin: 0, paddingRight: '20px' }}>
                     {message.role === 'assistant' && recipes.length > 0
                       ? linkifyRecipes(message.content).map((part, i) =>
                           part.recipeId ? (
