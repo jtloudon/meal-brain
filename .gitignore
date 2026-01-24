@@ -60,10 +60,3 @@ next-env.d.ts
 resume-context-prompt-for-human.md
 docs/reference-screen-shots/
 
-# Internal development notes (not for public repo)
-docs/11_project_status.md
-docs/CURRENT_WORK.md
-docs/MealBrain.key
-docs/17_dev_login_blocker.md
-docs/18_ui_refinement_decisions.md
-docs/19_meal_planner_page_plan.md
