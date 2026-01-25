@@ -40,20 +40,20 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
 
       // Only track downward pulls
       if (delta > 0) {
-        // Apply resistance curve for natural feel
-        const resistance = 2.5;
+        // Apply resistance curve for natural feel (higher = harder to pull)
+        const resistance = 3.5;
         const distance = Math.min(delta / resistance, 100);
         setPullDistance(distance);
 
-        // Prevent default bounce behavior on iOS
-        if (distance > 5) {
+        // Prevent default bounce behavior on iOS (higher threshold = less likely to hijack scroll)
+        if (distance > 20) {
           e.preventDefault();
         }
       }
     };
 
     const handleTouchEnd = async () => {
-      if (pullDistance > 50 && !isRefreshing) {
+      if (pullDistance > 70 && !isRefreshing) {
         setIsRefreshing(true);
 
         try {
@@ -84,7 +84,7 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
   }, [router, pullDistance, isRefreshing]);
 
   const showIndicator = pullDistance > 0 || isRefreshing;
-  const indicatorOpacity = isRefreshing ? 1 : Math.min(pullDistance / 50, 1);
+  const indicatorOpacity = isRefreshing ? 1 : Math.min(pullDistance / 70, 1);
   const indicatorY = isRefreshing ? 20 : Math.max(pullDistance - 40, -40);
 
   return (
