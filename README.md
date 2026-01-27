@@ -144,6 +144,14 @@ Issues and feature ideas welcome. PRs considered - please open an issue first to
 
 ---
 
+## Author
+
+**Jesse Loudon** - AI, Analytics & Business Insights
+
+Built with spec-driven development using [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Specs defined behavior and constraints; AI implemented.
+
+[GitHub Profile](https://github.com/jtloudon) | [LinkedIn](https://www.linkedin.com/in/jesseloudon/)
+
 ## License
 
 MIT - see [LICENSE](LICENSE)
