@@ -150,7 +150,7 @@ Issues and feature ideas welcome. PRs considered - please open an issue first to
 
 Built with spec-driven development using [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Specs defined behavior and constraints; AI implemented.
 
-[GitHub Profile](https://github.com/jtloudon) | [LinkedIn](https://www.linkedin.com/in/jesseloudon/)
+[GitHub Profile](https://github.com/jtloudon) | [LinkedIn](https://www.linkedin.com/in/jessetloudon/)
 
 ## License
 
