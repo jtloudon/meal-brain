@@ -62,11 +62,11 @@ export default function BottomNav() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: 80,
-                  height: 46,
-                  borderRadius: 23,
+                  width: 76,
+                  height: 44,
+                  borderRadius: 22,
                   backgroundColor: 'var(--theme-primary)',
-                  marginTop: -10,
+                  marginTop: -9,
                 }}>
                   <Icon size={26} strokeWidth={2} color="#ffffff" />
                 </span>
