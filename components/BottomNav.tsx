@@ -48,10 +48,10 @@ export default function BottomNav() {
               href={tab.href}
               style={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'flex-start',
                 justifyContent: 'center',
                 flex: 1,
-                padding: '10px',
+                padding: '6px',
                 textDecoration: 'none'
               }}
               aria-label={tab.name}
@@ -61,8 +61,8 @@ export default function BottomNav() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: 42,
-                  height: 42,
+                  width: 54,
+                  height: 40,
                   borderRadius: 12,
                   backgroundColor: 'var(--theme-primary)',
                 }}>
