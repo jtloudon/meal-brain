@@ -1017,8 +1017,8 @@ export default function GroceriesPage() {
                               stroke={item.out_of_stock ? 'white' : '#d1d5db'}
                               strokeWidth={1.5}
                               style={{
-                                width: item.out_of_stock ? '22px' : '20px',
-                                height: item.out_of_stock ? '22px' : '20px',
+                                width: item.out_of_stock ? '24px' : '20px',
+                                height: item.out_of_stock ? '24px' : '20px',
                                 transition: 'all 0.2s'
                               }}
                             />

@@ -51,7 +51,8 @@ export default function BottomNav() {
                 alignItems: 'flex-start',
                 justifyContent: 'center',
                 flex: 1,
-                padding: '6px',
+                paddingTop: '6px',
+                paddingBottom: '6px',
                 textDecoration: 'none'
               }}
               aria-label={tab.name}
@@ -61,12 +62,13 @@ export default function BottomNav() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: 54,
-                  height: 40,
-                  borderRadius: 12,
+                  width: 56,
+                  height: 32,
+                  borderRadius: 16,
                   backgroundColor: 'var(--theme-primary)',
+                  marginTop: -3,
                 }}>
-                  <Icon size={24} strokeWidth={2} color="#ffffff" />
+                  <Icon size={22} strokeWidth={2} color="#ffffff" />
                 </span>
               ) : (
                 <Icon size={26} strokeWidth={2} color="#9ca3af" />
