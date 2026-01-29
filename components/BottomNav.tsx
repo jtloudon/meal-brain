@@ -68,10 +68,10 @@ export default function BottomNav() {
                   backgroundColor: 'var(--theme-primary)',
                   marginTop: -9,
                 }}>
-                  <Icon size={26} strokeWidth={2} color="#ffffff" />
+                  <Icon size={26} strokeWidth={1.5} color="#ffffff" />
                 </span>
               ) : (
-                <Icon size={26} strokeWidth={2} color="#9ca3af" />
+                <Icon size={26} strokeWidth={1.5} color="#9ca3af" />
               )}
             </Link>
           );

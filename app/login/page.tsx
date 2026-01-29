@@ -117,7 +117,7 @@ function LoginContent() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--theme-primary)]" style={{ color: 'white' }}>
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--theme-primary)]" style={{ color: 'white', background: 'linear-gradient(135deg, #FF6B35 0%, #FF4B9E 50%, #9B59B6 100%)' }}>
       <div className="flex flex-col items-center">
         {/* Chef's Hat Icon - matches splash exactly */}
         <svg
@@ -280,7 +280,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--theme-primary)]">
+      <main className="flex min-h-screen flex-col items-center justify-center p-6" style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #FF4B9E 50%, #9B59B6 100%)' }}>
         <div className="text-center" style={{ color: 'white' }}>
           <div className="text-lg">Loading...</div>
         </div>
