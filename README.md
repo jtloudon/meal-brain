@@ -148,7 +148,7 @@ Issues and feature ideas welcome. PRs considered - please open an issue first to
 
 **Jesse Loudon** - AI, Analytics & Business Insights
 
-Built with spec-driven development using [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Specs defined behavior and constraints; AI implemented.
+Spec-driven development — I defined behavior, constraints, and product decisions; implemented with [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 [GitHub Profile](https://github.com/jtloudon) | [LinkedIn](https://www.linkedin.com/in/jessetloudon/)
 
