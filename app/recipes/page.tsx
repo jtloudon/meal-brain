@@ -573,10 +573,12 @@ export default function RecipesPage() {
           alignItems: 'center',
           flex: 1,
           minWidth: 0,
-          backgroundColor: 'white',
-          borderRadius: '20px',
-          border: '1px solid var(--theme-primary)',
-          padding: '6px 12px',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+          padding: '8px 14px',
           gap: '8px'
         }}>
           <Search size={18} style={{ color: '#9ca3af', strokeWidth: 2, flexShrink: 0 }} />
@@ -602,12 +604,15 @@ export default function RecipesPage() {
             onClick={() => setShowImportModal(true)}
             style={{
               padding: '8px 16px',
-              border: '1px solid var(--theme-primary)',
-              borderRadius: '20px',
-              backgroundColor: 'white',
+              border: 'none',
+              borderRadius: '22px',
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
               cursor: 'pointer',
               fontSize: '14px',
-              color: 'var(--theme-primary)',
+              color: '#333',
               fontWeight: '600',
               flexShrink: 0
             }}
@@ -617,11 +622,14 @@ export default function RecipesPage() {
           <button
             onClick={() => router.push('/recipes/new')}
             style={{
-              width: '36px',
-              height: '36px',
-              border: '1px solid var(--theme-primary)',
+              width: '38px',
+              height: '38px',
+              border: 'none',
               borderRadius: '50%',
-              backgroundColor: 'white',
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -629,12 +637,12 @@ export default function RecipesPage() {
               flexShrink: 0
             }}
           >
-            <Plus size={20} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+            <Plus size={20} style={{ color: '#333', strokeWidth: 2 }} />
           </button>
         </div>
       }
     >
-      <div style={{ paddingLeft: '8px', paddingRight: '8px', paddingTop: '12px', paddingBottom: '16px' }}>
+      <div style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '12px', paddingBottom: '16px' }}>
         {/* Filter Pills - compact row with accordion expand */}
         <div style={{ marginBottom: '12px' }}>
           {/* Summary row - 3 pills */}
@@ -646,10 +654,11 @@ export default function RecipesPage() {
               onClick={() => setExpandedFilter(expandedFilter === 'category' ? null : 'category')}
               style={{
                 padding: '6px 14px',
-                borderRadius: '16px',
+                borderRadius: '14px',
                 border: 'none',
-                backgroundColor: selectedCategory !== 'All' || expandedFilter === 'category' ? 'var(--theme-primary)' : '#f3f4f6',
-                color: selectedCategory !== 'All' || expandedFilter === 'category' ? 'white' : '#6b7280',
+                backgroundColor: selectedCategory !== 'All' || expandedFilter === 'category' ? 'var(--theme-primary)' : 'rgba(255, 255, 255, 0.85)',
+                color: selectedCategory !== 'All' || expandedFilter === 'category' ? 'white' : '#555',
+                boxShadow: '0 1px 6px rgba(0, 0, 0, 0.06)',
                 fontSize: '13px',
                 fontWeight: '500',
                 cursor: 'pointer',
@@ -662,10 +671,11 @@ export default function RecipesPage() {
               onClick={() => setExpandedFilter(expandedFilter === 'rating' ? null : 'rating')}
               style={{
                 padding: '6px 14px',
-                borderRadius: '16px',
+                borderRadius: '14px',
                 border: 'none',
-                backgroundColor: minRating !== null || expandedFilter === 'rating' ? 'var(--theme-primary)' : '#f3f4f6',
-                color: minRating !== null || expandedFilter === 'rating' ? 'white' : '#6b7280',
+                backgroundColor: minRating !== null || expandedFilter === 'rating' ? 'var(--theme-primary)' : 'rgba(255, 255, 255, 0.85)',
+                color: minRating !== null || expandedFilter === 'rating' ? 'white' : '#555',
+                boxShadow: '0 1px 6px rgba(0, 0, 0, 0.06)',
                 fontSize: '13px',
                 fontWeight: '500',
                 cursor: 'pointer',
@@ -688,10 +698,11 @@ export default function RecipesPage() {
               onClick={() => setExpandedFilter(expandedFilter === 'time' ? null : 'time')}
               style={{
                 padding: '6px 14px',
-                borderRadius: '16px',
+                borderRadius: '14px',
                 border: 'none',
-                backgroundColor: maxTime !== null || expandedFilter === 'time' ? 'var(--theme-primary)' : '#f3f4f6',
-                color: maxTime !== null || expandedFilter === 'time' ? 'white' : '#6b7280',
+                backgroundColor: maxTime !== null || expandedFilter === 'time' ? 'var(--theme-primary)' : 'rgba(255, 255, 255, 0.85)',
+                color: maxTime !== null || expandedFilter === 'time' ? 'white' : '#555',
+                boxShadow: '0 1px 6px rgba(0, 0, 0, 0.06)',
                 fontSize: '13px',
                 fontWeight: '500',
                 cursor: 'pointer',
