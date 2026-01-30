@@ -628,13 +628,22 @@ export default function GroceriesPage() {
     <AuthenticatedLayout
       title=""
     >
-      <div style={{ padding: '0 12px 80px 12px', marginTop: '-20px' }}>
+      {/* Fixed top bar - list name + action buttons */}
+      <div style={{
+        position: 'fixed',
+        top: 'calc(12px + env(safe-area-inset-top))',
+        left: '12px',
+        right: '12px',
+        zIndex: 40,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+      }}>
         {/* List Selector - Clickable name with arrow + Shield button */}
         <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '8px',
             backgroundColor: 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
@@ -689,20 +698,13 @@ export default function GroceriesPage() {
             </button>
           </div>
 
-        {/* Circular icon action buttons - sticky below list name */}
+        {/* Circular icon action buttons */}
         <div style={{
-          position: 'sticky',
-          top: '48px',
-          backgroundColor: 'transparent',
-          zIndex: 10,
-          paddingTop: '4px',
-          paddingBottom: '8px'
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          paddingLeft: '4px',
         }}>
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center'
-          }}>
           {/* Select All - now on same row */}
           {items.length > 0 && !lists.find(l => l.id === selectedListId)?.protected && (
             <button
@@ -802,8 +804,10 @@ export default function GroceriesPage() {
             </button>
           )}
           </div>
-        </div>
+      </div>
 
+      {/* Scrollable content */}
+      <div style={{ padding: '0 12px 80px 12px', marginTop: 'calc(100px + env(safe-area-inset-top))' }}>
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
           <div style={{
