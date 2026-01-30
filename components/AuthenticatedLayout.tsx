@@ -89,7 +89,7 @@ export default function AuthenticatedLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
+      <main className="flex-1 overflow-y-auto" style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
         {children}
       </main>
 

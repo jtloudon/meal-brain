@@ -18,23 +18,24 @@ export default function BottomNav() {
     <nav
       style={{
         position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#ffffff',
-        borderTop: '1px solid #e5e7eb',
+        bottom: 'calc(12px + env(safe-area-inset-bottom))',
+        left: '16px',
+        right: '16px',
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '28px',
+        boxShadow: '0 2px 20px rgba(0, 0, 0, 0.08), 0 0 0 0.5px rgba(0, 0, 0, 0.05)',
         zIndex: 50,
       }}
     >
       <div style={{
         display: 'flex',
         justifyContent: 'space-around',
-        alignItems: 'flex-start',
-        height: '58px',
-        paddingTop: '8px',
-        paddingLeft: '8px',
-        paddingRight: '8px',
-        paddingBottom: '6px',
+        alignItems: 'center',
+        height: '56px',
+        paddingLeft: '12px',
+        paddingRight: '12px',
         gap: '4px'
       }}>
         {tabs.map((tab) => {
@@ -48,7 +49,7 @@ export default function BottomNav() {
               href={tab.href}
               style={{
                 display: 'flex',
-                alignItems: 'flex-start',
+                alignItems: 'center',
                 justifyContent: 'center',
                 flex: 1,
                 paddingTop: '6px',
@@ -62,11 +63,10 @@ export default function BottomNav() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: 76,
-                  height: 44,
-                  borderRadius: 22,
+                  width: 72,
+                  height: 42,
+                  borderRadius: 21,
                   backgroundColor: 'var(--theme-primary)',
-                  marginTop: -9,
                 }}>
                   <Icon size={26} strokeWidth={1.5} color="#ffffff" />
                 </span>

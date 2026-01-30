@@ -19,7 +19,7 @@ export default function FloatingAIButton() {
       aria-label="Open AI Assistant"
       style={{
         position: 'fixed',
-        bottom: '80px', // Above the nav bar (58px + 22px margin)
+        bottom: 'calc(88px + env(safe-area-inset-bottom))', // Above floating nav
         right: '20px',
         width: '60px',
         height: '60px',
