@@ -71,25 +71,34 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="sticky top-0 z-40 flex-shrink-0" style={{ backgroundColor: 'var(--background)' }}>
-        <div className="flex justify-between items-center px-4 py-2" style={{ gap: '8px' }}>
-          <div style={{ flex: 1 }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ position: 'relative' }}>
+      {/* Header - floats over content */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(238, 238, 241, 0.72)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        zIndex: 40,
+      }}>
+        <div className="flex justify-between items-center py-2" style={{ gap: '8px', paddingLeft: '12px', paddingRight: '12px' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             {typeof title === 'string' ? (
               <h1 className="text-xl font-bold text-gray-900">{title}</h1>
             ) : (
               title
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" style={{ flexShrink: 0 }}>
             {action}
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto" style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
+      <main className="flex-1 overflow-y-auto" style={{ paddingTop: '56px', paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
         {children}
       </main>
 
