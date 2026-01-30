@@ -609,9 +609,9 @@ export default function RecipeDetailPage() {
           zIndex: 10
         }} />
 
-        {/* Action buttons on hero */}
+        {/* Action buttons - fixed, don't scroll */}
         <div style={{
-          position: 'absolute',
+          position: 'fixed',
           top: 'calc(12px + env(safe-area-inset-top))',
           left: 0,
           right: 0,
@@ -620,7 +620,7 @@ export default function RecipeDetailPage() {
           justifyContent: 'space-between',
           paddingLeft: '16px',
           paddingRight: '16px',
-          zIndex: 20
+          zIndex: 50
         }}>
           <button
             onClick={() => router.push('/recipes')}
