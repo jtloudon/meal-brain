@@ -31,6 +31,7 @@ export default function RecipesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [showSearch, setShowSearch] = useState(false);
+  const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
   const [householdName, setHouseholdName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [showImportModal, setShowImportModal] = useState(false);
@@ -566,65 +567,33 @@ export default function RecipesPage() {
   return (
     <AuthenticatedLayout
       title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, paddingLeft: '16px', minWidth: 0 }}>
-          {!showSearch ? (
-            <button
-              onClick={() => setShowSearch(true)}
-              style={{
-                width: '36px',
-                height: '36px',
-                border: '1px solid var(--theme-primary)',
-                borderRadius: '50%',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}
-            >
-              <Search size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={() => setShowSearch(false)}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  border: '1px solid var(--theme-primary)',
-                  borderRadius: '50%',
-                  backgroundColor: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}
-              >
-                <Search size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
-              </button>
-              <input
-                type="text"
-                placeholder="Search recipes..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                autoFocus
-                style={{
-                  width: '180px',
-                  paddingLeft: '16px',
-                  paddingRight: '16px',
-                  paddingTop: '8px',
-                  paddingBottom: '8px',
-                  backgroundColor: '#f3f4f6',
-                  border: 'none',
-                  borderRadius: '20px',
-                  fontSize: '16px',
-                  outline: 'none'
-                }}
-              />
-            </>
-          )}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          flex: 1,
+          paddingLeft: '16px',
+          minWidth: 0,
+          backgroundColor: 'white',
+          borderRadius: '20px',
+          border: '1px solid #e5e7eb',
+          padding: '6px 12px',
+          gap: '8px'
+        }}>
+          <Search size={18} style={{ color: '#9ca3af', strokeWidth: 2, flexShrink: 0 }} />
+          <input
+            type="text"
+            placeholder="Search recipes..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              flex: 1,
+              border: 'none',
+              fontSize: '16px',
+              outline: 'none',
+              backgroundColor: 'transparent',
+              minWidth: 0
+            }}
+          />
         </div>
       }
       action={
@@ -666,99 +635,170 @@ export default function RecipesPage() {
       }
     >
       <div style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
-        {/* Category Filter Pills */}
-        <div style={{
-          display: 'flex',
-          gap: '6px',
-          marginBottom: '8px',
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
-        }}>
-          {categories.map((category) => (
+        {/* Filter Pills - compact row with accordion expand */}
+        <div style={{ marginBottom: '12px' }}>
+          {/* Summary row - 3 pills */}
+          <div style={{
+            display: 'flex',
+            gap: '6px',
+          }}>
             <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => setExpandedFilter(expandedFilter === 'category' ? null : 'category')}
               style={{
                 padding: '6px 14px',
                 borderRadius: '16px',
                 border: 'none',
-                backgroundColor: selectedCategory === category ? 'var(--theme-primary)' : '#f3f4f6',
-                color: selectedCategory === category ? 'white' : '#6b7280',
+                backgroundColor: selectedCategory !== 'All' || expandedFilter === 'category' ? 'var(--theme-primary)' : '#f3f4f6',
+                color: selectedCategory !== 'All' || expandedFilter === 'category' ? 'white' : '#6b7280',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {selectedCategory}
+            </button>
+            <button
+              onClick={() => setExpandedFilter(expandedFilter === 'rating' ? null : 'rating')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '16px',
+                border: 'none',
+                backgroundColor: minRating !== null || expandedFilter === 'rating' ? 'var(--theme-primary)' : '#f3f4f6',
+                color: minRating !== null || expandedFilter === 'rating' ? 'white' : '#6b7280',
                 fontSize: '13px',
                 fontWeight: '500',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
-                flexShrink: 0
-              }}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-
-        {/* Rating Filter Pills */}
-        <div style={{
-          display: 'flex',
-          gap: '6px',
-          marginBottom: '8px'
-        }}>
-          {[null, 3, 4, 5].map((rating) => (
-            <button
-              key={rating ?? 'all'}
-              onClick={() => setMinRating(rating)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: '16px',
-                border: 'none',
-                backgroundColor: minRating === rating ? 'var(--theme-primary)' : '#f3f4f6',
-                color: minRating === rating ? 'white' : '#6b7280',
-                fontSize: '13px',
-                fontWeight: '500',
-                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px'
               }}
             >
-              {rating ? (
+              {minRating ? (
                 <>
-                  <Star size={14} fill={minRating === rating ? 'white' : 'var(--theme-primary)'} stroke={minRating === rating ? 'white' : 'var(--theme-primary)'} strokeWidth={2} />
-                  <span>{rating}+</span>
+                  <Star size={14} fill="white" stroke="white" strokeWidth={2} />
+                  <span>{minRating}+</span>
                 </>
               ) : (
                 'All Ratings'
               )}
             </button>
-          ))}
-        </div>
-
-        {/* Time Filter Pills */}
-        <div style={{
-          display: 'flex',
-          gap: '6px',
-          marginBottom: '16px',
-          flexWrap: 'wrap'
-        }}>
-          {[null, 30, 45, 60].map((time) => (
             <button
-              key={time ?? 'all'}
-              onClick={() => setMaxTime(time)}
+              onClick={() => setExpandedFilter(expandedFilter === 'time' ? null : 'time')}
               style={{
-                padding: '6px 10px',
+                padding: '6px 14px',
                 borderRadius: '16px',
                 border: 'none',
-                backgroundColor: maxTime === time ? 'var(--theme-primary)' : '#f3f4f6',
-                color: maxTime === time ? 'white' : '#6b7280',
+                backgroundColor: maxTime !== null || expandedFilter === 'time' ? 'var(--theme-primary)' : '#f3f4f6',
+                color: maxTime !== null || expandedFilter === 'time' ? 'white' : '#6b7280',
                 fontSize: '13px',
                 fontWeight: '500',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
               }}
             >
-              {time ? `≤ ${time} min` : 'Any Time'}
+              {maxTime ? `≤ ${maxTime} min` : 'Any Time'}
             </button>
-          ))}
+          </div>
+
+          {/* Expanded options row */}
+          {expandedFilter === 'category' && (
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              marginTop: '8px',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => { setSelectedCategory(category); setExpandedFilter(null); }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '16px',
+                    border: 'none',
+                    backgroundColor: selectedCategory === category ? 'var(--theme-primary)' : 'white',
+                    color: selectedCategory === category ? 'white' : '#6b7280',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {expandedFilter === 'rating' && (
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              marginTop: '8px'
+            }}>
+              {[null, 3, 4, 5].map((rating) => (
+                <button
+                  key={rating ?? 'all'}
+                  onClick={() => { setMinRating(rating); setExpandedFilter(null); }}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '16px',
+                    border: 'none',
+                    backgroundColor: minRating === rating ? 'var(--theme-primary)' : 'white',
+                    color: minRating === rating ? 'white' : '#6b7280',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  {rating ? (
+                    <>
+                      <Star size={14} fill={minRating === rating ? 'white' : 'var(--theme-primary)'} stroke={minRating === rating ? 'white' : 'var(--theme-primary)'} strokeWidth={2} />
+                      <span>{rating}+</span>
+                    </>
+                  ) : (
+                    'All Ratings'
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {expandedFilter === 'time' && (
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              marginTop: '8px'
+            }}>
+              {[null, 30, 45, 60].map((time) => (
+                <button
+                  key={time ?? 'all'}
+                  onClick={() => { setMaxTime(time); setExpandedFilter(null); }}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '16px',
+                    border: 'none',
+                    backgroundColor: maxTime === time ? 'var(--theme-primary)' : 'white',
+                    color: maxTime === time ? 'white' : '#6b7280',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {time ? `≤ ${time} min` : 'Any Time'}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
@@ -838,7 +878,7 @@ export default function RecipesPage() {
                   flexShrink: 0,
                   borderRadius: '6px',
                   overflow: 'hidden',
-                  backgroundColor: '#f3f4f6'
+                  backgroundColor: 'transparent'
                 }}>
                   {recipe.image_url ? (
                     <img
