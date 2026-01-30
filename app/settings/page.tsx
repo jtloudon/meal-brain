@@ -118,45 +118,35 @@ export default function SettingsPage() {
   ];
 
   return (
-    <AuthenticatedLayout title="">
-      <div style={{ padding: '8px 16px 80px 16px' }}>
-        {/* Household Info Banner */}
-        {householdName && (
+    <AuthenticatedLayout
+      title={
+        householdName ? (
           <div style={{
-            backgroundColor: '#fff7ed',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '24px',
-            border: '1px solid #fed7aa'
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            width: 'fit-content',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderRadius: '22px',
+            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+            padding: '0 16px',
+            height: '44px',
           }}>
-            <div style={{
-              fontSize: '12px',
-              color: '#9a3412',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              fontWeight: '600',
-              marginBottom: '4px'
-            }}>
-              Household
-            </div>
-            <div style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              color: '#ea580c',
-              marginBottom: '4px'
-            }}>
+            <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>
               {householdName}
-            </div>
+            </span>
             {userEmail && (
-              <div style={{
-                fontSize: '13px',
-                color: '#9a3412'
-              }}>
+              <span style={{ fontSize: '13px', color: '#6b7280' }}>
                 {userEmail}
-              </div>
+              </span>
             )}
           </div>
-        )}
+        ) : ''
+      }
+    >
+      <div style={{ padding: '8px 16px 80px 16px' }}>
 
         {settingsSections.map((section, idx) => (
           <div key={section.title} style={{ marginBottom: idx < settingsSections.length - 1 ? '32px' : '0' }}>
