@@ -507,7 +507,7 @@ export default function RecipesPage() {
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            size={14}
+            size={16}
             fill={star <= displayRating ? 'var(--theme-primary)' : 'none'}
             stroke={star <= displayRating ? 'var(--theme-primary)' : '#d1d5db'}
             strokeWidth={2}
@@ -956,22 +956,41 @@ export default function RecipesPage() {
                       </span>
                     )}
                   </div>
-                  {recipe.tags.length > 0 && (
+                  {(recipe.meal_type || recipe.tags.length > 0) && (
                     <div style={{
                       display: 'flex',
-                      flexWrap: 'wrap',
                       gap: '6px',
-                      marginTop: '6px'
+                      marginTop: '6px',
+                      overflowX: 'auto',
+                      WebkitOverflowScrolling: 'touch',
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                      whiteSpace: 'nowrap'
                     }}>
+                      {recipe.meal_type && (
+                        <span style={{
+                          fontSize: '12px',
+                          color: 'var(--theme-primary)',
+                          backgroundColor: 'transparent',
+                          border: '1px solid var(--theme-primary)',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          flexShrink: 0,
+                          fontWeight: '500'
+                        }}>
+                          {recipe.meal_type}
+                        </span>
+                      )}
                       {recipe.tags.map((tag) => (
                         <span
                           key={tag}
                           style={{
                             fontSize: '12px',
-                            color: '#6b7280',
-                            backgroundColor: '#f3f4f6',
+                            color: 'var(--theme-primary)',
+                            backgroundColor: 'transparent',
                             padding: '2px 8px',
-                            borderRadius: '4px'
+                            borderRadius: '4px',
+                            flexShrink: 0
                           }}
                         >
                           {tag}
