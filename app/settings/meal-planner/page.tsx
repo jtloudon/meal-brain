@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, Plus, X, ArrowLeft } from 'lucide-react';
+import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 
 interface MealCourse {
   id: string;
@@ -105,57 +106,51 @@ export default function MealPlannerSettingsPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        gap: '12px'
-      }}>
-        <button
-
-          onClick={() => router.push('/settings')}
-
-          style={{
-
-            width: '36px',
-
-            height: '36px',
-
-            borderRadius: '50%',
-
-            border: '1px solid var(--theme-primary)',
-
-            backgroundColor: 'white',
-
-            cursor: 'pointer',
-
-            display: 'flex',
-
-            alignItems: 'center',
-
-            justifyContent: 'center'
-
-          }}
-
-        >
-
-          <ArrowLeft size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
-
-        </button>
-        <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#111827', flex: 1 }}>
-          Meal planner
-        </h3>
-        {saveMessage && (
+    <AuthenticatedLayout
+      title={
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          width: 'fit-content',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '0 14px 0 6px',
+          height: '44px',
+        }}>
+          <button
+            onClick={() => router.push('/settings')}
+            style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              border: '1px solid var(--theme-primary)',
+              background: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <ArrowLeft size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+          </button>
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap' }}>
+            Meal planner
+          </span>
+        </div>
+      }
+      action={
+        saveMessage ? (
           <span style={{ color: saveMessage === 'Saved!' ? '#22c55e' : '#ef4444', fontSize: '14px' }}>
             {saveMessage}
           </span>
-        )}
-      </div>
-
-      {/* Content */}
+        ) : null
+      }
+    >
       <div style={{ padding: '16px 16px 80px 16px' }}>
         {/* Meals Section */}
         <div>
@@ -369,6 +364,6 @@ export default function MealPlannerSettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }

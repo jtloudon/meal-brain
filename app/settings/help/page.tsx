@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ChevronRight, X, Search } from 'lucide-react';
+import { ChevronRight, X, Search, ArrowLeft } from 'lucide-react';
+import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { useState, useMemo } from 'react';
 import Collapsible from '@/components/Collapsible';
 import { faqData, categories } from './faq-data';
@@ -39,41 +40,44 @@ export default function HelpPage() {
   const visibleCategories = categories.filter((category) => faqsByCategory[category]?.length > 0);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
-      {/* Header */}
-      <div
-        style={{
+    <AuthenticatedLayout
+      title={
+        <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px',
-          borderBottom: '1px solid #e5e7eb',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          gap: '10px',
+          width: 'fit-content',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '0 14px 0 6px',
+          height: '44px',
+        }}>
           <button
             onClick={() => router.back()}
             style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              border: '1px solid var(--theme-primary)',
               background: 'none',
-              border: 'none',
               cursor: 'pointer',
-              padding: '4px',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
             }}
           >
-            <ChevronRight
-              size={24}
-              style={{ transform: 'rotate(180deg)', color: 'var(--theme-primary)' }}
-            />
+            <ArrowLeft size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
-          <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827', margin: 0 }}>
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap' }}>
             Help
-          </h1>
+          </span>
         </div>
-      </div>
-
-      {/* Content */}
+      }
+    >
       <div style={{ padding: '16px' }}>
         {/* Introduction */}
         <p
@@ -192,6 +196,6 @@ export default function HelpPage() {
           </div>
         )}
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }
