@@ -629,6 +629,7 @@ export default function GroceriesPage() {
       title=""
     >
       {/* Fixed top bar - list name + action buttons */}
+      {/* Fixed top bar - list name + action buttons in one bar */}
       <div style={{
         position: 'fixed',
         top: 'calc(12px + env(safe-area-inset-top))',
@@ -636,81 +637,67 @@ export default function GroceriesPage() {
         right: '12px',
         zIndex: 40,
         display: 'flex',
-        flexDirection: 'column',
-        gap: '6px',
+        alignItems: 'center',
+        gap: '8px',
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '22px',
+        boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+        padding: '6px 10px',
       }}>
-        {/* List Selector - Clickable name with arrow + Shield button */}
-        <div style={{
+        {/* List name + chevron */}
+        <button
+          onClick={() => setShowListSelector(true)}
+          style={{
+            flex: 1,
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.85)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderRadius: '22px',
-            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-            padding: '6px 14px',
-          }}>
-            <button
-              onClick={() => setShowListSelector(true)}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '4px 0',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {selectedListId === defaultListId && (
-                  <Star size={18} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)' }} />
-                )}
-                <span style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-                  {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
-                </span>
-              </div>
-              <ChevronDown size={20} style={{ color: '#9ca3af' }} />
-            </button>
-            <button
-              onClick={toggleProtection}
-              disabled={saving}
-              style={{
-                padding: '6px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                opacity: saving ? 0.5 : 1
-              }}
-              title={lists.find(l => l.id === selectedListId)?.protected ? "Remove protection" : "Protect from bulk delete"}
-            >
-              <Shield
-                size={18}
-                style={{
-                  color: 'var(--theme-primary)',
-                  fill: lists.find(l => l.id === selectedListId)?.protected ? 'var(--theme-primary)' : 'none'
-                }}
-              />
-            </button>
-          </div>
+            gap: '6px',
+            padding: '4px 4px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            minWidth: 0,
+          }}
+        >
+          {selectedListId === defaultListId && (
+            <Star size={16} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)', flexShrink: 0 }} />
+          )}
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
+          </span>
+          <ChevronDown size={16} style={{ color: '#9ca3af', flexShrink: 0 }} />
+        </button>
 
-        {/* Circular icon action buttons */}
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'center',
-          paddingLeft: '4px',
-          backgroundColor: 'rgba(255, 255, 255, 0.72)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderRadius: '22px',
-          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-          padding: '6px 12px',
-        }}>
+        {/* Divider */}
+        <div style={{ width: '1px', height: '20px', backgroundColor: '#e5e7eb', flexShrink: 0 }} />
+
+        {/* Action buttons */}
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+          {/* Shield */}
+          <button
+            onClick={toggleProtection}
+            disabled={saving}
+            style={{
+              padding: '4px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              opacity: saving ? 0.5 : 1
+            }}
+            title={lists.find(l => l.id === selectedListId)?.protected ? "Remove protection" : "Protect from bulk delete"}
+          >
+            <Shield
+              size={18}
+              style={{
+                color: 'var(--theme-primary)',
+                fill: lists.find(l => l.id === selectedListId)?.protected ? 'var(--theme-primary)' : 'none'
+              }}
+            />
+          </button>
           {/* Select All - now on same row */}
           {items.length > 0 && !lists.find(l => l.id === selectedListId)?.protected && (
             <button
@@ -729,8 +716,8 @@ export default function GroceriesPage() {
                 });
               }}
               style={{
-                width: '36px',
-                height: '36px',
+                width: '28px',
+                height: '28px',
                 borderRadius: '50%',
                 border: '1px solid var(--theme-primary)',
                 backgroundColor: 'white',
@@ -743,17 +730,17 @@ export default function GroceriesPage() {
               title="Select All"
             >
               {items.every(item => item.checked) ? (
-                <CheckSquare size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+                <CheckSquare size={14} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
               ) : (
-                <Square size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+                <Square size={14} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
               )}
             </button>
           )}
           <button
             onClick={() => setShowInlineAddForm(!showInlineAddForm)}
             style={{
-              width: '36px',
-              height: '36px',
+              width: '28px',
+              height: '28px',
               borderRadius: '50%',
               border: showInlineAddForm ? 'none' : '1px solid var(--theme-primary)',
               backgroundColor: showInlineAddForm ? 'var(--theme-primary)' : 'white',
@@ -765,14 +752,14 @@ export default function GroceriesPage() {
             }}
             title="Add Item"
           >
-            <Plus size={20} style={{ color: showInlineAddForm ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
+            <Plus size={16} style={{ color: showInlineAddForm ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
           <button
             onClick={() => setShowCopyToModal(true)}
             disabled={!items.some(item => item.checked)}
             style={{
-              width: '36px',
-              height: '36px',
+              width: '28px',
+              height: '28px',
               borderRadius: '50%',
               border: items.some(item => item.checked) ? '1px solid var(--theme-primary)' : '1px solid #e5e7eb',
               backgroundColor: 'white',
@@ -785,15 +772,15 @@ export default function GroceriesPage() {
             }}
             title="Copy to..."
           >
-            <Copy size={16} style={{ color: items.some(item => item.checked) ? 'var(--theme-primary)' : '#9ca3af', strokeWidth: 2 }} />
+            <Copy size={13} style={{ color: items.some(item => item.checked) ? 'var(--theme-primary)' : '#9ca3af', strokeWidth: 2 }} />
           </button>
           {!lists.find(l => l.id === selectedListId)?.protected && (
             <button
               onClick={() => setShowClearCheckedConfirm(true)}
               disabled={!items.some(item => item.checked)}
               style={{
-                width: '36px',
-                height: '36px',
+                width: '28px',
+                height: '28px',
                 borderRadius: '50%',
                 border: items.some(item => item.checked) ? '1px solid var(--theme-primary)' : '1px solid #e5e7eb',
                 backgroundColor: 'white',
@@ -806,14 +793,14 @@ export default function GroceriesPage() {
               }}
               title="Delete Checked"
             >
-              <Trash2 size={16} style={{ color: items.some(item => item.checked) ? 'var(--theme-primary)' : '#9ca3af', strokeWidth: 2 }} />
+              <Trash2 size={13} style={{ color: items.some(item => item.checked) ? 'var(--theme-primary)' : '#9ca3af', strokeWidth: 2 }} />
             </button>
           )}
           </div>
       </div>
 
       {/* Scrollable content */}
-      <div style={{ padding: '0 12px 80px 12px', marginTop: '4px' }}>
+      <div style={{ padding: '0 8px 80px 8px' }}>
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
           <div style={{
@@ -962,7 +949,9 @@ export default function GroceriesPage() {
                   <div style={{
                     backgroundColor: 'white',
                     borderRadius: '12px',
-                    padding: '4px 16px',
+                    padding: '4px 20px',
+                    marginLeft: '8px',
+                    marginRight: '8px',
                   }}>
                     {categoryItems.map((item) => (
                       <div
