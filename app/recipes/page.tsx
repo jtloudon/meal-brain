@@ -816,7 +816,7 @@ export default function RecipesPage() {
 
         {/* Recipe List */}
         {!loading && !error && recipes.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0 16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0 8px' }}>
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}

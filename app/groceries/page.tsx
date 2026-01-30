@@ -637,7 +637,7 @@ export default function GroceriesPage() {
             marginBottom: '4px',
             position: 'sticky',
             top: 0,
-            backgroundColor: 'white',
+            backgroundColor: 'var(--background)',
             zIndex: 20,
             paddingTop: '0',
             paddingBottom: '0',
@@ -697,7 +697,7 @@ export default function GroceriesPage() {
         <div style={{
           position: 'sticky',
           top: '48px',
-          backgroundColor: 'white',
+          backgroundColor: 'var(--background)',
           zIndex: 10,
           marginLeft: '-16px',
           marginRight: '-16px',
