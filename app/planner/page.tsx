@@ -431,88 +431,103 @@ function PlannerContent() {
 
   return (
     <AuthenticatedLayout
-      title=""
-      action={null}
-    >
-      <div style={{ padding: '0 16px 80px 16px' }}>
-        {/* Month Navigation */}
+      title={
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '12px',
-          paddingTop: '4px'
+          gap: '8px',
+          width: 'fit-content',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '0 6px 0 14px',
+          height: '44px',
         }}>
           <button
             onClick={prevMonth}
             style={{
-              padding: '8px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: 'transparent',
+              padding: '4px',
+              border: '1px solid var(--theme-primary)',
+              borderRadius: '50%',
+              background: 'none',
               cursor: 'pointer',
-              color: 'var(--theme-primary)'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              flexShrink: 0
             }}
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>
-              {formatMonthYear()}
-            </h2>
-            <button
-              onClick={goToToday}
-              style={{
-                padding: '4px 12px',
-                border: '1px solid var(--theme-primary)',
-                borderRadius: '6px',
-                backgroundColor: 'white',
-                color: 'var(--theme-primary)',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              Today
-            </button>
-          </div>
-
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap' }}>
+            {formatMonthYear()}
+          </span>
+          <button
+            onClick={goToToday}
+            style={{
+              height: '28px',
+              padding: '0 10px',
+              border: '1px solid var(--theme-primary)',
+              borderRadius: '14px',
+              background: 'none',
+              color: 'var(--theme-primary)',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            Today
+          </button>
           <button
             onClick={nextMonth}
             style={{
-              padding: '8px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: 'transparent',
+              padding: '4px',
+              border: '1px solid var(--theme-primary)',
+              borderRadius: '50%',
+              background: 'none',
               cursor: 'pointer',
-              color: 'var(--theme-primary)'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              flexShrink: 0
             }}
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
         </div>
-
-        {/* View Toggle */}
+      }
+      action={
         <div style={{
           display: 'flex',
-          gap: '8px',
-          marginBottom: '16px',
+          alignItems: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
           padding: '4px',
-          backgroundColor: '#f3f4f6',
-          borderRadius: '8px',
-          width: 'fit-content'
+          height: '44px',
+          flexShrink: 0,
         }}>
           <button
             onClick={() => setViewMode('monthly')}
             style={{
-              padding: '6px 16px',
+              padding: '6px 14px',
               border: 'none',
-              borderRadius: '6px',
+              borderRadius: '18px',
               backgroundColor: viewMode === 'monthly' ? 'var(--theme-primary)' : 'transparent',
               color: viewMode === 'monthly' ? 'white' : '#6b7280',
-              fontSize: '14px',
-              fontWeight: '500',
+              fontSize: '13px',
+              fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.2s'
             }}
@@ -522,13 +537,13 @@ function PlannerContent() {
           <button
             onClick={() => setViewMode('weekly')}
             style={{
-              padding: '6px 16px',
+              padding: '6px 14px',
               border: 'none',
-              borderRadius: '6px',
+              borderRadius: '18px',
               backgroundColor: viewMode === 'weekly' ? 'var(--theme-primary)' : 'transparent',
               color: viewMode === 'weekly' ? 'white' : '#6b7280',
-              fontSize: '14px',
-              fontWeight: '500',
+              fontSize: '13px',
+              fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.2s'
             }}
@@ -536,6 +551,9 @@ function PlannerContent() {
             Weekly
           </button>
         </div>
+      }
+    >
+      <div style={{ padding: '0 16px 80px 16px' }}>
 
         {/* Calendar Grid */}
         {viewMode === 'monthly' && (
