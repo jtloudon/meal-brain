@@ -25,7 +25,7 @@ export default function BottomNav() {
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: '28px',
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06)',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.08)',
         zIndex: 50,
       }}
     >
