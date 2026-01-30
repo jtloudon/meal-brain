@@ -566,9 +566,9 @@ export default function RecipeDetailPage() {
 
   return (
     <AuthenticatedLayout title="">
-      <div style={{ backgroundColor: 'white', paddingBottom: '80px' }}>
+      <div style={{ backgroundColor: 'white', paddingBottom: '80px', marginTop: 'calc(-64px - env(safe-area-inset-top))' }}>
         {/* Hero Image with Overlay */}
-        <div style={{ position: 'relative', height: '320px', width: '100%', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', height: '380px', width: '100%', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
         {recipe.image_url ? (
           <img
             src={recipe.image_url}
@@ -612,7 +612,7 @@ export default function RecipeDetailPage() {
         {/* Action buttons on hero */}
         <div style={{
           position: 'absolute',
-          top: '16px',
+          top: 'calc(12px + env(safe-area-inset-top))',
           left: 0,
           right: 0,
           display: 'flex',
@@ -626,10 +626,12 @@ export default function RecipeDetailPage() {
             onClick={() => router.push('/recipes')}
             style={{
               padding: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              backgroundColor: 'rgba(255, 255, 255, 0.72)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
               border: 'none',
               borderRadius: '50%',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -660,10 +662,12 @@ export default function RecipeDetailPage() {
               }}
               style={{
                 padding: '8px 14px',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'rgba(255, 255, 255, 0.72)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
                 border: 'none',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                borderRadius: '22px',
+                boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -677,10 +681,12 @@ export default function RecipeDetailPage() {
               onClick={() => router.push(`/recipes/${recipe.id}/edit`)}
               style={{
                 padding: '8px 14px',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'rgba(255, 255, 255, 0.72)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
                 border: 'none',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                borderRadius: '22px',
+                boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
