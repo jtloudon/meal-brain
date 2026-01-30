@@ -4,8 +4,8 @@
   "description": "An AI sous chef you control - helpful, never bossy",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f97316",
-  "theme_color": "#f97316",
+  "background_color": "#eeeef1",
+  "theme_color": "#eeeef1",
   "orientation": "portrait",
   "icons": [
     {
