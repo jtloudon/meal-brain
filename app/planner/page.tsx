@@ -436,7 +436,6 @@ function PlannerContent() {
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          width: 'fit-content',
           backgroundColor: 'rgba(255, 255, 255, 0.6)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
@@ -448,7 +447,8 @@ function PlannerContent() {
           <button
             onClick={prevMonth}
             style={{
-              padding: '4px',
+              width: '28px',
+              height: '28px',
               border: '1px solid var(--theme-primary)',
               borderRadius: '50%',
               background: 'none',
@@ -456,26 +456,24 @@ function PlannerContent() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
               flexShrink: 0
             }}
           >
             <ChevronLeft size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
-          <span style={{ fontSize: viewMode === 'weekly' ? '13px' : '15px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap', width: viewMode === 'weekly' ? '150px' : '115px', textAlign: 'center' }}>
+          <span style={{ fontSize: viewMode === 'weekly' ? '13px' : '15px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap', textAlign: 'center', flex: 1, minWidth: 0 }}>
             {formatMonthYear()}
           </span>
           <button
             onClick={goToToday}
             style={{
               height: '28px',
-              padding: '0 10px',
+              padding: '0 8px',
               border: '1px solid var(--theme-primary)',
               borderRadius: '14px',
               background: 'none',
               color: 'var(--theme-primary)',
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: '600',
               cursor: 'pointer',
               flexShrink: 0,
@@ -485,10 +483,52 @@ function PlannerContent() {
           >
             Today
           </button>
+          {/* View toggle - inline segmented control */}
+          <div style={{
+            display: 'flex',
+            backgroundColor: 'rgba(0,0,0,0.06)',
+            borderRadius: '14px',
+            padding: '2px',
+            flexShrink: 0
+          }}>
+            <button
+              onClick={() => setViewMode('monthly')}
+              style={{
+                padding: '4px 8px',
+                border: 'none',
+                borderRadius: '12px',
+                backgroundColor: viewMode === 'monthly' ? 'var(--theme-primary)' : 'transparent',
+                color: viewMode === 'monthly' ? 'white' : '#6b7280',
+                fontSize: '11px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              M
+            </button>
+            <button
+              onClick={() => setViewMode('weekly')}
+              style={{
+                padding: '4px 8px',
+                border: 'none',
+                borderRadius: '12px',
+                backgroundColor: viewMode === 'weekly' ? 'var(--theme-primary)' : 'transparent',
+                color: viewMode === 'weekly' ? 'white' : '#6b7280',
+                fontSize: '11px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              W
+            </button>
+          </div>
           <button
             onClick={nextMonth}
             style={{
-              padding: '4px',
+              width: '28px',
+              height: '28px',
               border: '1px solid var(--theme-primary)',
               borderRadius: '50%',
               background: 'none',
@@ -496,59 +536,10 @@ function PlannerContent() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
               flexShrink: 0
             }}
           >
             <ChevronRight size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
-          </button>
-        </div>
-      }
-      action={
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.6)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderRadius: '22px',
-          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-          padding: '3px',
-          height: '36px',
-          flexShrink: 0,
-        }}>
-          <button
-            onClick={() => setViewMode('monthly')}
-            style={{
-              padding: '6px 14px',
-              border: 'none',
-              borderRadius: '18px',
-              backgroundColor: viewMode === 'monthly' ? 'var(--theme-primary)' : 'transparent',
-              color: viewMode === 'monthly' ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setViewMode('weekly')}
-            style={{
-              padding: '6px 14px',
-              border: 'none',
-              borderRadius: '18px',
-              backgroundColor: viewMode === 'weekly' ? 'var(--theme-primary)' : 'transparent',
-              color: viewMode === 'weekly' ? 'white' : '#6b7280',
-              fontSize: '13px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            Weekly
           </button>
         </div>
       }

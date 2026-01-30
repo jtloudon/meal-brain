@@ -602,90 +602,72 @@ export default function RecipesPage() {
         </div>
       }
       action={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          {/* Filter button */}
-          <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.6)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderRadius: '50%',
-            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-            width: '44px',
-            height: '44px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <button
-              onClick={() => { setShowFilters(!showFilters); setExpandedFilter(null); }}
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                border: '1px solid var(--theme-primary)',
-                backgroundColor: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'var(--theme-primary)' : 'transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative'
-              }}
-            >
-              <ListFilter size={14} style={{ color: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
-            </button>
-          </div>
-          {/* Import / Add */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: 'rgba(255, 255, 255, 0.6)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderRadius: '22px',
-            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-            padding: '0 10px',
-            height: '44px',
-            flexShrink: 0,
-          }}>
-            <button
-              onClick={() => setShowImportModal(true)}
-              style={{
-                height: '28px',
-                padding: '0 10px',
-                border: '1px solid var(--theme-primary)',
-                borderRadius: '14px',
-                background: 'none',
-                cursor: 'pointer',
-                fontSize: '13px',
-                color: 'var(--theme-primary)',
-                fontWeight: '600',
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              Import
-            </button>
-            <button
-              onClick={() => router.push('/recipes/new')}
-              style={{
-                width: '28px',
-                height: '28px',
-                background: 'none',
-                border: '1px solid var(--theme-primary)',
-                borderRadius: '50%',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}
-            >
-              <Plus size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
-            </button>
-          </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          backgroundColor: 'rgba(255, 255, 255, 0.6)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '0 10px',
+          height: '44px',
+          flexShrink: 0,
+        }}>
+          <button
+            onClick={() => { setShowFilters(!showFilters); setExpandedFilter(null); }}
+            style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              border: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'none' : '1px solid var(--theme-primary)',
+              backgroundColor: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'var(--theme-primary)' : 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <ListFilter size={14} style={{ color: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
+          </button>
+          <button
+            onClick={() => setShowImportModal(true)}
+            style={{
+              height: '28px',
+              padding: '0 10px',
+              border: '1px solid var(--theme-primary)',
+              borderRadius: '14px',
+              background: 'none',
+              cursor: 'pointer',
+              fontSize: '13px',
+              color: 'var(--theme-primary)',
+              fontWeight: '600',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            Import
+          </button>
+          <button
+            onClick={() => router.push('/recipes/new')}
+            style={{
+              width: '28px',
+              height: '28px',
+              background: 'none',
+              border: '1px solid var(--theme-primary)',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <Plus size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+          </button>
         </div>
       }
     >
