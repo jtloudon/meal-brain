@@ -435,14 +435,14 @@ function PlannerContent() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: '6px',
           width: 'fit-content',
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: 'rgba(255, 255, 255, 0.6)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderRadius: '22px',
           boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-          padding: '0 6px 0 14px',
+          padding: '0 6px',
           height: '44px',
         }}>
           <button
@@ -463,7 +463,7 @@ function PlannerContent() {
           >
             <ChevronLeft size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
-          <span style={{ fontSize: viewMode === 'weekly' ? '14px' : '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap', width: viewMode === 'weekly' ? '168px' : '132px', textAlign: 'center' }}>
+          <span style={{ fontSize: viewMode === 'weekly' ? '13px' : '15px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap', width: viewMode === 'weekly' ? '150px' : '115px', textAlign: 'center' }}>
             {formatMonthYear()}
           </span>
           <button
@@ -509,7 +509,7 @@ function PlannerContent() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: 'rgba(255, 255, 255, 0.6)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderRadius: '22px',

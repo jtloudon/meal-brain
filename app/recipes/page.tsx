@@ -604,39 +604,37 @@ export default function RecipesPage() {
       action={
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {/* Filter button */}
-          <button
-            onClick={() => { setShowFilters(!showFilters); setExpandedFilter(null); }}
-            style={{
-              width: '44px',
-              height: '44px',
-              backgroundColor: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'var(--theme-primary)' : 'rgba(255, 255, 255, 0.6)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              borderRadius: '50%',
-              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              position: 'relative'
-            }}
-          >
-            <ListFilter size={18} style={{ color: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
-            {(selectedCategory !== 'All' || minRating !== null || maxTime !== null) && !showFilters && (
-              <div style={{
-                position: 'absolute',
-                top: '6px',
-                right: '6px',
-                width: '8px',
-                height: '8px',
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderRadius: '50%',
+            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+            width: '44px',
+            height: '44px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <button
+              onClick={() => { setShowFilters(!showFilters); setExpandedFilter(null); }}
+              style={{
+                width: '28px',
+                height: '28px',
                 borderRadius: '50%',
-                backgroundColor: 'white',
-                border: '1.5px solid var(--theme-primary)'
-              }} />
-            )}
-          </button>
+                border: '1px solid var(--theme-primary)',
+                backgroundColor: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'var(--theme-primary)' : 'transparent',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}
+            >
+              <ListFilter size={14} style={{ color: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
+            </button>
+          </div>
           {/* Import / Add */}
           <div style={{
             display: 'flex',
