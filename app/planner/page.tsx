@@ -463,7 +463,7 @@ function PlannerContent() {
           >
             <ChevronLeft size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
-          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap', width: '132px', textAlign: 'center' }}>
+          <span style={{ fontSize: viewMode === 'weekly' ? '14px' : '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap', width: viewMode === 'weekly' ? '168px' : '132px', textAlign: 'center' }}>
             {formatMonthYear()}
           </span>
           <button
