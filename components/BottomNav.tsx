@@ -21,7 +21,7 @@ export default function BottomNav() {
         bottom: 'calc(12px + env(safe-area-inset-bottom))',
         left: '16px',
         right: '16px',
-        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backgroundColor: 'rgba(255, 255, 255, 0.72)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: '28px',
