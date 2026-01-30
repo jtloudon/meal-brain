@@ -626,56 +626,38 @@ export default function GroceriesPage() {
 
   return (
     <AuthenticatedLayout
-      title=""
-    >
-      {/* Fixed top bar - list name + action buttons */}
-      {/* Fixed top bar - list name + action buttons in one bar */}
-      <div style={{
-        position: 'fixed',
-        top: 'calc(12px + env(safe-area-inset-top))',
-        left: '12px',
-        right: '12px',
-        zIndex: 40,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        backgroundColor: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '22px',
-        boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-        padding: '6px 10px',
-      }}>
-        {/* List name + chevron */}
-        <button
-          onClick={() => setShowListSelector(true)}
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 4px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            minWidth: 0,
-          }}
-        >
-          {selectedListId === defaultListId && (
-            <Star size={16} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)', flexShrink: 0 }} />
-          )}
-          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
-          </span>
-          <ChevronDown size={16} style={{ color: '#9ca3af', flexShrink: 0 }} />
-        </button>
-
-        {/* Divider */}
-        <div style={{ width: '1px', height: '20px', backgroundColor: '#e5e7eb', flexShrink: 0 }} />
-
-        {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
-          {/* Shield */}
+      title={
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '0 14px',
+          height: '38px',
+        }}>
+          <button
+            onClick={() => setShowListSelector(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {selectedListId === defaultListId && (
+              <Star size={16} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)', flexShrink: 0 }} />
+            )}
+            <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap' }}>
+              {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
+            </span>
+            <ChevronDown size={16} style={{ color: '#9ca3af', flexShrink: 0 }} />
+          </button>
           <button
             onClick={toggleProtection}
             disabled={saving}
@@ -691,13 +673,29 @@ export default function GroceriesPage() {
             title={lists.find(l => l.id === selectedListId)?.protected ? "Remove protection" : "Protect from bulk delete"}
           >
             <Shield
-              size={18}
+              size={16}
               style={{
                 color: 'var(--theme-primary)',
                 fill: lists.find(l => l.id === selectedListId)?.protected ? 'var(--theme-primary)' : 'none'
               }}
             />
           </button>
+        </div>
+      }
+      action={
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '0 10px',
+          height: '38px',
+          flexShrink: 0,
+        }}>
           {/* Select All - now on same row */}
           {items.length > 0 && !lists.find(l => l.id === selectedListId)?.protected && (
             <button
@@ -796,10 +794,9 @@ export default function GroceriesPage() {
               <Trash2 size={13} style={{ color: items.some(item => item.checked) ? 'var(--theme-primary)' : '#9ca3af', strokeWidth: 2 }} />
             </button>
           )}
-          </div>
-      </div>
-
-      {/* Scrollable content */}
+        </div>
+      }
+    >
       <div style={{ padding: '0 8px 80px 8px' }}>
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
