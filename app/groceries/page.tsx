@@ -704,6 +704,12 @@ export default function GroceriesPage() {
           gap: '8px',
           alignItems: 'center',
           paddingLeft: '4px',
+          backgroundColor: 'rgba(255, 255, 255, 0.72)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '6px 12px',
         }}>
           {/* Select All - now on same row */}
           {items.length > 0 && !lists.find(l => l.id === selectedListId)?.protected && (
@@ -807,7 +813,7 @@ export default function GroceriesPage() {
       </div>
 
       {/* Scrollable content */}
-      <div style={{ padding: '0 12px 80px 12px', marginTop: 'calc(100px + env(safe-area-inset-top))' }}>
+      <div style={{ padding: '0 12px 80px 12px', marginTop: '4px' }}>
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
           <div style={{
@@ -956,7 +962,7 @@ export default function GroceriesPage() {
                   <div style={{
                     backgroundColor: 'white',
                     borderRadius: '12px',
-                    padding: '4px 12px',
+                    padding: '4px 16px',
                   }}>
                     {categoryItems.map((item) => (
                       <div
