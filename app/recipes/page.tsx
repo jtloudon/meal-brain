@@ -816,7 +816,7 @@ export default function RecipesPage() {
 
         {/* Recipe List */}
         {!loading && !error && recipes.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0 8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0 5px' }}>
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}
@@ -829,7 +829,6 @@ export default function RecipesPage() {
                   cursor: 'pointer',
                   padding: '12px',
                   borderRadius: '12px',
-                  border: '1px solid #e5e7eb',
                 }}
               >
                 {/* Recipe Image - Square thumbnail on left */}

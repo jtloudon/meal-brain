@@ -25,7 +25,7 @@ export default function BottomNav() {
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: '28px',
-        boxShadow: '0 2px 20px rgba(0, 0, 0, 0.08), 0 0 0 0.5px rgba(0, 0, 0, 0.05)',
+        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06)',
         zIndex: 50,
       }}
     >
@@ -33,7 +33,7 @@ export default function BottomNav() {
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        height: '56px',
+        height: '60px',
         paddingLeft: '12px',
         paddingRight: '12px',
         gap: '4px'
