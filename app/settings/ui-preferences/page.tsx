@@ -68,18 +68,61 @@ export default function UIPreferencesPage() {
     );
   }
 
-  const themeColors = [
-    { name: 'Sky Blue', hex: '#00A0DC' },
-    { name: 'Teal', hex: '#00BFA5' },
-    { name: 'Ocean Blue', hex: '#0284C7' },
-    { name: 'Coral', hex: '#F87171' },
-    { name: 'Purple', hex: '#A78BFA' },
-    { name: 'Emerald', hex: '#34D399' },
-    { name: 'Light Blue', hex: '#93C5FD' },
-    { name: 'Mint', hex: '#86EFAC' },
-    { name: 'Yellow', hex: '#FCD34D' },
-    { name: 'Slate', hex: '#64748B' },
-    { name: 'Warm Gray', hex: '#78716C' },
+  const colorSections = [
+    {
+      title: 'Reds & Pinks',
+      colors: [
+        { name: 'Red', hex: '#FF3B30' },
+        { name: 'Coral', hex: '#FF6961' },
+        { name: 'Rose', hex: '#FF2D55' },
+        { name: 'Magenta', hex: '#E91E8C' },
+        { name: 'Pink', hex: '#FF6B9D' },
+        { name: 'Berry', hex: '#C44569' },
+      ],
+    },
+    {
+      title: 'Oranges & Yellows',
+      colors: [
+        { name: 'Orange', hex: '#FF9500' },
+        { name: 'Tangerine', hex: '#FF6F3C' },
+        { name: 'Yellow', hex: '#FFCC00' },
+        { name: 'Gold', hex: '#E8A317' },
+      ],
+    },
+    {
+      title: 'Greens',
+      colors: [
+        { name: 'Green', hex: '#34C759' },
+        { name: 'Mint', hex: '#30D158' },
+        { name: 'Forest', hex: '#248A52' },
+        { name: 'Teal', hex: '#00C7A8' },
+      ],
+    },
+    {
+      title: 'Blues',
+      colors: [
+        { name: 'Blue', hex: '#007AFF' },
+        { name: 'Sky', hex: '#5AC8FA' },
+        { name: 'Vivid', hex: '#0A84FF' },
+        { name: 'Ocean', hex: '#1A6FC4' },
+        { name: 'Indigo', hex: '#5856D6' },
+      ],
+    },
+    {
+      title: 'Purples',
+      colors: [
+        { name: 'Purple', hex: '#AF52DE' },
+        { name: 'Plum', hex: '#8944AB' },
+        { name: 'Violet', hex: '#BF5AF2' },
+      ],
+    },
+    {
+      title: 'Neutrals',
+      colors: [
+        { name: 'Graphite', hex: '#636366' },
+        { name: 'Silver', hex: '#8E8E93' },
+      ],
+    },
   ];
 
   return (
@@ -129,43 +172,57 @@ export default function UIPreferencesPage() {
       }
     >
       <div style={{ padding: '16px' }}>
-        {/* Theme Color */}
-        <div style={{ marginBottom: '32px' }}>
-          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '8px' }}>
-            Theme Color
-          </h4>
-          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
-            Customize your app's accent color
-          </p>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-            maxWidth: '400px'
-          }}>
-            {themeColors.map((color) => (
-              <button
-                key={color.hex}
-                onClick={() => saveThemeColor(color.hex)}
-                disabled={saving}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '8px',
-                  backgroundColor: color.hex,
-                  border: (preferences.theme_color || '#f97316') === color.hex
-                    ? '3px solid #111827'
-                    : '1px solid #e5e7eb',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s',
-                  opacity: saving ? 0.6 : 1,
-                }}
-                aria-label={color.name}
-                title={color.name}
-              />
-            ))}
+        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '20px' }}>
+          Customize your app&apos;s accent color
+        </p>
+        {colorSections.map((section) => (
+          <div key={section.title} style={{ marginBottom: '20px' }}>
+            <h4 style={{
+              fontSize: '12px',
+              fontWeight: '600',
+              color: '#9ca3af',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginBottom: '10px'
+            }}>
+              {section.title}
+            </h4>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(6, 1fr)',
+              gap: '12px',
+            }}>
+              {section.colors.map((color) => (
+                <div key={color.hex} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <button
+                    onClick={() => saveThemeColor(color.hex)}
+                    disabled={saving}
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '50%',
+                      backgroundColor: color.hex,
+                      border: (preferences.theme_color || '#f97316') === color.hex
+                        ? '3px solid #111827'
+                        : '3px solid transparent',
+                      boxShadow: (preferences.theme_color || '#f97316') === color.hex
+                        ? '0 0 0 2px white, 0 0 0 4px #111827'
+                        : 'none',
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s',
+                      opacity: saving ? 0.6 : 1,
+                    }}
+                    aria-label={color.name}
+                    title={color.name}
+                  />
+                  <span style={{ fontSize: '10px', color: '#6b7280', textAlign: 'center' }}>
+                    {color.name}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </AuthenticatedLayout>
   );
