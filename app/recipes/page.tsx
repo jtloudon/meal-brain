@@ -617,15 +617,18 @@ export default function RecipesPage() {
           <button
             onClick={() => setShowImportModal(true)}
             style={{
-              padding: '4px 10px',
-              border: '1.5px solid var(--theme-primary)',
+              height: '28px',
+              padding: '0 10px',
+              border: '1px solid var(--theme-primary)',
               borderRadius: '14px',
               background: 'none',
               cursor: 'pointer',
               fontSize: '13px',
               color: 'var(--theme-primary)',
               fontWeight: '600',
-              flexShrink: 0
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center'
             }}
           >
             Import
@@ -633,9 +636,10 @@ export default function RecipesPage() {
           <button
             onClick={() => router.push('/recipes/new')}
             style={{
-              padding: '4px',
+              width: '28px',
+              height: '28px',
               background: 'none',
-              border: '1.5px solid var(--theme-primary)',
+              border: '1px solid var(--theme-primary)',
               borderRadius: '50%',
               cursor: 'pointer',
               display: 'flex',
@@ -644,7 +648,7 @@ export default function RecipesPage() {
               flexShrink: 0
             }}
           >
-            <Plus size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2.5 }} />
+            <Plus size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
         </div>
       }
