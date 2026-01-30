@@ -578,7 +578,8 @@ export default function RecipesPage() {
           WebkitBackdropFilter: 'blur(16px)',
           borderRadius: '22px',
           boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
-          padding: '8px 14px',
+          padding: '0 14px',
+          height: '38px',
           gap: '8px'
         }}>
           <Search size={18} style={{ color: '#9ca3af', strokeWidth: 2, flexShrink: 0 }} />
@@ -590,10 +591,11 @@ export default function RecipesPage() {
             style={{
               flex: 1,
               border: 'none',
-              fontSize: '16px',
+              fontSize: '15px',
               outline: 'none',
               backgroundColor: 'transparent',
-              minWidth: 0
+              minWidth: 0,
+              height: '100%'
             }}
           />
         </div>

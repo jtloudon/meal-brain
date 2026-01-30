@@ -78,9 +78,7 @@ export default function AuthenticatedLayout({
         top: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'rgba(238, 238, 241, 0.72)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backgroundColor: 'transparent',
         zIndex: 40,
       }}>
         <div className="flex justify-between items-center py-2" style={{ gap: '8px', paddingLeft: '12px', paddingRight: '12px' }}>
