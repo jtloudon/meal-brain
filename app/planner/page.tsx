@@ -463,7 +463,7 @@ function PlannerContent() {
           >
             <ChevronLeft size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
           </button>
-          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827', whiteSpace: 'nowrap', width: '132px', textAlign: 'center' }}>
             {formatMonthYear()}
           </span>
           <button
@@ -514,8 +514,8 @@ function PlannerContent() {
           WebkitBackdropFilter: 'blur(16px)',
           borderRadius: '22px',
           boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-          padding: '4px',
-          height: '44px',
+          padding: '3px',
+          height: '36px',
           flexShrink: 0,
         }}>
           <button
