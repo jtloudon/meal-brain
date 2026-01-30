@@ -591,7 +591,7 @@ export default function RecipesPage() {
             style={{
               flex: 1,
               border: 'none',
-              fontSize: '15px',
+              fontSize: '16px',
               outline: 'none',
               backgroundColor: 'transparent',
               minWidth: 0,
@@ -601,20 +601,29 @@ export default function RecipesPage() {
         </div>
       }
       action={
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+          padding: '0 10px',
+          height: '44px',
+          flexShrink: 0,
+        }}>
           <button
             onClick={() => setShowImportModal(true)}
             style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '22px',
-              backgroundColor: 'rgba(255, 255, 255, 0.85)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+              padding: '4px 10px',
+              border: '1.5px solid var(--theme-primary)',
+              borderRadius: '14px',
+              background: 'none',
               cursor: 'pointer',
-              fontSize: '14px',
-              color: '#333',
+              fontSize: '13px',
+              color: 'var(--theme-primary)',
               fontWeight: '600',
               flexShrink: 0
             }}
@@ -624,14 +633,10 @@ export default function RecipesPage() {
           <button
             onClick={() => router.push('/recipes/new')}
             style={{
-              width: '38px',
-              height: '44px',
-              border: 'none',
+              padding: '4px',
+              background: 'none',
+              border: '1.5px solid var(--theme-primary)',
               borderRadius: '50%',
-              backgroundColor: 'rgba(255, 255, 255, 0.85)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -639,7 +644,7 @@ export default function RecipesPage() {
               flexShrink: 0
             }}
           >
-            <Plus size={20} style={{ color: '#333', strokeWidth: 2 }} />
+            <Plus size={18} style={{ color: 'var(--theme-primary)', strokeWidth: 2.5 }} />
           </button>
         </div>
       }

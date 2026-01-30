@@ -631,7 +631,6 @@ export default function GroceriesPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          flex: 1,
           backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
