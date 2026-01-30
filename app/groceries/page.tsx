@@ -628,23 +628,19 @@ export default function GroceriesPage() {
     <AuthenticatedLayout
       title=""
     >
-      <div style={{ padding: '0 16px 80px 16px' }}>
+      <div style={{ padding: '0 12px 80px 12px', marginTop: '-20px' }}>
         {/* List Selector - Clickable name with arrow + Shield button */}
         <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            marginBottom: '4px',
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'var(--background)',
-            zIndex: 20,
-            paddingTop: '0',
-            paddingBottom: '0',
-            marginLeft: '-16px',
-            marginRight: '-16px',
-            paddingLeft: '16px',
-            paddingRight: '16px'
+            gap: '8px',
+            marginBottom: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderRadius: '22px',
+            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+            padding: '6px 14px',
           }}>
             <button
               onClick={() => setShowListSelector(true)}
@@ -653,7 +649,7 @@ export default function GroceriesPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '12px 0',
+                padding: '4px 0',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer'
@@ -661,19 +657,19 @@ export default function GroceriesPage() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {selectedListId === defaultListId && (
-                  <Star size={20} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)' }} />
+                  <Star size={18} style={{ color: 'var(--theme-primary)', fill: 'var(--theme-primary)' }} />
                 )}
-                <span style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
+                <span style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
                   {lists.find(l => l.id === selectedListId)?.name || 'Groceries'}
                 </span>
               </div>
-              <ChevronDown size={24} style={{ color: '#9ca3af' }} />
+              <ChevronDown size={20} style={{ color: '#9ca3af' }} />
             </button>
             <button
               onClick={toggleProtection}
               disabled={saving}
               style={{
-                padding: '8px',
+                padding: '6px',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
@@ -684,7 +680,7 @@ export default function GroceriesPage() {
               title={lists.find(l => l.id === selectedListId)?.protected ? "Remove protection" : "Protect from bulk delete"}
             >
               <Shield
-                size={20}
+                size={18}
                 style={{
                   color: 'var(--theme-primary)',
                   fill: lists.find(l => l.id === selectedListId)?.protected ? 'var(--theme-primary)' : 'none'
@@ -697,12 +693,8 @@ export default function GroceriesPage() {
         <div style={{
           position: 'sticky',
           top: '48px',
-          backgroundColor: 'var(--background)',
+          backgroundColor: 'transparent',
           zIndex: 10,
-          marginLeft: '-16px',
-          marginRight: '-16px',
-          paddingLeft: '16px',
-          paddingRight: '16px',
           paddingTop: '4px',
           paddingBottom: '8px'
         }}>
@@ -957,7 +949,11 @@ export default function GroceriesPage() {
                   </h3>
 
                   {/* Items in this category */}
-                  <div className="space-y-0">
+                  <div style={{
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    padding: '4px 12px',
+                  }}>
                     {categoryItems.map((item) => (
                       <div
                         key={item.id}
