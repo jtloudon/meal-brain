@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Plus, Search, Star, Clock } from 'lucide-react';
+import { Plus, Search, Star, Clock, ListFilter } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
 interface Recipe {
@@ -31,6 +31,7 @@ export default function RecipesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [showSearch, setShowSearch] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
   const [householdName, setHouseholdName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -573,7 +574,7 @@ export default function RecipesPage() {
           alignItems: 'center',
           flex: 1,
           minWidth: 0,
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: 'rgba(255, 255, 255, 0.6)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderRadius: '22px',
@@ -601,60 +602,98 @@ export default function RecipesPage() {
         </div>
       }
       action={
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderRadius: '22px',
-          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
-          padding: '0 10px',
-          height: '44px',
-          flexShrink: 0,
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          {/* Filter button */}
           <button
-            onClick={() => setShowImportModal(true)}
+            onClick={() => { setShowFilters(!showFilters); setExpandedFilter(null); }}
             style={{
-              height: '28px',
-              padding: '0 10px',
-              border: '1px solid var(--theme-primary)',
-              borderRadius: '14px',
-              background: 'none',
-              cursor: 'pointer',
-              fontSize: '13px',
-              color: 'var(--theme-primary)',
-              fontWeight: '600',
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            Import
-          </button>
-          <button
-            onClick={() => router.push('/recipes/new')}
-            style={{
-              width: '28px',
-              height: '28px',
-              background: 'none',
-              border: '1px solid var(--theme-primary)',
+              width: '44px',
+              height: '44px',
+              backgroundColor: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'var(--theme-primary)' : 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
               borderRadius: '50%',
+              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+              border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexShrink: 0
+              flexShrink: 0,
+              position: 'relative'
             }}
           >
-            <Plus size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+            <ListFilter size={18} style={{ color: (showFilters || selectedCategory !== 'All' || minRating !== null || maxTime !== null) ? 'white' : 'var(--theme-primary)', strokeWidth: 2 }} />
+            {(selectedCategory !== 'All' || minRating !== null || maxTime !== null) && !showFilters && (
+              <div style={{
+                position: 'absolute',
+                top: '6px',
+                right: '6px',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: 'white',
+                border: '1.5px solid var(--theme-primary)'
+              }} />
+            )}
           </button>
+          {/* Import / Add */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderRadius: '22px',
+            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
+            padding: '0 10px',
+            height: '44px',
+            flexShrink: 0,
+          }}>
+            <button
+              onClick={() => setShowImportModal(true)}
+              style={{
+                height: '28px',
+                padding: '0 10px',
+                border: '1px solid var(--theme-primary)',
+                borderRadius: '14px',
+                background: 'none',
+                cursor: 'pointer',
+                fontSize: '13px',
+                color: 'var(--theme-primary)',
+                fontWeight: '600',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              Import
+            </button>
+            <button
+              onClick={() => router.push('/recipes/new')}
+              style={{
+                width: '28px',
+                height: '28px',
+                background: 'none',
+                border: '1px solid var(--theme-primary)',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <Plus size={16} style={{ color: 'var(--theme-primary)', strokeWidth: 2 }} />
+            </button>
+          </div>
         </div>
       }
     >
       <div style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '12px', paddingBottom: '16px' }}>
         {/* Filter Pills - compact row with accordion expand */}
+        {showFilters && (
         <div style={{ marginBottom: '12px' }}>
           {/* Summary row - 3 pills */}
           <div style={{
@@ -822,6 +861,7 @@ export default function RecipesPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Loading State */}
         {loading && (
