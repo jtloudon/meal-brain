@@ -563,6 +563,7 @@ export default function RecipesPage() {
 
   // Dynamic meal type categories from user preferences
   const categories = ['All', ...mealCourses.map(course => course.name)];
+  const categoryLabels: Record<string, string> = { 'All': 'Any Meal' };
 
   return (
     <AuthenticatedLayout
@@ -571,11 +572,10 @@ export default function RecipesPage() {
           display: 'flex',
           alignItems: 'center',
           flex: 1,
-          paddingLeft: '16px',
           minWidth: 0,
           backgroundColor: 'white',
           borderRadius: '20px',
-          border: '1px solid #e5e7eb',
+          border: '1px solid var(--theme-primary)',
           padding: '6px 12px',
           gap: '8px'
         }}>
@@ -597,7 +597,7 @@ export default function RecipesPage() {
         </div>
       }
       action={
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', paddingRight: '16px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
           <button
             onClick={() => setShowImportModal(true)}
             style={{
@@ -634,7 +634,7 @@ export default function RecipesPage() {
         </div>
       }
     >
-      <div style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
+      <div style={{ paddingLeft: '8px', paddingRight: '8px', paddingTop: '12px', paddingBottom: '16px' }}>
         {/* Filter Pills - compact row with accordion expand */}
         <div style={{ marginBottom: '12px' }}>
           {/* Summary row - 3 pills */}
@@ -656,7 +656,7 @@ export default function RecipesPage() {
                 whiteSpace: 'nowrap'
               }}
             >
-              {selectedCategory}
+              {selectedCategory === 'All' ? 'Any Meal' : selectedCategory}
             </button>
             <button
               onClick={() => setExpandedFilter(expandedFilter === 'rating' ? null : 'rating')}
@@ -730,7 +730,7 @@ export default function RecipesPage() {
                     flexShrink: 0
                   }}
                 >
-                  {category}
+                  {categoryLabels[category] || category}
                 </button>
               ))}
             </div>
@@ -856,7 +856,7 @@ export default function RecipesPage() {
 
         {/* Recipe List */}
         {!loading && !error && recipes.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0 5px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0' }}>
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}
