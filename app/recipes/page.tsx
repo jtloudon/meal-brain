@@ -828,7 +828,8 @@ export default function RecipesPage() {
                   backgroundColor: 'white',
                   cursor: 'pointer',
                   padding: '12px',
-                  borderRadius: '14px',
+                  borderRadius: '12px',
+                  border: '1px solid #e5e7eb',
                 }}
               >
                 {/* Recipe Image - Square thumbnail on left */}
