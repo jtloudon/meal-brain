@@ -579,7 +579,7 @@ export default function RecipesPage() {
           borderRadius: '22px',
           boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
           padding: '0 14px',
-          height: '38px',
+          height: '44px',
           gap: '8px'
         }}>
           <Search size={18} style={{ color: '#9ca3af', strokeWidth: 2, flexShrink: 0 }} />
@@ -625,7 +625,7 @@ export default function RecipesPage() {
             onClick={() => router.push('/recipes/new')}
             style={{
               width: '38px',
-              height: '38px',
+              height: '44px',
               border: 'none',
               borderRadius: '50%',
               backgroundColor: 'rgba(255, 255, 255, 0.85)',

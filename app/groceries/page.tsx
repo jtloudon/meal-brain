@@ -630,14 +630,15 @@ export default function GroceriesPage() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          justifyContent: 'space-between',
+          flex: 1,
           backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderRadius: '22px',
           boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
           padding: '0 14px',
-          height: '38px',
+          height: '44px',
         }}>
           <button
             onClick={() => setShowListSelector(true)}
@@ -693,7 +694,7 @@ export default function GroceriesPage() {
           borderRadius: '22px',
           boxShadow: '0 2px 16px rgba(0, 0, 0, 0.12)',
           padding: '0 10px',
-          height: '38px',
+          height: '44px',
           flexShrink: 0,
         }}>
           {/* Select All - now on same row */}
