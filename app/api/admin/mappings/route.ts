@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       .select('category')
       .order('category');
 
-    const distinctCategories = [...new Set(categoriesData?.map(c => c.category) || [])];
+    const distinctCategories = Array.from(new Set(categoriesData?.map(c => c.category) || []));
 
     return NextResponse.json({
       mappings,
