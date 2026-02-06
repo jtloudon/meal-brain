@@ -83,6 +83,8 @@ export default function GroceriesPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showClearCheckedConfirm, setShowClearCheckedConfirm] = useState(false);
   const [shoppingCategories, setShoppingCategories] = useState<string[]>([]);
+  const [rememberCategory, setRememberCategory] = useState(false);
+  const [originalCategory, setOriginalCategory] = useState('');
   const [showDeleteListConfirm, setShowDeleteListConfirm] = useState(false);
   const [listToDelete, setListToDelete] = useState<string | null>(null);
   const [showCopyToModal, setShowCopyToModal] = useState(false);
@@ -312,6 +314,28 @@ export default function GroceriesPage() {
       });
 
       if (res.ok) {
+        // If category changed and user wants to remember it, update the mapping
+        if (rememberCategory && editCategory !== originalCategory) {
+          try {
+            // Normalize the item name (lowercase, trimmed)
+            const normalizedName = editName.toLowerCase().trim();
+            await fetch('/api/category-admin/mappings', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                updates: [{
+                  item_name_normalized: normalizedName,
+                  new_category: editCategory
+                }]
+              }),
+            });
+            console.log('[Grocery] Saved category mapping:', normalizedName, '->', editCategory);
+          } catch (mappingError) {
+            // Don't fail the whole operation if mapping update fails
+            console.error('[Grocery] Failed to save category mapping:', mappingError);
+          }
+        }
+
         // If list changed, remove from current list
         if (editListId && editListId !== selectedListId) {
           setItems((prev) => prev.filter((item) => item.id !== editingItem.id));
@@ -334,6 +358,7 @@ export default function GroceriesPage() {
         }
         setCurrentView('list');
         setEditingItem(null);
+        setRememberCategory(false);
       }
     } catch (error) {
       console.error('Error updating item:', error);
@@ -1086,6 +1111,8 @@ export default function GroceriesPage() {
                             setEditingItem(item);
                             setEditName(item.display_name);
                             setEditCategory(item.category || 'Other');
+                            setOriginalCategory(item.category || 'Other');
+                            setRememberCategory(false);
                             setEditQuantity(item.quantity.toString());
                             setEditUnit(item.unit || '');
                             setEditNotes(item.notes || '');
@@ -1809,6 +1836,32 @@ export default function GroceriesPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* Remember category checkbox - only show if category changed */}
+                {editCategory !== originalCategory && (
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginTop: '12px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={rememberCategory}
+                      onChange={(e) => setRememberCategory(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        accentColor: 'var(--theme-primary)',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    Remember "{editCategory}" for future "{editName}" items
+                  </label>
+                )}
               </div>
 
               {/* Notes Field */}

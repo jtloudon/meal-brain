@@ -101,10 +101,21 @@ export async function PATCH(request: NextRequest) {
         continue;
       }
 
+      // Use upsert to create or update the mapping
       const { error } = await supabase
         .from('category_mappings')
-        .update({ category: new_category })
-        .eq('item_name_normalized', item_name_normalized);
+        .upsert(
+          {
+            item_name_normalized,
+            category: new_category,
+            times_used: 1,
+            last_used_at: new Date().toISOString()
+          },
+          {
+            onConflict: 'item_name_normalized',
+            ignoreDuplicates: false
+          }
+        );
 
       if (error) {
         results.failed.push({ item: item_name_normalized, error: error.message });
