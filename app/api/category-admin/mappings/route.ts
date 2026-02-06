@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/auth/supabase-server';
 
-// GET /api/admin/mappings - List all category mappings
-// Optional query params: ?category=FROZEN/REFRIGERATED
+// GET /api/category-admin/mappings - List all category mappings
+// Optional query params: ?category=Frozen&search=hummus
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const categoryFilter = searchParams.get('category');
+    const searchTerm = searchParams.get('search');
 
     let query = supabase
       .from('category_mappings')
@@ -24,6 +25,10 @@ export async function GET(request: NextRequest) {
 
     if (categoryFilter) {
       query = query.eq('category', categoryFilter);
+    }
+
+    if (searchTerm) {
+      query = query.ilike('item_name_normalized', `%${searchTerm.toLowerCase()}%`);
     }
 
     const { data: mappings, error } = await query;
@@ -45,7 +50,8 @@ export async function GET(request: NextRequest) {
       mappings,
       count: mappings?.length || 0,
       distinctCategories,
-      filter: categoryFilter || 'all'
+      filter: categoryFilter || 'all',
+      search: searchTerm || null
     });
 
   } catch (error) {
@@ -57,7 +63,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PATCH /api/admin/mappings - Bulk update category mappings
+// PATCH /api/category-admin/mappings - Bulk update category mappings
 // Body: { updates: [{ item_name_normalized: "popsicles", new_category: "Frozen" }] }
 export async function PATCH(request: NextRequest) {
   try {
