@@ -136,10 +136,8 @@ export default function ImageUpload({
         <div
           className="relative w-full bg-gray-100 rounded-lg overflow-hidden"
           style={{
-            border: '3px solid red',
-            height: '128px', // Force height with inline style
-            minHeight: '128px',
-            maxHeight: '128px'
+            aspectRatio: '16 / 9',
+            maxHeight: '240px'
           }}
         >
           <img
