@@ -827,115 +827,89 @@ export default function GroceriesPage() {
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
           <div style={{
+            display: 'flex',
+            gap: '6px',
+            alignItems: 'center',
+            marginBottom: '16px',
+            padding: '8px',
             backgroundColor: '#f9fafb',
-            padding: '16px',
-            borderRadius: '8px',
-            marginBottom: '24px'
+            borderRadius: '10px'
           }}>
-            {/* Quantity and Unit - Top Row */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-              <input
-                type="text"
-                value={newItemQuantity}
-                onChange={(e) => setNewItemQuantity(e.target.value)}
-                placeholder="Qty (e.g., 1-3)"
-                inputMode="decimal"
-                step="0.01"
-                style={{
-                  width: '80px',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none'
-                }}
-              />
-              <select
-                value={newItemUnit}
-                onChange={(e) => setNewItemUnit(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="">Select unit...</option>
-                {GROCERY_UNITS.map((unit) => (
-                  <option key={unit} value={unit}>{unit}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Item Name - Second Row */}
-            <div style={{ marginBottom: '12px' }}>
-              <input
-                type="text"
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-                placeholder="Item name (e.g., Milk)"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
-            {/* Buttons */}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => {
-                  setShowInlineAddForm(false);
-                  setNewItemName('');
-                  setNewItemQuantity('1');
-                  setNewItemUnit('');
-                }}
-                disabled={saving}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  backgroundColor: '#e5e7eb',
-                  color: '#374151',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  opacity: saving ? 0.5 : 1
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={async () => {
-                  await handleAddItem();
-                  setShowInlineAddForm(false);
-                }}
-                disabled={saving || !newItemName.trim()}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  backgroundColor: (saving || !newItemName.trim()) ? '#e5e7eb' : 'var(--theme-primary)',
-                  color: (saving || !newItemName.trim()) ? '#9ca3af' : 'white',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: (saving || !newItemName.trim()) ? 'not-allowed' : 'pointer',
-                  opacity: (saving || !newItemName.trim()) ? 0.5 : 1
-                }}
-              >
-                {saving ? 'Adding...' : 'Add'}
-              </button>
-            </div>
+            <input
+              type="text"
+              value={newItemQuantity}
+              onChange={(e) => setNewItemQuantity(e.target.value)}
+              placeholder="Qty"
+              inputMode="decimal"
+              step="0.01"
+              style={{
+                width: '44px',
+                padding: '8px 6px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                textAlign: 'center',
+                flexShrink: 0
+              }}
+            />
+            <select
+              value={newItemUnit}
+              onChange={(e) => setNewItemUnit(e.target.value)}
+              style={{
+                width: '72px',
+                padding: '8px 4px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                backgroundColor: 'white',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              <option value="">unit</option>
+              {GROCERY_UNITS.map((unit) => (
+                <option key={unit} value={unit}>{unit}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              placeholder="Item name"
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: '8px 10px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
+            />
+            <button
+              onClick={async () => {
+                await handleAddItem();
+                setShowInlineAddForm(false);
+              }}
+              disabled={saving || !newItemName.trim()}
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: (saving || !newItemName.trim()) ? '#d1d5db' : 'var(--theme-primary)',
+                color: 'white',
+                cursor: (saving || !newItemName.trim()) ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <Check size={16} strokeWidth={2.5} />
+            </button>
           </div>
         )}
 
