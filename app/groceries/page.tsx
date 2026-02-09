@@ -832,8 +832,9 @@ export default function GroceriesPage() {
             alignItems: 'center',
             marginBottom: '16px',
             padding: '8px',
-            backgroundColor: '#f9fafb',
-            borderRadius: '10px'
+            border: '1.5px dashed #c7ccd4',
+            borderRadius: '10px',
+            backgroundColor: 'transparent'
           }}>
             <input
               type="text"
@@ -844,10 +845,11 @@ export default function GroceriesPage() {
               step="0.01"
               style={{
                 width: '44px',
-                padding: '8px 6px',
+                height: '36px',
+                padding: '0 4px',
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
-                fontSize: '14px',
+                fontSize: '16px',
                 outline: 'none',
                 textAlign: 'center',
                 flexShrink: 0
@@ -857,11 +859,12 @@ export default function GroceriesPage() {
               value={newItemUnit}
               onChange={(e) => setNewItemUnit(e.target.value)}
               style={{
-                width: '72px',
-                padding: '8px 4px',
+                width: '76px',
+                height: '36px',
+                padding: '0 4px',
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
-                fontSize: '14px',
+                fontSize: '16px',
                 outline: 'none',
                 backgroundColor: 'white',
                 cursor: 'pointer',
@@ -881,10 +884,11 @@ export default function GroceriesPage() {
               style={{
                 flex: 1,
                 minWidth: 0,
-                padding: '8px 10px',
+                height: '36px',
+                padding: '0 10px',
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
-                fontSize: '14px',
+                fontSize: '16px',
                 outline: 'none'
               }}
             />
