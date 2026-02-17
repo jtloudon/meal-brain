@@ -898,14 +898,14 @@ export default function RecipesPage() {
 
         {/* Recipe List */}
         {!loading && !error && recipes.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '0' }}>
             {recipes.map((recipe) => (
               <div
                 key={recipe.id}
                 onClick={() => router.push(`/recipes/${recipe.id}`)}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                   gap: '12px',
                   backgroundColor: 'white',
                   cursor: 'pointer',
