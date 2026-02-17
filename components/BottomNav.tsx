@@ -18,10 +18,10 @@ export default function BottomNav() {
     <nav
       style={{
         position: 'fixed',
-        bottom: 'calc(12px + env(safe-area-inset-bottom))',
+        bottom: 'calc(24px + env(safe-area-inset-bottom))',
         left: '16px',
         right: '16px',
-        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+        backgroundColor: 'rgba(255, 255, 255, 0.45)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: '28px',
