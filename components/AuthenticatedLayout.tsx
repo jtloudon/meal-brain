@@ -81,7 +81,7 @@ export default function AuthenticatedLayout({
         backgroundColor: 'transparent',
         zIndex: 40,
       }}>
-        <div className="flex justify-between items-center" style={{ gap: '8px', paddingLeft: '12px', paddingRight: '12px', paddingTop: 'calc(12px + env(safe-area-inset-top))', paddingBottom: '8px' }}>
+        <div className="flex justify-between items-center" style={{ gap: '8px', paddingLeft: '16px', paddingRight: '16px', paddingTop: 'calc(12px + env(safe-area-inset-top))', paddingBottom: '8px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             {typeof title === 'string' ? (
               <h1 className="text-xl font-bold text-gray-900">{title}</h1>

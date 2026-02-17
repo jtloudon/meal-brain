@@ -671,7 +671,7 @@ export default function RecipesPage() {
         </div>
       }
     >
-      <div style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '12px', paddingBottom: '16px' }}>
+      <div style={{ paddingLeft: '28px', paddingRight: '28px', paddingTop: '12px', paddingBottom: '16px' }}>
         {/* Filter Pills - compact row with accordion expand */}
         {showFilters && (
         <div style={{ marginBottom: '12px' }}>
