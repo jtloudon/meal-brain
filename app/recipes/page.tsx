@@ -948,11 +948,12 @@ export default function RecipesPage() {
                 </div>
 
                 {/* Recipe Info - Title and tags on right */}
-                <div style={{ flex: 1, minWidth: 0, height: '72px', overflow: 'hidden' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <h3 style={{
                     fontSize: '17px',
                     fontWeight: '600',
                     color: '#111827',
+                    marginTop: 0,
                     marginBottom: '4px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
