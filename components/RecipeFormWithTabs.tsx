@@ -440,6 +440,38 @@ export default function RecipeFormWithTabs({
               />
             </div>
 
+            {/* Meal Type */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #e5e7eb',
+              padding: '12px 0'
+            }}>
+              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Meal type</span>
+              <select
+                value={mealType}
+                onChange={(e) => setMealType(e.target.value)}
+                style={{
+                  fontSize: '17px',
+                  marginLeft: '16px',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent',
+                  color: mealType ? '#111827' : '#9ca3af',
+                  appearance: 'none',
+                  direction: 'rtl'
+                }}
+              >
+                <option value="">Select...</option>
+                {mealCourses.map(course => (
+                  <option key={course.id} value={course.id}>
+                    {course.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Tags */}
             <div style={{
               display: 'flex',
@@ -453,7 +485,7 @@ export default function RecipeFormWithTabs({
                 type="text"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                placeholder="dinner, vegetarian"
+                placeholder="easy, kid-friendly"
                 style={{
                   textAlign: 'right',
                   fontSize: '17px',
@@ -542,38 +574,6 @@ export default function RecipeFormWithTabs({
                   backgroundColor: 'transparent'
                 }}
               />
-            </div>
-
-            {/* Meal Type */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid #e5e7eb',
-              padding: '12px 0'
-            }}>
-              <span style={{ color: '#9ca3af', fontSize: '17px' }}>Meal type</span>
-              <select
-                value={mealType}
-                onChange={(e) => setMealType(e.target.value)}
-                style={{
-                  fontSize: '17px',
-                  marginLeft: '16px',
-                  border: 'none',
-                  outline: 'none',
-                  backgroundColor: 'transparent',
-                  color: mealType ? '#111827' : '#9ca3af',
-                  appearance: 'none',
-                  direction: 'rtl'
-                }}
-              >
-                <option value="">Select...</option>
-                {mealCourses.map(course => (
-                  <option key={course.id} value={course.id}>
-                    {course.name}
-                  </option>
-                ))}
-              </select>
             </div>
 
             {/* Rating */}
