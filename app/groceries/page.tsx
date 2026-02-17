@@ -610,7 +610,7 @@ export default function GroceriesPage() {
   if (lists.length === 0) {
     return (
       <AuthenticatedLayout title="">
-        <div style={{ padding: '0 16px' }}>
+        <div style={{ padding: '0 28px' }}>
           {/* Pill-shaped action button */}
           <div style={{
             display: 'flex',
@@ -823,7 +823,7 @@ export default function GroceriesPage() {
         </div>
       }
     >
-      <div style={{ padding: '0 8px 80px 8px' }}>
+      <div style={{ padding: '0 28px 80px 28px' }}>
         {/* Inline Add Item Form */}
         {showInlineAddForm && (
           <div style={{
