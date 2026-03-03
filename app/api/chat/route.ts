@@ -349,8 +349,15 @@ export async function POST(request: NextRequest) {
 
     const householdId = userData.household_id;
 
-    // Parse request body
-    const { messages } = await request.json();
+    // Parse request body and fetch household preferences in parallel
+    const [{ messages }, { data: householdPrefs }] = await Promise.all([
+      request.json(),
+      supabase
+        .from('household_preferences')
+        .select('household_context, dietary_constraints, ai_style, planning_preferences')
+        .eq('household_id', householdId)
+        .maybeSingle(),
+    ]);
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -374,6 +381,24 @@ export async function POST(request: NextRequest) {
     const weekStartStr = thisWeekStart.toISOString().split('T')[0];
     const weekEndStr = thisWeekEnd.toISOString().split('T')[0];
 
+    // Build household context section from pre-fetched preferences
+    const dietaryConstraints = householdPrefs?.dietary_constraints?.length
+      ? householdPrefs.dietary_constraints.join(', ')
+      : 'None';
+    const householdContext = householdPrefs?.household_context || 'unknown';
+    const planningPrefs = householdPrefs?.planning_preferences?.length
+      ? householdPrefs.planning_preferences.join(', ')
+      : 'No preference set';
+    const aiStyle = householdPrefs?.ai_style || 'collaborator';
+
+    const aiStyleGuidance = aiStyle === 'coach'
+      ? `- Explain your reasoning briefly before acting
+- Offer 2-3 options rather than jumping to one answer
+- Ask a clarifying question if the request is ambiguous`
+      : `- Be direct and action-oriented — propose a concrete plan immediately
+- Minimize explanation unless asked; lead with the recommendation
+- Default to doing rather than asking`;
+
     // System prompt for the AI agent
     const systemPrompt = `You are an AI sous chef for MealBrain, a meal planning and recipe management app.
 
@@ -381,11 +406,24 @@ CURRENT DATE CONTEXT:
 - Today is: ${dayOfWeek}, ${todayStr}
 - This week: ${weekStartStr} to ${weekEndStr} (Sunday to Saturday)
 
+HOUSEHOLD PREFERENCES (always apply these — do not ask the user to confirm them):
+- Household: ${householdContext}
+- Dietary constraints: ${dietaryConstraints}
+- Planning style: ${planningPrefs}
+- AI style: ${aiStyle}
+
+DIETARY CONSTRAINTS ARE HARD RULES:
+- NEVER suggest recipes or meals that violate the dietary constraints above
+- If constraints are set, filter all suggestions and recipe ideas through them automatically
+- Do not mention the constraints in every response — just silently apply them
+
+AI STYLE — ${aiStyle.toUpperCase()} MODE:
+${aiStyleGuidance}
+
 Your role:
 - Help users plan meals, find recipes, and manage grocery lists
 - Be helpful, friendly, and concise (this is a mobile app)
 - Use the available tools to read data when needed
-- Explain your reasoning clearly but briefly
 
 CRITICAL RULES - NEVER VIOLATE THESE:
 
@@ -419,7 +457,6 @@ CRITICAL RULES - NEVER VIOLATE THESE:
      - Offer to create any suggested recipe using recipe_create tool
 
 4. **Other Guidelines**:
-   - Check user preferences (preferences_get) to understand dietary constraints, household context, and AI style preferences
    - When suggesting meal plans with existing recipes, be specific and use tools to verify recipes exist
    - Keep responses concise and mobile-friendly (2-3 sentences max unless asked for details)
 
