@@ -14,6 +14,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const CHAT_MODEL = 'claude-sonnet-4-6';
+
 // Define tool schemas for Claude
 const tools: Anthropic.Tool[] = [
   {
@@ -450,7 +452,7 @@ The user's household context is important - recipes and meals are specific to th
     // Call Claude with tools
     console.log('[Chat API] Calling Claude with', messages.length, 'messages');
     let response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
+      model: CHAT_MODEL,
       max_tokens: 4096,
       system: systemPrompt,
       tools,
@@ -543,7 +545,7 @@ The user's household context is important - recipes and meals are specific to th
 
       // Continue conversation with ALL tool results
       response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
+        model: CHAT_MODEL,
         max_tokens: 4096,
         system: systemPrompt, // Include system prompt in follow-up calls
         tools,

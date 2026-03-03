@@ -319,7 +319,7 @@ export default function GroceriesPage() {
           try {
             // Normalize the item name (lowercase, trimmed)
             const normalizedName = editName.toLowerCase().trim();
-            await fetch('/api/category-admin/mappings', {
+            const mappingRes = await fetch('/api/category-admin/mappings', {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -329,7 +329,11 @@ export default function GroceriesPage() {
                 }]
               }),
             });
-            console.log('[Grocery] Saved category mapping:', normalizedName, '->', editCategory);
+            if (!mappingRes.ok) {
+              console.error('[Grocery] Failed to save category mapping:', await mappingRes.text());
+            } else {
+              console.log('[Grocery] Saved category mapping:', normalizedName, '->', editCategory);
+            }
           } catch (mappingError) {
             // Don't fail the whole operation if mapping update fails
             console.error('[Grocery] Failed to save category mapping:', mappingError);

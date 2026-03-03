@@ -101,21 +101,12 @@ export async function PATCH(request: NextRequest) {
         continue;
       }
 
-      // Use upsert to create or update the mapping
+      // Use the canonical RPC — same normalization + correct times_used increment
       const { error } = await supabase
-        .from('category_mappings')
-        .upsert(
-          {
-            item_name_normalized,
-            category: new_category,
-            times_used: 1,
-            last_used_at: new Date().toISOString()
-          },
-          {
-            onConflict: 'item_name_normalized',
-            ignoreDuplicates: false
-          }
-        );
+        .rpc('save_category_mapping', {
+          item_name: item_name_normalized,
+          category_name: new_category
+        });
 
       if (error) {
         results.failed.push({ item: item_name_normalized, error: error.message });
