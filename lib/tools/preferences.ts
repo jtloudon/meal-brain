@@ -20,31 +20,18 @@ export async function getUserPreferences(
 }> {
   const { householdId } = context;
 
-  // Get the first user in the household (preferences are household-wide)
-  const { data: users, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('household_id', householdId)
-    .limit(1);
-
-  if (userError || !users || users.length === 0) {
-    throw new Error('No user found for household');
-  }
-
-  const user = users[0];
-
-  // Get preferences for this user
-  const { data: preferences, error: prefsError } = await supabase
-    .from('user_preferences')
+  // Get household-level preferences (dietary, AI style, planning, etc.)
+  const { data: householdPrefs, error: householdError } = await supabase
+    .from('household_preferences')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('household_id', householdId)
     .maybeSingle();
 
-  if (prefsError) {
-    throw new Error(`Failed to fetch preferences: ${prefsError.message}`);
+  if (householdError) {
+    throw new Error(`Failed to fetch household preferences: ${householdError.message}`);
   }
 
-  if (!preferences) {
+  if (!householdPrefs) {
     // Return defaults if no preferences exist
     return {
       household_context: null,
@@ -78,14 +65,14 @@ export async function getUserPreferences(
   }
 
   return {
-    household_context: preferences.household_context,
-    dietary_constraints: preferences.dietary_constraints || [],
-    ai_style: preferences.ai_style,
-    planning_preferences: preferences.planning_preferences || [],
-    ai_learning_enabled: preferences.ai_learning_enabled ?? true,
-    shopping_categories: preferences.shopping_categories,
-    meal_courses: preferences.meal_courses,
-    default_grocery_list_id: preferences.default_grocery_list_id || null,
-    theme_color: preferences.theme_color || '#f97316',
+    household_context: householdPrefs.household_context,
+    dietary_constraints: householdPrefs.dietary_constraints || [],
+    ai_style: householdPrefs.ai_style,
+    planning_preferences: householdPrefs.planning_preferences || [],
+    ai_learning_enabled: householdPrefs.ai_learning_enabled ?? true,
+    shopping_categories: householdPrefs.shopping_categories,
+    meal_courses: householdPrefs.meal_courses,
+    default_grocery_list_id: null, // user-specific, not needed by chef
+    theme_color: '#f97316',        // user-specific, not needed by chef
   };
 }
