@@ -51,6 +51,7 @@ interface GroceryList {
   id: string;
   name: string;
   created_at: string;
+  updated_at: string;
   protected: boolean;
 }
 
@@ -920,6 +921,19 @@ export default function GroceriesPage() {
             </button>
           </div>
         )}
+
+        {/* Last edited timestamp */}
+        {(() => {
+          const selectedList = lists.find(l => l.id === selectedListId);
+          const ts = selectedList?.updated_at || selectedList?.created_at;
+          if (!ts) return null;
+          const label = new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          return (
+            <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '8px', paddingLeft: '4px' }}>
+              Last edited: {label}
+            </p>
+          );
+        })()}
 
         {/* Items List - Grouped by Category */}
         <div className="space-y-4">
