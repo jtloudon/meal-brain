@@ -211,6 +211,8 @@ export default function GroceriesPage() {
           )
         );
         console.error('Failed to toggle item');
+      } else {
+        fetchLists();
       }
     } catch (error) {
       // Revert on error
@@ -248,6 +250,8 @@ export default function GroceriesPage() {
           )
         );
         console.error('Failed to toggle out of stock');
+      } else {
+        fetchLists();
       }
     } catch (error) {
       // Revert on error
@@ -271,8 +275,8 @@ export default function GroceriesPage() {
       });
 
       if (res.ok) {
-        // Remove item from current list
         setItems((prev) => prev.filter((item) => item.id !== itemId));
+        fetchLists();
       }
     } catch (error) {
       console.error('Error moving item:', error);
@@ -364,6 +368,7 @@ export default function GroceriesPage() {
         setCurrentView('list');
         setEditingItem(null);
         setRememberCategory(false);
+        fetchLists();
       }
     } catch (error) {
       console.error('Error updating item:', error);
@@ -386,6 +391,7 @@ export default function GroceriesPage() {
         setCurrentView('list');
         setEditingItem(null);
         setShowDeleteConfirm(false);
+        fetchLists();
       }
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -471,9 +477,9 @@ export default function GroceriesPage() {
         )
       );
 
-      // Update local state to remove checked items
       setItems((prev) => prev.filter((item) => !item.checked));
       setShowClearCheckedConfirm(false);
+      fetchLists();
     } catch (error) {
       console.error('Error clearing checked items:', error);
     } finally {
@@ -520,13 +526,11 @@ export default function GroceriesPage() {
       // Update local state
       setItems(prev => prev.map(item => ({ ...item, checked: false })));
 
-      // Show success message
       const destListName = lists.find(l => l.id === destinationListId)?.name || 'list';
       setCopySuccessMessage(`Copied ${checkedItems.length} item${checkedItems.length !== 1 ? 's' : ''} to ${destListName}`);
       setShowCopyToModal(false);
-
-      // Clear message after 3 seconds
       setTimeout(() => setCopySuccessMessage(''), 3000);
+      fetchLists();
     } catch (error) {
       console.error('Error copying items:', error);
     } finally {
@@ -594,6 +598,7 @@ export default function GroceriesPage() {
         setNewItemQuantity('1');
         setNewItemUnit('');
         setShowAddItemModal(false);
+        fetchLists();
       }
     } catch (error) {
       console.error('Error adding item:', error);
