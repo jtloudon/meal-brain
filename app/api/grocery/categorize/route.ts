@@ -62,7 +62,7 @@ Instructions:
 Category:`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307', // Fast, cheap model for simple categorization
+      model: 'claude-haiku-4-5-20251001', // Fast, cheap model for simple categorization
       max_tokens: 50,
       messages: [{
         role: 'user',
