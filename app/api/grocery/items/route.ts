@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
 
   // Auto-categorize if category not provided or is "Other"
   let suggestedCategory: string | null = null;
+  let categorizationWarning: string | null = null;
   if (!category || category === 'Other') {
     try {
       // Call categorization endpoint
@@ -64,36 +65,43 @@ export async function POST(request: NextRequest) {
       );
 
       if (categorizeResponse.ok) {
-        const { category: suggestedCat } = await categorizeResponse.json();
-        suggestedCategory = suggestedCat;
+        const { category: suggestedCat, source: categorizeSource, error: categorizeError } = await categorizeResponse.json();
 
-        // Get user's actual categories to validate
-        const categoriesResponse = await fetch(
-          `${request.nextUrl.origin}/api/settings/shopping-categories`,
-          {
-            method: 'GET',
-            headers: {
-              'Cookie': request.headers.get('cookie') || '',
-            },
-          }
-        );
-
-        let userCategories: string[] = [];
-        if (categoriesResponse.ok) {
-          const { categories: cats } = await categoriesResponse.json();
-          userCategories = cats || [];
-        }
-
-        // Check if suggested category exists in user's list
-        if (userCategories.includes(suggestedCat)) {
-          category = suggestedCat;
-          console.log('[Add Item] Auto-categorized:', display_name, '→', category);
-        } else {
-          // Category doesn't exist - add note and use "Other"
+        if (categorizeSource === 'model_error') {
           category = 'Other';
-          const notePrefix = `AI suggested: "${suggestedCat}" (add via Settings)`;
-          notes = notes ? `${notePrefix}. ${notes}` : notePrefix;
-          console.log('[Add Item] Unknown category:', suggestedCat, '- added to notes');
+          categorizationWarning = `AI model "${categorizeError?.match(/model: ([^\s"]+)/)?.[1] ?? 'unknown'}" is not available (perhaps deprecated) — item added to "Other". Please set the category manually.`;
+          console.error('[Add Item] Categorization model error — item defaulted to Other');
+        } else {
+          suggestedCategory = suggestedCat;
+
+          // Get user's actual categories to validate
+          const categoriesResponse = await fetch(
+            `${request.nextUrl.origin}/api/settings/shopping-categories`,
+            {
+              method: 'GET',
+              headers: {
+                'Cookie': request.headers.get('cookie') || '',
+              },
+            }
+          );
+
+          let userCategories: string[] = [];
+          if (categoriesResponse.ok) {
+            const { categories: cats } = await categoriesResponse.json();
+            userCategories = cats || [];
+          }
+
+          // Check if suggested category exists in user's list
+          if (userCategories.includes(suggestedCat)) {
+            category = suggestedCat;
+            console.log('[Add Item] Auto-categorized:', display_name, '→', category);
+          } else {
+            // Category doesn't exist - add note and use "Other"
+            category = 'Other';
+            const notePrefix = `AI suggested: "${suggestedCat}" (add via Settings)`;
+            notes = notes ? `${notePrefix}. ${notes}` : notePrefix;
+            console.log('[Add Item] Unknown category:', suggestedCat, '- added to notes');
+          }
         }
       } else {
         category = 'Other'; // Fallback
@@ -153,5 +161,5 @@ export async function POST(request: NextRequest) {
     .eq('id', result.data.grocery_item_id)
     .single();
 
-  return NextResponse.json({ item: createdItem });
+  return NextResponse.json({ item: createdItem, categorization_warning: categorizationWarning });
 }

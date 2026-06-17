@@ -102,10 +102,12 @@ Category:`;
   } catch (error: any) {
     console.error('[Categorize] Error:', error);
 
-    // Fallback to "Other" on any error
+    // Detect deprecated or missing model specifically (Anthropic returns 404 not_found_error)
+    const isModelError = error?.message?.includes('not_found_error') || error?.status === 404;
+
     return NextResponse.json({
       category: 'Other',
-      source: 'error',
+      source: isModelError ? 'model_error' : 'error',
       error: error.message
     });
   }

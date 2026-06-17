@@ -90,6 +90,7 @@ export default function GroceriesPage() {
   const [listToDelete, setListToDelete] = useState<string | null>(null);
   const [showCopyToModal, setShowCopyToModal] = useState(false);
   const [copySuccessMessage, setCopySuccessMessage] = useState('');
+  const [categorizationWarning, setCategorizationWarning] = useState<string | null>(null);
   const [editingListIdInModal, setEditingListIdInModal] = useState<string | null>(null);
   const [editingListNameInModal, setEditingListNameInModal] = useState('');
   const [creatingNewListInModal, setCreatingNewListInModal] = useState(false);
@@ -600,6 +601,9 @@ export default function GroceriesPage() {
         setNewItemUnit('');
         setShowAddItemModal(false);
         fetchLists();
+        if (data.categorization_warning) {
+          setCategorizationWarning(data.categorization_warning);
+        }
       }
     } catch (error) {
       console.error('Error adding item:', error);
@@ -2257,6 +2261,34 @@ export default function GroceriesPage() {
                 Cancel
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Categorization Warning Banner */}
+        {categorizationWarning && (
+          <div style={{
+            position: 'fixed',
+            top: '20px',
+            left: '16px',
+            right: '16px',
+            backgroundColor: '#fef3c7',
+            border: '1px solid #f59e0b',
+            color: '#92400e',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: '500',
+            zIndex: 201,
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '8px',
+          }}>
+            <span style={{ flex: 1 }}>⚠️ {categorizationWarning}</span>
+            <button
+              onClick={() => setCategorizationWarning(null)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#92400e', fontSize: '16px', lineHeight: 1, flexShrink: 0 }}
+            >×</button>
           </div>
         )}
 
