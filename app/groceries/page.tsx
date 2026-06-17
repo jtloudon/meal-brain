@@ -158,12 +158,13 @@ export default function GroceriesPage() {
           console.error('Error fetching preferences:', prefsError);
         }
 
-        // Auto-select default list if set, otherwise first list
-        if (fetchedDefaultListId && data.lists?.some((list: GroceryList) => list.id === fetchedDefaultListId)) {
-          setSelectedListId(fetchedDefaultListId);
-        } else if (data.lists && data.lists.length > 0) {
-          setSelectedListId(data.lists[0].id);
-        }
+        // Auto-select on first load only — don't reset if user already has a list selected
+        setSelectedListId(prev => {
+          if (prev !== null) return prev;
+          if (fetchedDefaultListId && data.lists?.some((list: GroceryList) => list.id === fetchedDefaultListId))
+            return fetchedDefaultListId;
+          return data.lists?.length > 0 ? data.lists[0].id : null;
+        });
       }
     } catch (error) {
       console.error('Error fetching lists:', error);
