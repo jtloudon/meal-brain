@@ -13,7 +13,6 @@ interface Recipe {
   rating: number | null;
   created_at: string;
   notes?: string | null;
-  instructions?: string | null;
   image_url?: string | null;
   meal_type?: string | null;
   prep_time?: string | null;
@@ -451,12 +450,11 @@ export default function RecipesPage() {
               tag.toLowerCase().includes(searchLower)
             );
             const matchesNotes = recipe.notes?.toLowerCase().includes(searchLower) || false;
-            const matchesInstructions = recipe.instructions?.toLowerCase().includes(searchLower) || false;
             const matchesIngredient = recipe.recipe_ingredients?.some(ing =>
               ing.display_name.toLowerCase().includes(searchLower)
             ) || false;
 
-            matchesSearch = matchesTitle || matchesTag || matchesNotes || matchesInstructions || matchesIngredient;
+            matchesSearch = matchesTitle || matchesTag || matchesNotes || matchesIngredient;
           }
 
           // Rating filter (minimum rating)
