@@ -352,14 +352,19 @@ export async function listRecipes(
         query = query.eq('rating', validated.filters.rating);
       }
 
-      // Search is handled client-side for comprehensive tag/text search
+      // Server-side title search so recipes beyond the page limit are findable
+      if (validated.filters.search) {
+        query = query.ilike('title', `%${validated.filters.search}%`);
+      }
     }
 
-    // Apply pagination
-    query = query.range(
-      validated.offset,
-      validated.offset + validated.limit - 1
-    );
+    // Skip pagination when searching so all matching recipes are returned
+    if (!validated.filters?.search) {
+      query = query.range(
+        validated.offset,
+        validated.offset + validated.limit - 1
+      );
+    }
 
     // Execute query
     const { data: recipes, error, count } = await query;
