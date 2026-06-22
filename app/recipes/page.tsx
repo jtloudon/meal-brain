@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Plus, Search, Star, Clock, ListFilter } from 'lucide-react';
@@ -18,6 +18,128 @@ interface Recipe {
   prep_time?: string | null;
   cook_time?: string | null;
   recipe_ingredients?: Array<{ display_name: string }>;
+}
+
+function RecipeTile({ recipe, onClick, renderStars, calculateTotalTime }: {
+  recipe: Recipe;
+  onClick: () => void;
+  renderStars: (rating: number | null) => React.ReactNode;
+  calculateTotalTime: (prep: string | null, cook: string | null) => string | null;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '12px',
+        backgroundColor: 'white',
+        cursor: 'pointer',
+        padding: '12px',
+        borderRadius: '12px',
+      }}
+    >
+      <div style={{
+        width: '72px',
+        height: '72px',
+        flexShrink: 0,
+        borderRadius: '6px',
+        overflow: 'hidden',
+        backgroundColor: 'transparent'
+      }}>
+        {recipe.image_url ? (
+          <img
+            src={recipe.image_url}
+            alt={recipe.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#9ca3af',
+            fontSize: '12px'
+          }}>
+            No image
+          </div>
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h3 style={{
+          fontSize: '17px',
+          fontWeight: '600',
+          color: '#111827',
+          marginTop: 0,
+          marginBottom: '4px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}>
+          {decodeHTML(recipe.title)}
+        </h3>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {renderStars(recipe.rating)}
+          {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null) && (
+            <span style={{
+              fontSize: '12px',
+              color: '#6b7280',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <Clock size={14} strokeWidth={2} />
+              {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null)}
+            </span>
+          )}
+        </div>
+        {(recipe.meal_type || recipe.tags.length > 0) && (
+          <div style={{
+            display: 'flex',
+            gap: '6px',
+            marginTop: '6px',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            whiteSpace: 'nowrap'
+          }}>
+            {recipe.meal_type && (
+              <span style={{
+                fontSize: '12px',
+                color: 'var(--theme-primary)',
+                backgroundColor: 'transparent',
+                border: '1px solid var(--theme-primary)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                flexShrink: 0,
+                fontWeight: '500'
+              }}>
+                {recipe.meal_type}
+              </span>
+            )}
+            {recipe.tags.map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  fontSize: '12px',
+                  color: 'var(--theme-primary)',
+                  backgroundColor: 'transparent',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  flexShrink: 0
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function RecipesPage() {
@@ -39,6 +161,33 @@ export default function RecipesPage() {
   const [importing, setImporting] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [mealCourses, setMealCourses] = useState<Array<{ id: string; name: string }>>([]);
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const isBrowsing = !search && minRating === null && selectedCategory === 'All' && maxTime === null;
+
+  const groupedRecipes = useMemo(() => {
+    if (!isBrowsing) return null;
+    const sorted = [...recipes].sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })
+    );
+    const groups: Record<string, Recipe[]> = {};
+    sorted.forEach(recipe => {
+      const first = recipe.title[0]?.toUpperCase() ?? '#';
+      const key = /[A-Z]/.test(first) ? first : '#';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(recipe);
+    });
+    return groups;
+  }, [recipes, isBrowsing]);
+
+  const indexLetters = useMemo(() =>
+    groupedRecipes ? Object.keys(groupedRecipes).sort((a, b) => a.localeCompare(b)) : [],
+    [groupedRecipes]
+  );
+
+  const scrollToLetter = (letter: string) => {
+    sectionRefs.current[letter]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     fetchRecipes();
@@ -896,131 +1045,75 @@ export default function RecipesPage() {
 
         {/* Recipe List */}
         {!loading && !error && recipes.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '0' }}>
-            {recipes.map((recipe) => (
-              <div
-                key={recipe.id}
-                onClick={() => router.push(`/recipes/${recipe.id}`)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  backgroundColor: 'white',
-                  cursor: 'pointer',
-                  padding: '12px',
-                  borderRadius: '12px',
-                }}
-              >
-                {/* Recipe Image - Square thumbnail on left */}
-                <div style={{
-                  width: '72px',
-                  height: '72px',
-                  flexShrink: 0,
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  backgroundColor: 'transparent'
-                }}>
-                  {recipe.image_url ? (
-                    <img
-                      src={recipe.image_url}
-                      alt={recipe.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#9ca3af',
-                      fontSize: '12px'
-                    }}>
-                      No image
-                    </div>
-                  )}
-                </div>
+          <div style={{ position: 'relative' }}>
+            {/* Section Index Bar — only in browse mode */}
+            {isBrowsing && indexLetters.length > 0 && (
+              <div style={{
+                position: 'fixed',
+                right: '4px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 20,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1px',
+              }}>
+                {indexLetters.map(letter => (
+                  <button
+                    key={letter}
+                    onClick={() => scrollToLetter(letter)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '1px 4px',
+                      fontSize: '10px',
+                      fontWeight: '600',
+                      color: 'var(--theme-primary)',
+                      cursor: 'pointer',
+                      lineHeight: 1.2,
+                      minWidth: '16px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {letter}
+                  </button>
+                ))}
+              </div>
+            )}
 
-                {/* Recipe Info - Title and tags on right */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3 style={{
-                    fontSize: '17px',
-                    fontWeight: '600',
-                    color: '#111827',
-                    marginTop: 0,
-                    marginBottom: '4px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {decodeHTML(recipe.title)}
-                  </h3>
-                  {/* Star Rating and Total Time */}
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    {renderStars(recipe.rating)}
-                    {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null) && (
-                      <span style={{
-                        fontSize: '12px',
-                        color: '#6b7280',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        <Clock size={14} strokeWidth={2} />
-                        {calculateTotalTime(recipe.prep_time || null, recipe.cook_time || null)}
-                      </span>
-                    )}
-                  </div>
-                  {(recipe.meal_type || recipe.tags.length > 0) && (
+            {/* Grouped alphabetical list (browse mode) */}
+            {isBrowsing && groupedRecipes ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0', paddingRight: '20px' }}>
+                {indexLetters.map(letter => (
+                  <div key={letter} ref={el => { sectionRefs.current[letter] = el; }}>
+                    {/* Section header */}
                     <div style={{
-                      display: 'flex',
-                      gap: '6px',
-                      marginTop: '6px',
-                      overflowX: 'auto',
-                      WebkitOverflowScrolling: 'touch',
-                      scrollbarWidth: 'none',
-                      msOverflowStyle: 'none',
-                      whiteSpace: 'nowrap'
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      color: '#9ca3af',
+                      paddingTop: '14px',
+                      paddingBottom: '4px',
                     }}>
-                      {recipe.meal_type && (
-                        <span style={{
-                          fontSize: '12px',
-                          color: 'var(--theme-primary)',
-                          backgroundColor: 'transparent',
-                          border: '1px solid var(--theme-primary)',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          flexShrink: 0,
-                          fontWeight: '500'
-                        }}>
-                          {recipe.meal_type}
-                        </span>
-                      )}
-                      {recipe.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          style={{
-                            fontSize: '12px',
-                            color: 'var(--theme-primary)',
-                            backgroundColor: 'transparent',
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            flexShrink: 0
-                          }}
-                        >
-                          {tag}
-                        </span>
+                      {letter}
+                    </div>
+                    {/* Recipes in this section */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {groupedRecipes[letter].map(recipe => (
+                        <RecipeTile key={recipe.id} recipe={recipe} onClick={() => router.push(`/recipes/${recipe.id}`)} renderStars={renderStars} calculateTotalTime={calculateTotalTime} />
                       ))}
                     </div>
-                  )}
-                </div>
-
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              /* Flat list (search / filter mode) */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {recipes.map(recipe => (
+                  <RecipeTile key={recipe.id} recipe={recipe} onClick={() => router.push(`/recipes/${recipe.id}`)} renderStars={renderStars} calculateTotalTime={calculateTotalTime} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
