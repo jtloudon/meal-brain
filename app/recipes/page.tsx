@@ -163,7 +163,7 @@ export default function RecipesPage() {
   const [mealCourses, setMealCourses] = useState<Array<{ id: string; name: string }>>([]);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const isBrowsing = !search && minRating === null && selectedCategory === 'All' && maxTime === null;
+  const isBrowsing = !search;
 
   const groupedRecipes = useMemo(() => {
     if (!isBrowsing) return null;
@@ -186,7 +186,13 @@ export default function RecipesPage() {
   );
 
   const scrollToLetter = (letter: string) => {
-    sectionRefs.current[letter]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = sectionRefs.current[letter];
+    if (!el) return;
+    const container = el.closest('main');
+    if (!container) return;
+    const offset = 80; // fixed header height
+    const top = container.scrollTop + el.getBoundingClientRect().top - container.getBoundingClientRect().top - offset;
+    container.scrollTo({ top, behavior: 'smooth' });
   };
 
   useEffect(() => {
