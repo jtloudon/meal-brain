@@ -351,9 +351,26 @@ export async function listRecipes(
         query = query.eq('rating', validated.filters.rating);
       }
 
-      // Server-side title search so recipes beyond the page limit are findable
+      // Server-side search across title, notes, and ingredient names so
+      // recipes beyond the page limit are findable by any of those fields
       if (validated.filters.search) {
-        query = query.ilike('title', `%${validated.filters.search}%`);
+        const term = validated.filters.search;
+
+        const { data: ingredientMatches } = await supabase
+          .from('recipe_ingredients')
+          .select('recipe_id, recipes!inner(household_id)')
+          .eq('recipes.household_id', context.householdId)
+          .ilike('display_name', `%${term}%`);
+
+        const matchingRecipeIds = [
+          ...new Set((ingredientMatches ?? []).map((row) => row.recipe_id)),
+        ];
+
+        const orFilters = [`title.ilike.%${term}%`, `notes.ilike.%${term}%`];
+        if (matchingRecipeIds.length > 0) {
+          orFilters.push(`id.in.(${matchingRecipeIds.join(',')})`);
+        }
+        query = query.or(orFilters.join(','));
       }
     }
 
