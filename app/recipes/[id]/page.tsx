@@ -122,12 +122,21 @@ export default function RecipeDetailPage() {
   };
 
   useEffect(() => {
-    if (params.id) {
-      fetchRecipe(params.id as string);
-    }
+    if (!params.id) return;
+
+    // RecipeDetailPage is reused (not remounted) when navigating between
+    // two different /recipes/[id] URLs, so a slow response for the
+    // *previous* recipe can otherwise arrive after and overwrite the
+    // correct data for the recipe now being viewed. Ignore any response
+    // that resolves after a newer navigation has superseded it.
+    let cancelled = false;
+    fetchRecipe(params.id as string, () => cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, [params.id]);
 
-  const fetchRecipe = async (id: string) => {
+  const fetchRecipe = async (id: string, isCancelled: () => boolean = () => false) => {
     try {
       setLoading(true);
       setError(null);
@@ -139,6 +148,7 @@ export default function RecipeDetailPage() {
       }
 
       const data = await response.json();
+      if (isCancelled()) return;
       setRecipe(data);
 
       // Parse base servings from serving_size string
@@ -149,13 +159,18 @@ export default function RecipeDetailPage() {
         }
       }
     } catch (err) {
+      if (isCancelled()) return;
       setError(err instanceof Error ? err.message : 'Failed to load recipe');
     } finally {
-      setLoading(false);
+      if (!isCancelled()) setLoading(false);
     }
   };
 
-  // Let the Sous Chef know which recipe the user currently has open
+  // Let the Sous Chef know which recipe the user currently has open.
+  // This effect intentionally has no cleanup — switching directly from one
+  // recipe to another should update the store straight from A's data to
+  // B's data, not blip through null in between (a null blip defeats
+  // AIChatPanel's "did the recipe change" detection).
   useEffect(() => {
     if (!recipe) return;
 
@@ -171,9 +186,14 @@ export default function RecipeDetailPage() {
       instructions: recipe.instructions ? decodeHTML(recipe.instructions) : null,
       notes: recipe.notes ? decodeHTML(recipe.notes) : null,
     });
-
-    return () => setCurrentRecipe(null);
   }, [recipe]);
+
+  // Only clear the current-recipe context when this page is genuinely torn
+  // down (navigating away from recipe pages entirely), not on every recipe
+  // switch.
+  useEffect(() => {
+    return () => setCurrentRecipe(null);
+  }, []);
 
   const handleDelete = async () => {
     if (!recipe) return;
