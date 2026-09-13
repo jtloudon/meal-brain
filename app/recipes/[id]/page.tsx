@@ -164,9 +164,12 @@ export default function RecipeDetailPage() {
       title: recipe.title,
       ingredients: recipe.recipe_ingredients
         .filter((ing) => !ing.is_header)
-        .map((ing) => `${formatQuantity(ing.quantity_min, ing.quantity_max)} ${ing.unit} ${ing.display_name}`.trim()),
-      instructions: recipe.instructions,
-      notes: recipe.notes,
+        .map((ing) => {
+          const line = `${formatQuantity(ing.quantity_min, ing.quantity_max)} ${ing.unit} ${decodeHTML(ing.display_name)}`.trim();
+          return ing.prep_state ? `${line}, ${decodeHTML(ing.prep_state)}` : line;
+        }),
+      instructions: recipe.instructions ? decodeHTML(recipe.instructions) : null,
+      notes: recipe.notes ? decodeHTML(recipe.notes) : null,
     });
 
     return () => setCurrentRecipe(null);
