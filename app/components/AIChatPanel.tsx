@@ -130,7 +130,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
       recognition.onerror = null;
       recognition.onend = null;
       try {
-        recognition.stop();
+        recognition.abort();
       } catch {}
     };
   }, []);
@@ -139,7 +139,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   useEffect(() => {
     if (!isOpen && recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch {}
       setIsListening(false);
     }
@@ -149,15 +149,19 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     if (!recognitionRef.current) return;
 
     if (isListening) {
-      // Let onend flip isListening back to false rather than doing it here —
-      // starting a new session before the browser confirms the previous one
-      // has actually ended can throw and leave the button stuck.
+      // Update the button immediately on user-initiated stop — with
+      // continuous:true, the browser can take a moment (or, apparently,
+      // effectively forever) to actually fire onend, which left the button
+      // stuck showing "listening" with no visible way to stop.
       try {
-        recognitionRef.current.stop();
+        // abort() cuts off immediately rather than waiting to finalize a
+        // pending result, which is more reliable across browsers than
+        // stop() for actually ending a continuous session promptly.
+        recognitionRef.current.abort();
       } catch (err) {
         console.error('Error stopping speech recognition:', err);
-        setIsListening(false);
       }
+      setIsListening(false);
       return;
     }
 
