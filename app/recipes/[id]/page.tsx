@@ -6,6 +6,7 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import BottomNav from '@/components/BottomNav';
 import { ArrowLeft, Calendar, ShoppingCart, Star, Share2, Edit, Trash2 } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
+import { useCurrentRecipe } from '@/lib/context/CurrentRecipeContext';
 
 interface RecipeIngredient {
   id: string;
@@ -56,6 +57,7 @@ export default function RecipeDetailPage() {
   const [showServingSizeModal, setShowServingSizeModal] = useState(false);
   const [adjustedServings, setAdjustedServings] = useState<number | null>(null);
   const [baseServings, setBaseServings] = useState<number>(1);
+  const { setCurrentRecipe } = useCurrentRecipe();
 
   // Helper to format quantity (handles ranges like "1-2")
   const formatQuantity = (min: number, max: number | null): string => {
@@ -152,6 +154,23 @@ export default function RecipeDetailPage() {
       setLoading(false);
     }
   };
+
+  // Let the Sous Chef know which recipe the user currently has open
+  useEffect(() => {
+    if (!recipe) return;
+
+    setCurrentRecipe({
+      id: recipe.id,
+      title: recipe.title,
+      ingredients: recipe.recipe_ingredients
+        .filter((ing) => !ing.is_header)
+        .map((ing) => `${formatQuantity(ing.quantity_min, ing.quantity_max)} ${ing.unit} ${ing.display_name}`.trim()),
+      instructions: recipe.instructions,
+      notes: recipe.notes,
+    });
+
+    return () => setCurrentRecipe(null);
+  }, [recipe]);
 
   const handleDelete = async () => {
     if (!recipe) return;

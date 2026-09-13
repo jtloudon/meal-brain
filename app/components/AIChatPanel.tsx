@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { X, Send, Copy, Check } from 'lucide-react';
+import { useCurrentRecipe } from '@/lib/context/CurrentRecipeContext';
 
 // Helper to get keyboard height from visual viewport
 const useKeyboardHeight = () => {
@@ -80,6 +81,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { keyboardHeight, isKeyboardOpen } = useKeyboardHeight();
+  const { currentRecipe } = useCurrentRecipe();
 
   // Only render on client-side and get portal root
   useEffect(() => {
@@ -378,6 +380,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
         },
         body: JSON.stringify({
           messages: conversationMessages,
+          current_recipe: currentRecipe,
         }),
         signal: controller.signal,
       });

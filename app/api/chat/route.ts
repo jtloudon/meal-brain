@@ -350,7 +350,7 @@ export async function POST(request: NextRequest) {
     const householdId = userData.household_id;
 
     // Parse request body and fetch household preferences in parallel
-    const [{ messages }, { data: householdPrefs }] = await Promise.all([
+    const [{ messages, current_recipe: currentRecipe }, { data: householdPrefs }] = await Promise.all([
       request.json(),
       supabase
         .from('household_preferences')
@@ -391,6 +391,16 @@ export async function POST(request: NextRequest) {
       : 'No preference set';
     const aiStyle = householdPrefs?.ai_style || 'collaborator';
 
+    const currentRecipeSection = currentRecipe
+      ? `
+CURRENTLY VIEWED RECIPE (the user has this recipe open right now on their screen — if they ask something without naming a recipe, e.g. "is this step necessary?" or "how long does this take?", assume they mean this one):
+- Title: ${currentRecipe.title}
+- Ingredients: ${currentRecipe.ingredients?.length ? currentRecipe.ingredients.join(', ') : 'none listed'}
+- Instructions: ${currentRecipe.instructions || 'none listed'}
+${currentRecipe.notes ? `- Notes: ${currentRecipe.notes}` : ''}
+`
+      : '';
+
     const aiStyleGuidance = aiStyle === 'coach'
       ? `- Explain your reasoning briefly before acting
 - Offer 2-3 options rather than jumping to one answer
@@ -419,7 +429,7 @@ DIETARY CONSTRAINTS ARE HARD RULES:
 
 AI STYLE — ${aiStyle.toUpperCase()} MODE:
 ${aiStyleGuidance}
-
+${currentRecipeSection}
 Your role:
 - Help users plan meals, find recipes, and manage grocery lists
 - Be helpful, friendly, and concise (this is a mobile app)
