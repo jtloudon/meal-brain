@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { X, Send, Copy, Check } from 'lucide-react';
+import { X, Send, Copy, Check, Mic } from 'lucide-react';
 import { useCurrentRecipe } from '@/lib/context/CurrentRecipeContext';
 
 // Helper to get keyboard height from visual viewport
@@ -77,11 +77,78 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
   const [recipes, setRecipes] = useState<Array<{ id: string; title: string }>>([]);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
   const router = useRouter();
   const { keyboardHeight, isKeyboardOpen } = useKeyboardHeight();
   const { currentRecipe } = useCurrentRecipe();
+
+  // Voice input via the browser's SpeechRecognition API — lets you dictate a
+  // question instead of typing with messy hands mid-recipe. Support varies
+  // by browser/platform (notably iOS Safari in installed-PWA mode), so the
+  // mic button only renders when the API is actually available.
+  useEffect(() => {
+    const SpeechRecognitionCtor =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) return;
+
+    const recognition = new SpeechRecognitionCtor();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    setVoiceSupported(true);
+
+    return () => {
+      recognition.onresult = null;
+      recognition.onerror = null;
+      recognition.onend = null;
+      recognition.stop();
+    };
+  }, []);
+
+  // Stop listening if the panel is closed mid-dictation
+  useEffect(() => {
+    if (!isOpen && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  }, [isOpen]);
+
+  const handleMicClick = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    setInput('');
+    setIsListening(true);
+    recognitionRef.current.start();
+  };
 
   // Only render on client-side and get portal root
   useEffect(() => {
@@ -785,7 +852,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Sous Chef"
+              placeholder={isListening ? 'Listening…' : 'Ask Sous Chef'}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -794,7 +861,7 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
               data-lpignore="true"
               style={{
                 width: '100%',
-                padding: '12px 50px 12px 16px',
+                padding: voiceSupported ? '12px 86px 12px 16px' : '12px 50px 12px 16px',
                 backgroundColor: '#f3f4f6',
                 border: 'none',
                 borderRadius: '24px',
@@ -806,6 +873,41 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
               }}
               disabled={isLoading}
             />
+            {voiceSupported && (
+              <button
+                type="button"
+                onClick={handleMicClick}
+                disabled={isLoading}
+                style={{
+                  position: 'absolute',
+                  right: '50px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  padding: '4px',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  color: isListening ? '#ef4444' : isLoading ? '#d1d5db' : '#6b7280',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  animation: isListening ? 'mic-pulse 1.2s ease-in-out infinite' : undefined,
+                }}
+                aria-label={isListening ? 'Stop listening' : 'Ask by voice'}
+                onMouseEnter={(e) => {
+                  if (!isLoading && !isListening) {
+                    e.currentTarget.style.color = 'var(--theme-primary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isLoading && !isListening) {
+                    e.currentTarget.style.color = '#6b7280';
+                  }
+                }}
+              >
+                <Mic style={{ width: '20px', height: '20px' }} />
+              </button>
+            )}
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
@@ -839,6 +941,12 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
             </button>
           </div>
         </form>
+        <style jsx>{`
+          @keyframes mic-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+          }
+        `}</style>
       </div>
     </>
   );
