@@ -249,6 +249,18 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     setMessages([]);
   };
 
+  // Switching from one open recipe to a different one starts a fresh
+  // conversation — otherwise Sous Chef can carry over stale context/history
+  // from whatever recipe the chat was previously about.
+  const lastRecipeIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const newRecipeId = currentRecipe?.id ?? null;
+    if (lastRecipeIdRef.current && newRecipeId && lastRecipeIdRef.current !== newRecipeId) {
+      handleNewChat();
+    }
+    lastRecipeIdRef.current = newRecipeId;
+  }, [currentRecipe?.id]);
+
   const handleCopyMessage = async (messageId: string, content: string) => {
     try {
       await navigator.clipboard.writeText(content);
