@@ -15,7 +15,16 @@ interface CurrentRecipeContextValue {
   setCurrentRecipe: (recipe: CurrentRecipeInfo | null) => void;
 }
 
-const CurrentRecipeContext = createContext<CurrentRecipeContextValue | undefined>(undefined);
+// Default (no-op) value used when a consumer renders outside a provider —
+// e.g. a transient render during navigation/auth transitions. Falling back
+// silently here is preferable to crashing the whole app over a "nice to
+// have" chat feature.
+const defaultValue: CurrentRecipeContextValue = {
+  currentRecipe: null,
+  setCurrentRecipe: () => {},
+};
+
+const CurrentRecipeContext = createContext<CurrentRecipeContextValue>(defaultValue);
 
 export function CurrentRecipeProvider({ children }: { children: ReactNode }) {
   const [currentRecipe, setCurrentRecipe] = useState<CurrentRecipeInfo | null>(null);
@@ -28,9 +37,5 @@ export function CurrentRecipeProvider({ children }: { children: ReactNode }) {
 }
 
 export function useCurrentRecipe() {
-  const ctx = useContext(CurrentRecipeContext);
-  if (!ctx) {
-    throw new Error('useCurrentRecipe must be used within CurrentRecipeProvider');
-  }
-  return ctx;
+  return useContext(CurrentRecipeContext);
 }
