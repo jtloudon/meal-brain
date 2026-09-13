@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/auth/supabase-client';
-import { CurrentRecipeProvider } from '@/lib/context/CurrentRecipeContext';
 import BottomNav from './BottomNav';
 import FloatingAIButton from './FloatingAIButton';
 
@@ -72,42 +71,40 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <CurrentRecipeProvider>
-      <div className="h-screen flex flex-col overflow-hidden" style={{ position: 'relative' }}>
-        {/* Header - floats over content */}
-        <header style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: 'transparent',
-          zIndex: 40,
-        }}>
-          <div className="flex justify-between items-center" style={{ gap: '8px', paddingLeft: '16px', paddingRight: '16px', paddingTop: 'calc(12px + env(safe-area-inset-top))', paddingBottom: '8px' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {typeof title === 'string' ? (
-                <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-              ) : (
-                title
-              )}
-            </div>
-            <div className="flex items-center gap-2" style={{ flexShrink: 0 }}>
-              {action}
-            </div>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ position: 'relative' }}>
+      {/* Header - floats over content */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'transparent',
+        zIndex: 40,
+      }}>
+        <div className="flex justify-between items-center" style={{ gap: '8px', paddingLeft: '16px', paddingRight: '16px', paddingTop: 'calc(12px + env(safe-area-inset-top))', paddingBottom: '8px' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {typeof title === 'string' ? (
+              <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+            ) : (
+              title
+            )}
           </div>
-        </header>
+          <div className="flex items-center gap-2" style={{ flexShrink: 0 }}>
+            {action}
+          </div>
+        </div>
+      </header>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto" style={{ paddingTop: 'calc(64px + env(safe-area-inset-top))', paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
-          {children}
-        </main>
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto" style={{ paddingTop: 'calc(64px + env(safe-area-inset-top))', paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
+        {children}
+      </main>
 
-        {/* Floating AI Button */}
-        <FloatingAIButton />
+      {/* Floating AI Button */}
+      <FloatingAIButton />
 
-        {/* Bottom Navigation */}
-        <BottomNav />
-      </div>
-    </CurrentRecipeProvider>
+      {/* Bottom Navigation */}
+      <BottomNav />
+    </div>
   );
 }

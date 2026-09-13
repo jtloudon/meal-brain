@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 export interface CurrentRecipeInfo {
   id: string;
@@ -10,32 +10,48 @@ export interface CurrentRecipeInfo {
   notes: string | null;
 }
 
-interface CurrentRecipeContextValue {
-  currentRecipe: CurrentRecipeInfo | null;
-  setCurrentRecipe: (recipe: CurrentRecipeInfo | null) => void;
+// Turbopack/webpack can duplicate small shared modules into more than one
+// route chunk, which gives each copy its own `createContext()` identity —
+// a React Context provider mounted from one chunk's copy is then invisible
+// to a consumer using another chunk's copy of "the same" context. Storing
+// state on `globalThis` sidesteps that: there is only ever one JS global
+// object, so every copy of this module reads/writes the same value
+// regardless of which chunk it was bundled into.
+declare global {
+  // eslint-disable-next-line no-var
+  var __mealbrainCurrentRecipe: CurrentRecipeInfo | null | undefined;
+  // eslint-disable-next-line no-var
+  var __mealbrainCurrentRecipeListeners: Set<() => void> | undefined;
 }
 
-// Default (no-op) value used when a consumer renders outside a provider —
-// e.g. a transient render during navigation/auth transitions. Falling back
-// silently here is preferable to crashing the whole app over a "nice to
-// have" chat feature.
-const defaultValue: CurrentRecipeContextValue = {
-  currentRecipe: null,
-  setCurrentRecipe: () => {},
-};
+function getListeners(): Set<() => void> {
+  if (!globalThis.__mealbrainCurrentRecipeListeners) {
+    globalThis.__mealbrainCurrentRecipeListeners = new Set();
+  }
+  return globalThis.__mealbrainCurrentRecipeListeners;
+}
 
-const CurrentRecipeContext = createContext<CurrentRecipeContextValue>(defaultValue);
+function getSnapshot(): CurrentRecipeInfo | null {
+  return globalThis.__mealbrainCurrentRecipe ?? null;
+}
 
-export function CurrentRecipeProvider({ children }: { children: ReactNode }) {
-  const [currentRecipe, setCurrentRecipe] = useState<CurrentRecipeInfo | null>(null);
+function getServerSnapshot(): CurrentRecipeInfo | null {
+  return null;
+}
 
-  return (
-    <CurrentRecipeContext.Provider value={{ currentRecipe, setCurrentRecipe }}>
-      {children}
-    </CurrentRecipeContext.Provider>
-  );
+function subscribe(callback: () => void) {
+  const listeners = getListeners();
+  listeners.add(callback);
+  return () => listeners.delete(callback);
+}
+
+function setCurrentRecipeGlobal(recipe: CurrentRecipeInfo | null) {
+  globalThis.__mealbrainCurrentRecipe = recipe;
+  getListeners().forEach((cb) => cb());
 }
 
 export function useCurrentRecipe() {
-  return useContext(CurrentRecipeContext);
+  const currentRecipe = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const setCurrentRecipe = useCallback(setCurrentRecipeGlobal, []);
+  return { currentRecipe, setCurrentRecipe };
 }
