@@ -96,7 +96,12 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     if (!SpeechRecognitionCtor) return;
 
     const recognition = new SpeechRecognitionCtor();
-    recognition.continuous = false;
+    // continuous:true keeps the mic open across natural pauses in speech —
+    // with continuous:false (the default), Chrome/Safari end the session
+    // after the first brief pause, which can feel like it stops the moment
+    // you start talking. Ending is now driven by the user tapping the mic
+    // again (or the browser's own error/timeout handling).
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
@@ -124,14 +129,18 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
       recognition.onresult = null;
       recognition.onerror = null;
       recognition.onend = null;
-      recognition.stop();
+      try {
+        recognition.stop();
+      } catch {}
     };
   }, []);
 
   // Stop listening if the panel is closed mid-dictation
   useEffect(() => {
     if (!isOpen && recognitionRef.current) {
-      recognitionRef.current.stop();
+      try {
+        recognitionRef.current.stop();
+      } catch {}
       setIsListening(false);
     }
   }, [isOpen]);
@@ -140,14 +149,29 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     if (!recognitionRef.current) return;
 
     if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
+      // Let onend flip isListening back to false rather than doing it here —
+      // starting a new session before the browser confirms the previous one
+      // has actually ended can throw and leave the button stuck.
+      try {
+        recognitionRef.current.stop();
+      } catch (err) {
+        console.error('Error stopping speech recognition:', err);
+        setIsListening(false);
+      }
       return;
     }
 
     setInput('');
-    setIsListening(true);
-    recognitionRef.current.start();
+    try {
+      recognitionRef.current.start();
+      setIsListening(true);
+    } catch (err) {
+      // start() throws if the recognizer is still settling from a previous
+      // session — without this catch, the button was left permanently
+      // stuck showing "listening" with no way to retry.
+      console.error('Error starting speech recognition:', err);
+      setIsListening(false);
+    }
   };
 
   // Only render on client-side and get portal root
