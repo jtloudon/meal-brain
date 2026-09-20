@@ -104,6 +104,11 @@ export const faqData: FAQItem[] = [
     category: 'Grocery Lists',
   },
   {
+    question: 'Can I sort my list to match the order of a specific store?',
+    answer: 'Yes. Open the list and tap "Arrange aisles" under the list name. Use the arrows to put categories in the order you walk through that store (for example Produce first at Costco), then tap "Save order". Each list remembers its own order and it\'s shared with your household, so a "Costco" list and a "Target" list can be arranged differently.',
+    category: 'Grocery Lists',
+  },
+  {
     question: 'What does "protected list" mean?',
     answer: 'Protected lists (like your "Costco Master" catalog) are shielded from bulk operations. You can\'t accidentally "Check All" or "Delete Checked" on a protected list - only individual item management is allowed. Use this for master lists you want to preserve as reference catalogs.',
     category: 'Grocery Lists',

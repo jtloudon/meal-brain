@@ -237,6 +237,22 @@ household_invite_uses (
 
 ---
 
+## Per-List Aisle Order (Added 2026-09-20)
+
+**Problem:** Stores lay out categories differently (Costco: Produce, Meat, Dairy; Target differs), so a single household-wide category order doesn't match how people actually shop.
+
+**Decision:** Store the order on the list itself: `grocery_lists.category_order` (nullable `jsonb` array of category names). `null` falls back to the household `shopping_categories` order. Categories missing from a saved order sort to the end.
+
+**Why on the list:** Lists are already named per store and are long-lived (items are cleared after a trip, the list stays). Household members often shop at different stores the same day, so a household-wide setting would collide.
+
+**Editing:** "Arrange aisles" mode on the grocery page lists ALL categories (not just ones with items), so it works on an empty list. Saves via `PATCH /api/grocery/lists/[id]` with a full ordering. Up/down arrows for v1 (no new dependency, reliable on mobile).
+
+**Alternatives considered:** a separate `store_layouts` table plus a store picker (extra concept with no benefit since lists already map to stores); household-wide order (fails the same-day-different-stores case); drag-and-drop (deferred, layers on the same data model).
+
+**Gotcha:** `listLists` in `lib/tools/grocery.ts` selects explicit columns, so any new list column must be added there or it won't come back on reload.
+
+---
+
 ## Major Components
 
 **Frontend** (Next.js):

@@ -48,7 +48,7 @@ The AI **suggests but never surprises**. All write operations (adding meals, mod
 
 - **Recipes** - Create, import from URLs, import with camera pictures,tag, rate, and organize
 - **Meal Planner** - Calendar-style week view, drag meals around
-- **Grocery Lists** - Auto-categorized by aisle (leverage Claude for undefined mappings), tracks which recipe needs what
+- **Grocery Lists** - Auto-categorized by aisle (leverage Claude for undefined mappings), tracks which recipe needs what, aisle order sortable per store
 - **Mobile-First** - Cloud deployed, PWA installable on any device, optimized for one-handed use
 
 ---
