@@ -150,9 +150,12 @@ Multiple lists are allowed per household.
   "id": "uuid",
   "household_id": "uuid",
   "name": "Target weekly",
+  "category_order": ["Produce", "Meat & Seafood", "Dairy & Eggs"],
   "created_at": "timestamp"
 }
 ```
+
+`category_order` (nullable) is the store-layout order for this list's category groups. Null falls back to the household's `shopping_categories` order.
 
 ---
 

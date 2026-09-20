@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-import { Check, Plus, Pencil, ChevronDown, Trash2, Star, Frown, Shield, Copy, CheckSquare, Square, X } from 'lucide-react';
+import { Check, Plus, Pencil, ChevronDown, ChevronUp, Trash2, Star, Frown, Shield, Copy, CheckSquare, Square, X, ListOrdered } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
 
 // Practical shopping units - sorted alphabetically
@@ -53,6 +53,7 @@ interface GroceryList {
   created_at: string;
   updated_at: string;
   protected: boolean;
+  category_order?: string[] | null;
 }
 
 export default function GroceriesPage() {
@@ -93,6 +94,8 @@ export default function GroceriesPage() {
   const [categorizationWarning, setCategorizationWarning] = useState<string | null>(null);
   const [editingListIdInModal, setEditingListIdInModal] = useState<string | null>(null);
   const [editingListNameInModal, setEditingListNameInModal] = useState('');
+  const [arranging, setArranging] = useState(false);
+  const [draftOrder, setDraftOrder] = useState<string[]>([]);
   const [creatingNewListInModal, setCreatingNewListInModal] = useState(false);
   const [newListNameInModal, setNewListNameInModal] = useState('');
 
@@ -126,6 +129,11 @@ export default function GroceriesPage() {
     };
     fetchCategories();
   }, []);
+
+  // Leave arrange mode when switching lists
+  useEffect(() => {
+    setArranging(false);
+  }, [selectedListId]);
 
   // Fetch all lists on mount
   useEffect(() => {
@@ -397,6 +405,58 @@ export default function GroceriesPage() {
       }
     } catch (error) {
       console.error('Error deleting item:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Full category order for a list: saved order first, then any other known categories
+  const getFullCategoryOrder = (list: GroceryList | undefined): string[] => {
+    const order: string[] = [];
+    const add = (c: string) => { if (!order.includes(c)) order.push(c); };
+    (list?.category_order || []).forEach(add);
+    shoppingCategories.forEach(add);
+    items.forEach(item => add(item.category || 'Other'));
+    return order;
+  };
+
+  const startArranging = () => {
+    setDraftOrder(getFullCategoryOrder(lists.find(l => l.id === selectedListId)));
+    setArranging(true);
+  };
+
+  const moveCategory = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    setDraftOrder(prev => {
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const saveCategoryOrder = async () => {
+    if (!selectedListId) return;
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/grocery/lists/${selectedListId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category_order: draftOrder }),
+      });
+
+      if (res.ok) {
+        const updatedList = await res.json();
+        setLists((prev) =>
+          prev.map((list) => (list.id === selectedListId ? updatedList : list))
+        );
+        setArranging(false);
+      } else {
+        alert('Could not save the aisle order. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving category order:', error);
+      alert('Could not save the aisle order. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -939,15 +999,81 @@ export default function GroceriesPage() {
           if (!ts) return null;
           const label = new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           return (
-            <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '8px', paddingLeft: '4px' }}>
-              Last edited: {label}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', paddingLeft: '4px' }}>
+              <p style={{ fontSize: '12px', color: '#9ca3af' }}>
+                Last edited: {label}
+              </p>
+              {!arranging && (
+                <button
+                  onClick={startArranging}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--theme-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px' }}
+                >
+                  <ListOrdered size={14} />
+                  Arrange aisles
+                </button>
+              )}
+            </div>
           );
         })()}
 
         {/* Items List - Grouped by Category */}
         <div className="space-y-4">
-          {items.length === 0 ? (
+          {arranging ? (
+            <div>
+              <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '12px', paddingLeft: '4px' }}>
+                Order categories the way this store is laid out. Top is the first aisle you hit.
+              </p>
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '4px 16px', marginLeft: '8px', marginRight: '8px' }}>
+                {draftOrder.map((category, index) => {
+                  const count = items.filter(i => (i.category || 'Other') === category).length;
+                  return (
+                    <div
+                      key={category}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', borderBottom: index < draftOrder.length - 1 ? '1px solid #f3f4f6' : 'none' }}
+                    >
+                      <span style={{ fontSize: '12px', color: '#9ca3af', width: '20px' }}>{index + 1}</span>
+                      <span style={{ flex: 1, fontSize: '15px', color: '#111827' }}>
+                        {category}
+                        {count > 0 && <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: '6px' }}>({count})</span>}
+                      </span>
+                      <button
+                        onClick={() => moveCategory(index, -1)}
+                        disabled={index === 0}
+                        aria-label={`Move ${category} up`}
+                        style={{ padding: '6px', background: 'none', border: 'none', cursor: index === 0 ? 'default' : 'pointer', color: index === 0 ? '#d1d5db' : 'var(--theme-primary)' }}
+                      >
+                        <ChevronUp size={20} />
+                      </button>
+                      <button
+                        onClick={() => moveCategory(index, 1)}
+                        disabled={index === draftOrder.length - 1}
+                        aria-label={`Move ${category} down`}
+                        style={{ padding: '6px', background: 'none', border: 'none', cursor: index === draftOrder.length - 1 ? 'default' : 'pointer', color: index === draftOrder.length - 1 ? '#d1d5db' : 'var(--theme-primary)' }}
+                      >
+                        <ChevronDown size={20} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
+                <button
+                  onClick={() => setArranging(false)}
+                  disabled={saving}
+                  style={{ padding: '10px 20px', borderRadius: '10px', border: '1px solid #e5e7eb', backgroundColor: 'white', color: '#374151', fontSize: '15px', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveCategoryOrder}
+                  disabled={saving}
+                  style={{ padding: '10px 24px', borderRadius: '10px', border: 'none', backgroundColor: 'var(--theme-primary)', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                >
+                  {saving ? 'Saving...' : 'Save order'}
+                </button>
+              </div>
+            </div>
+          ) : items.length === 0 ? (
             <p className="text-gray-500 text-center py-8">This list is empty</p>
           ) : (
             (() => {
@@ -967,7 +1093,13 @@ export default function GroceriesPage() {
               });
 
               // Render each category group
-              return Object.entries(grouped).map(([category, categoryItems], index) => (
+              // Order groups by this list's saved aisle order (falls back to household default order)
+              const categoryOrder = getFullCategoryOrder(lists.find(l => l.id === selectedListId));
+              const sortedGroups = Object.entries(grouped).sort(
+                ([a], [b]) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b)
+              );
+
+              return sortedGroups.map(([category, categoryItems], index) => (
                 <div key={category} className={index > 0 ? 'mt-6' : ''}>
                   {/* Category Header */}
                   <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>

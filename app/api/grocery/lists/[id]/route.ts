@@ -77,10 +77,23 @@ export async function PATCH(
 
   // Parse request body
   const body = await request.json();
-  const { name, protected: isProtected } = body;
+  const { name, protected: isProtected, category_order: categoryOrder } = body;
 
   // Build update object dynamically
-  const updateData: { name?: string; protected?: boolean } = {};
+  const updateData: { name?: string; protected?: boolean; category_order?: string[] | null } = {};
+
+  // null resets to the household default order
+  if (categoryOrder !== undefined) {
+    if (
+      categoryOrder !== null &&
+      (!Array.isArray(categoryOrder) ||
+        categoryOrder.length > 100 ||
+        !categoryOrder.every((c) => typeof c === 'string' && c.trim().length > 0))
+    ) {
+      return NextResponse.json({ error: 'category_order must be an array of category names or null' }, { status: 400 });
+    }
+    updateData.category_order = categoryOrder;
+  }
 
   if (name !== undefined) {
     if (typeof name !== 'string' || name.trim().length === 0) {
