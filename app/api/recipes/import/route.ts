@@ -17,7 +17,15 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: 'Failed to fetch URL' }, { status: 400 });
+      // 401/402/403/429 = the site is deliberately refusing automated requests
+      if ([401, 402, 403, 429].includes(response.status)) {
+        const host = new URL(response.url || url).hostname.replace(/^www\./, '');
+        return NextResponse.json(
+          { error: `${host} blocks automatic imports. Copy and paste the recipe directly for this site.` },
+          { status: 400 }
+        );
+      }
+      return NextResponse.json({ error: `Failed to fetch URL (site returned ${response.status})` }, { status: 400 });
     }
 
     const html = await response.text();
