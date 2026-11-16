@@ -83,7 +83,7 @@ export const faqData: FAQItem[] = [
   },
   {
     question: 'How do recipe ratings work?',
-    answer: 'Rate recipes 1-5 stars based on your household\'s experience. Ratings help you remember favorites and filter recipes - you can show only 4+ star recipes when you want guaranteed winners. Ratings are optional and only visible to your household.',
+    answer: 'Rate recipes 1-5 stars based on your household\'s experience. Ratings help you remember favorites and filter recipes - you can show only 4+ star recipes when you want guaranteed winners. To rate, tap a star on the recipe page, then tap Save (Cancel discards it, so a stray tap never changes anything). Ratings are optional and only visible to your household.',
     category: 'Recipe Organization',
   },
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import { formatDuration } from '@/lib/utils/format-duration';
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,8 +79,8 @@ function extractFromJsonLd($: cheerio.CheerioAPI, url: string) {
             ingredients: extractIngredients(recipe.recipeIngredient || []),
             instructions: extractInstructions(recipe.recipeInstructions || ''),
             notes: recipe.description || null,
-            prep_time: recipe.prepTime || null,
-            cook_time: recipe.cookTime || null,
+            prep_time: formatDuration(recipe.prepTime),
+            cook_time: formatDuration(recipe.cookTime),
             serving_size: normalizeServingSize(recipe.recipeYield),
             image_url: extractImage(recipe.image) || null,
             source: url,

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import RecipeFormWithTabs from '@/components/RecipeFormWithTabs';
 import { parseIngredientsText, ingredientsToText } from '@/lib/utils/parse-ingredients';
+import { formatDuration } from '@/lib/utils/format-duration';
 
 interface RecipeIngredient {
   id: string;
@@ -85,8 +86,8 @@ export default function EditRecipePage() {
         imageUrl: recipe.image_url,
         source: recipe.source || '',
         servingSize: recipe.serving_size || '',
-        prepTime: recipe.prep_time || '',
-        cookTime: recipe.cook_time || '',
+        prepTime: formatDuration(recipe.prep_time) || '',
+        cookTime: formatDuration(recipe.cook_time) || '',
         mealType: recipe.meal_type || null,
       });
     } catch (err) {

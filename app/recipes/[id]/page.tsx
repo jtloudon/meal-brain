@@ -6,6 +6,7 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import BottomNav from '@/components/BottomNav';
 import { ArrowLeft, Calendar, ShoppingCart, Star, Share2, Edit, Trash2 } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
+import { formatDuration } from '@/lib/utils/format-duration';
 import { useCurrentRecipe } from '@/lib/context/CurrentRecipeContext';
 
 interface RecipeIngredient {
@@ -57,6 +58,9 @@ export default function RecipeDetailPage() {
   const [showServingSizeModal, setShowServingSizeModal] = useState(false);
   const [adjustedServings, setAdjustedServings] = useState<number | null>(null);
   const [baseServings, setBaseServings] = useState<number>(1);
+  const [pendingRating, setPendingRating] = useState<number | null>(null);
+  const [savingRating, setSavingRating] = useState(false);
+  const [ratingError, setRatingError] = useState<string | null>(null);
   const { setCurrentRecipe } = useCurrentRecipe();
 
   // Helper to format quantity (handles ranges like "1-2")
@@ -430,20 +434,112 @@ export default function RecipeDetailPage() {
     }
   };
 
-  const renderStars = (rating: number | null) => {
-    const displayRating = rating || 0; // Show empty stars if no rating
+  // Tap a star to stage a rating; nothing is saved until the user confirms
+  const handleSelectRating = (star: number) => {
+    if (!recipe || savingRating) return;
+    setRatingError(null);
+    setPendingRating(star === recipe.rating ? null : star);
+  };
+
+  const handleCancelRating = () => {
+    setPendingRating(null);
+    setRatingError(null);
+  };
+
+  const handleSaveRating = async () => {
+    if (!recipe || pendingRating === null) return;
+    setSavingRating(true);
+    setRatingError(null);
+    try {
+      const response = await fetch(`/api/recipes/${recipe.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: pendingRating }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to save rating');
+      }
+      setRecipe({ ...recipe, rating: pendingRating });
+      setPendingRating(null);
+    } catch (err) {
+      setRatingError(err instanceof Error ? err.message : 'Failed to save rating');
+      console.error('Save rating error:', err);
+    } finally {
+      setSavingRating(false);
+    }
+  };
+
+  const renderRatingControl = () => {
+    if (!recipe) return null;
+    const displayRating = pendingRating ?? recipe.rating ?? 0;
+    const isPending = pendingRating !== null;
 
     return (
-      <div className="flex gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            size={16}
-            fill={star <= displayRating ? 'var(--theme-primary)' : 'none'}
-            stroke={star <= displayRating ? 'var(--theme-primary)' : '#d1d5db'}
-            strokeWidth={2}
-          />
-        ))}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '2px' }} role="radiogroup" aria-label="Rating">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              role="radio"
+              aria-checked={star === displayRating}
+              aria-label={`${star} star${star > 1 ? 's' : ''}`}
+              onClick={() => handleSelectRating(star)}
+              disabled={savingRating}
+              style={{ background: 'none', border: 'none', padding: '2px', cursor: 'pointer', lineHeight: 0 }}
+            >
+              <Star
+                size={22}
+                fill={star <= displayRating ? 'var(--theme-primary)' : 'none'}
+                stroke={star <= displayRating ? 'var(--theme-primary)' : '#d1d5db'}
+                strokeWidth={2}
+                style={{ opacity: isPending && star > (recipe.rating ?? 0) && star <= displayRating ? 0.6 : 1 }}
+              />
+            </button>
+          ))}
+        </div>
+        {isPending && (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={handleSaveRating}
+              disabled={savingRating}
+              style={{
+                backgroundColor: 'var(--theme-primary)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '4px 12px',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                opacity: savingRating ? 0.6 : 1,
+              }}
+            >
+              {savingRating ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={handleCancelRating}
+              disabled={savingRating}
+              style={{
+                background: 'none',
+                color: '#6b7280',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                padding: '4px 12px',
+                fontSize: '14px',
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+        {ratingError && (
+          <span style={{ color: '#dc2626', fontSize: '14px', width: '100%' }}>{ratingError}</span>
+        )}
       </div>
     );
   };
@@ -783,7 +879,7 @@ export default function RecipeDetailPage() {
             {recipe.rating !== undefined && (
               <>
                 <span style={{ color: '#9ca3af', textAlign: 'right' }}>Rating</span>
-                {renderStars(recipe.rating)}
+                {renderRatingControl()}
               </>
             )}
             {recipe.serving_size && (
@@ -813,13 +909,13 @@ export default function RecipeDetailPage() {
             {recipe.prep_time && (
               <>
                 <span style={{ color: '#9ca3af', textAlign: 'right' }}>Prep time</span>
-                <span style={{ color: '#111827' }}>{recipe.prep_time}</span>
+                <span style={{ color: '#111827' }}>{formatDuration(recipe.prep_time)}</span>
               </>
             )}
             {recipe.cook_time && (
               <>
                 <span style={{ color: '#9ca3af', textAlign: 'right' }}>Cook time</span>
-                <span style={{ color: '#111827' }}>{recipe.cook_time}</span>
+                <span style={{ color: '#111827' }}>{formatDuration(recipe.cook_time)}</span>
               </>
             )}
           </div>

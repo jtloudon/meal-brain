@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 import { Plus, Search, Star, Clock, ListFilter } from 'lucide-react';
 import { decodeHTML } from '@/lib/utils/decode-html';
+import { formatDuration } from '@/lib/utils/format-duration';
 
 interface Recipe {
   id: string;
@@ -372,20 +373,6 @@ export default function RecipesPage() {
 
   const processImportedRecipe = async (importedRecipe: any) => {
     try {
-    // Parse ISO 8601 duration format (PT20M -> "20 min")
-    const parseDuration = (duration: string | null): string | null => {
-      if (!duration) return null;
-      const match = duration.match(/PT(\d+)M/);
-      if (match) return `${match[1]} min`;
-      const hourMatch = duration.match(/PT(\d+)H(\d+)?M?/);
-      if (hourMatch) {
-        const hours = hourMatch[1];
-        const mins = hourMatch[2];
-        return mins ? `${hours} hr ${mins} min` : `${hours} hr`;
-      }
-      return duration; // Return as-is if can't parse
-    };
-
     // Format instructions with numbering
     const formatInstructions = (instructions: string): string => {
       if (!instructions) return '';
@@ -520,8 +507,8 @@ export default function RecipesPage() {
       instructions: formatInstructions(importedRecipe.instructions || ''),
       notes: importedRecipe.notes || '',
       tags: JSON.stringify(importedRecipe.tags || []),
-      prepTime: parseDuration(importedRecipe.prepTime) || importedRecipe.prep_time || '',
-      cookTime: parseDuration(importedRecipe.cookTime) || importedRecipe.cook_time || '',
+      prepTime: formatDuration(importedRecipe.prepTime ?? importedRecipe.prep_time) || '',
+      cookTime: formatDuration(importedRecipe.cookTime ?? importedRecipe.cook_time) || '',
       servingSize: importedRecipe.servingSize || importedRecipe.serving_size || '',
       imageUrl: importedRecipe.imageUrl || importedRecipe.image_url || '',
       source: importedRecipe.source || '',
